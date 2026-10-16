@@ -11,7 +11,7 @@ import { INBOX_CONTENT_TYPE, TIP_CONTENT_TYPE, daysToBlocks, decodeInbox, encode
 
 // ---- clients ----------------------------------------------------------------------------------------
 
-/** Cost units the public RPC reports for the queries this page has run (headers `Arkiv-Cost` and `RateLimit`). */
+/** Cost units the public RPC reports for the queries this page has run (header `Arkiv-Cost`). */
 export const budget = { spent: 0, queries: 0 }
 
 /** Thrown instead of waiting: see failFast. */

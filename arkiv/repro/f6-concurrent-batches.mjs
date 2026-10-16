@@ -1,11 +1,12 @@
 // Friction F6: two create+hand-over batches built with predictEntityKeys() from the same account at the same time.
 // Needs a funded Tiramisu key:  PRIVATE_KEY=0x... node arkiv/repro/f6-concurrent-batches.mjs
+// With NONCE_MANAGER=1 the account gets viem's nonce manager, the fix the Arkiv docs recommend ("Concurrent writes and nonces").
 import { http } from 'viem'
-import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
+import { generatePrivateKey, nonceManager, privateKeyToAccount } from 'viem/accounts'
 import { createPublicClient, createWalletClient, ExpirationTime } from '@arkiv-network/sdk'
 import { tiramisu } from '@arkiv-network/sdk/chains'
 
-const account = privateKeyToAccount(process.env.PRIVATE_KEY)
+const account = privateKeyToAccount(process.env.PRIVATE_KEY, process.env.NONCE_MANAGER ? { nonceManager } : undefined)
 const pub = createPublicClient({ chain: tiramisu, transport: http() })
 const wallet = createWalletClient({ chain: tiramisu, transport: http(), account })
 const recipient = privateKeyToAccount(generatePrivateKey()).address // the hand-over target; needs no funds
@@ -13,6 +14,7 @@ const recipient = privateKeyToAccount(generatePrivateKey()).address // the hand-
 async function send(label) {
   try {
     const [p] = await pub.predictEntityKeys({ owner: account.address, count: 1 })
+    console.log(label, 'predicted', p.key)
     const r = await wallet.executeBatch({
       creates: [{ payload: new Uint8Array([1]), contentType: 'application/octet-stream', attributes: { type: 'f6' }, expires: ExpirationTime.fromHours(1), salt: p.salt }],
       ownershipChanges: [{ entityKey: p.key, newOwner: recipient }],

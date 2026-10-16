@@ -1,0 +1,9 @@
+# Independent reader: arkiv/examples/read-tips.mjs, run 2026-10-16T18:09:44Z against the Demo Desk. It imports nothing from src/.
+# INBOX=0x65a2d0b97fe693af3916c4a954564dda4d44a584ee4ec206454ac9c0148c25a1 OWNER=0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6 BOX_SECRET=<from .env.local, not printed>
+0x4eccbaadea4061f6ee99b1c9d33a66eccfae046b95405244667f510cf561634d  $creator 0xa05d5bd99440d95526120062364518ddfe11797f
+    "SYNTHETIC TEST TIP (smoke run, Demo Desk 2026-10-16T18:09:17.519Z): a made-up message for the demo inbox."
+0x35e8ec7fa950c96c86211b0869047a1a27c2be71f08b04c8fffd5915f0bc85e3  $creator 0xfae2825319cbc6e6650ac591c01586897ed0d5ba
+    "SYNTHETIC TEST TIP (wallet-only debug run): a made-up message."
+0xf87e8df2726af8d8ae2e15292610ea982c29e88d7f5edbab2b39f843f6e7a7a8  $creator 0xa05d5bd99440d95526120062364518ddfe11797f
+    "SYNTHETIC TEST TIP (smoke run, Demo Desk 2026-10-16T18:05:33.596Z): a made-up message for the demo inbox."
+3 tip(s) for inbox 0x65a2d0b97fe693af3916c4a954564dda4d44a584ee4ec206454ac9c0148c25a1

@@ -48,7 +48,9 @@ Or press **Send to the Demo Desk** on the home page: a flagship inbox run by a s
 of this repository or the build. Open the entity link on the Data Explorer to see what anyone can see: ciphertext and
 three attributes.
 
-<<FILL: measured judge-path time from evidence/smoke.txt>>
+Measured on 2026-10-16 by a headless Chromium run against the built site and the live testnet ([evidence/smoke.txt](evidence/smoke.txt)):
+creating the newsroom takes under a second (no network), creating the inbox 14.5 s (two transactions and the first look-up),
+and the decrypted tip appeared in the newsroom tab 2.9 s after Send was clicked. The whole path took 19.1 s.
 
 ## What is on Arkiv, and what is not
 
@@ -83,11 +85,11 @@ each of those becomes an operator you have to trust:
 | Entity Expiration per type | The source picks 1, 7, 14 or 30 days and sees the exact expiry on the result screen. The inbox itself lives for 7 days. | `sendTip`, `createInbox` |
 | Lifetime Extension as a lease | The console renews the inbox whenever the newsroom opens it, so an abandoned or seized inbox falls off by itself and sources see "no live inbox" instead of writing into it. "Keep 30 more days" extends a single tip. | `renewInbox`, `pinTip` |
 | Range query on `$expiresAt` | One query finds every inbox of this creator that has less than 6 days left. | `inboxesDueForRenewal` |
-| `watchEntityEvents` over WebSocket | The tip shows up in the open console within seconds, with no polling and no query budget used. | `watchHandovers` |
+| `watchEntityEvents` over WebSocket | The tip shows up in the open console within seconds, with no polling (the socket itself costs no queries; reading the new tip afterwards is one). | `watchHandovers` |
 | Cursor pagination | The console loads inboxes with more than 200 tips. | `sweepTips` |
 | Range query on `$createdAt` | When you return to the tab it fetches only tips created since the last sweep. | `tipsSince` |
 | `readonly` creation flag | The sealed bytes of a tip cannot be rewritten by anyone, including the key that created it. | `sendTip` |
-| Plain JSON-RPC (`arkiv_query`) | Anyone can read and decrypt a newsroom's tips with a short script and no Sealdrop code. | [arkiv/examples/read-tips.mjs](arkiv/examples/read-tips.mjs) |
+| Plain JSON-RPC (`arkiv_query`) | Anyone can read and decrypt a newsroom's tips with a 43-line script and no Sealdrop code. | [arkiv/examples/read-tips.mjs](arkiv/examples/read-tips.mjs) |
 
 Every page has a **Queries this page runs** panel showing the exact query strings, and the footer shows how much of the
 public RPC's anonymous query budget the tab has used (see [friction F7](arkiv/friction.md)).
@@ -165,6 +167,9 @@ npm run build && npm run check:bundle
 
 Run the integration test and the smoke test one at a time: they share the demo sender key and the public RPC's
 anonymous query budget.
+
+Not verified: wallet mode with a real browser wallet extension (the smoke test uses a scripted EIP-1193 stand-in that signs in
+Node), Firefox, Safari, mobile browsers and Tor Browser. The smoke test ran in Chromium 154 only.
 
 ## Addresses and roles (Tiramisu testnet, chain id 7738577)
 

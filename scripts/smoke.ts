@@ -1,5 +1,6 @@
 // Headless Chromium against the BUILT site and the live Tiramisu testnet: the 60-second judge path.
 //   npm run build && npm run smoke        (run alone: never in parallel with `npm run integration`)
+//   SMOKE_URL=https://<host>/<path>/ npm run smoke   the same checks against a deployed copy (writes evidence/smoke-live.txt)
 import http from 'node:http'
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -14,7 +15,8 @@ const DIST = join(ROOT, 'dist') + '/'
 const EVIDENCE = join(ROOT, 'evidence')
 const SHOTS = join(EVIDENCE, 'screens')
 mkdirSync(SHOTS, { recursive: true })
-if (!existsSync(DIST + 'index.html')) throw new Error('dist/ is missing: run `npm run build` first')
+const REMOTE = process.env.SMOKE_URL
+if (!REMOTE && !existsSync(DIST + 'index.html')) throw new Error('dist/ is missing: run `npm run build` first')
 
 const lines: string[] = []
 const log = (s = '') => { console.log(s); lines.push(s) }
@@ -24,14 +26,14 @@ const secs = (ms: number) => `${(ms / 1000).toFixed(1)} s`
 
 // ---- static server for dist/ -------------------------------------------------------------------------------
 const types: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css' }
-const server = http.createServer((req, res) => {
+const server = REMOTE ? null : http.createServer((req, res) => {
   const path = normalize(decodeURIComponent(new URL(req.url ?? '/', 'http://x').pathname))
   const file = join(DIST, path.endsWith('/') ? path + 'index.html' : path)
   if (!file.startsWith(DIST) || !existsSync(file)) return void res.writeHead(404).end('not found')
   res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' }).end(readFileSync(file))
 })
-await new Promise<void>((r) => server.listen(0, '127.0.0.1', r))
-const base = `http://127.0.0.1:${(server.address() as { port: number }).port}/`
+if (server) await new Promise<void>((r) => server.listen(0, '127.0.0.1', r))
+const base = REMOTE ? (REMOTE.endsWith('/') ? REMOTE : REMOTE + '/') : `http://127.0.0.1:${(server!.address() as { port: number }).port}/`
 
 const browser = await puppeteer.launch({ executablePath: process.env.CHROMIUM ?? '/usr/bin/chromium', headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
 const problems: string[] = []
@@ -46,7 +48,7 @@ const sendResultVisible = (page: Page) => page.waitForFunction(() => { const r =
 
 let step = 'start'
 try {
-  log(`Sealdrop smoke run ${new Date().toISOString()}  Chromium ${await browser.version()}  served from dist/`)
+  log(`Sealdrop smoke run ${new Date().toISOString()}  Chromium ${await browser.version()}  served from ${REMOTE ? base : 'dist/'}`)
 
   // ---- 1. the newsroom ---------------------------------------------------------------------------------------
   step = 'open the newsroom page and create a throwaway newsroom'
@@ -153,8 +155,8 @@ try {
   log(`FAIL  step "${step}": ${(e as Error).message.split('\n')[0]}`)
 } finally {
   await browser.close()
-  server.close()
+  server?.close()
   log(failed ? `\nsmoke: ${failed} failure(s)` : '\nsmoke: all checks passed')
-  writeFileSync(join(EVIDENCE, 'smoke.txt'), lines.join('\n') + '\n')
+  writeFileSync(join(EVIDENCE, `${REMOTE ? 'smoke-live' : 'smoke'}${failed ? '.failed' : ''}.txt`), lines.join('\n') + '\n') // a failed run must not overwrite good evidence
   process.exit(failed ? 1 : 0)
 }

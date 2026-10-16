@@ -5,3 +5,7 @@ dist/
 scratch/
 *.log
 .DS_Store
+evidence/*.failed.txt
+HANDOFF.md
+SUBMISSION.md
+SUBMISSION.filled.md

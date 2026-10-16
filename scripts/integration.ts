@@ -182,6 +182,6 @@ main()
   .catch((e) => { failed++; log(`\nFAILED: ${(e as Error).stack ?? e}`) })
   .finally(() => {
     mkdirSync('evidence', { recursive: true })
-    writeFileSync('evidence/integration.txt', lines.join('\n') + '\n')
+    writeFileSync(failed === 0 ? 'evidence/integration.txt' : 'evidence/integration.failed.txt', lines.join('\n') + '\n') // a failed run must not overwrite good evidence
     process.exit(failed === 0 ? 0 : 1)
   })

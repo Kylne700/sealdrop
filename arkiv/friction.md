@@ -15,7 +15,8 @@ appended to as the build goes on; the last section lists what was checked and fo
 | F3 | SDK validator vs engine | Medium | The SDK accepts uppercase attribute names and its error text lists `A-Z` as valid; the engine rejects them |
 | F4 | Fundamentals page | Low | "Every other transaction reverts" is not what happens for a plain GLM transfer |
 | F5 | Faucet | Low | Only usable from an interactive browser session, no scriptable path for CI or agents |
-| F6 | SDK writes from one account | High | Two overlapping batches: one fails before broadcast with an unhelpful error, or both report success with the same tx hash and one write is lost |
+| F6 | Concurrent batches from one wallet | Medium | The docs' nonce fix stops the collision, but the second `predictEntityKeys` + `executeBatch` batch then reverts on chain (5 of 5 runs) because its predicted key is stale; the docs do not say a prediction holds for one batch in flight only |
+| F7 | Public RPC anonymous budget | High | `arkiv_query` costs 100 units against an undocumented anonymous budget of 10,000; only the 429 says so, and the SDK (viem) sleeps through the `Retry-After` (about 30 min) instead of failing |
 
 ---
 
@@ -160,39 +161,118 @@ docs saying the Hub login and Cap widget are browser-only.
 
 ---
 
-## F6. Two batches from one account at the same time: failures before broadcast, and one write that silently vanishes
+## F6. Concurrent create batches from one wallet: the documented nonce fix removes the collision, then the second batch reverts on chain
 
-**Expected.** Two `predictEntityKeys` + `executeBatch` calls started together from the same account either both
-succeed with different entities, or one fails with an error that says why. This is what a shared sender key
-(Sealdrop's demo mode, a relayer) does whenever two people send at once.
+**What the docs say.** The TypeScript SDK *Mutating data* page has a section "Concurrent writes and nonces": two writes in
+flight from one wallet fetch the same nonce and collide, "one of them is rejected, or silently replaces the other"; the
+preferred fix is one batch, otherwise give the account viem's `nonceManager`, after which "the `Promise.all` above works".
+Another section on the same page ("Reference an entity created in the same batch") says "a key is derived from the wallet,
+its entity counter and the salt" and shows `predictEntityKeys()` followed by `executeBatch`. Sealdrop needs both: a tip is
+created and handed to the inbox owner in one atomic batch, and with the shared demo key two visitors can send at once.
 
-**Actual.** `arkiv/repro/f6-concurrent-batches.mjs` starts two such batches with `Promise.all`. Over 6 runs on
-Tiramisu:
+**Expected.** Read together, the two sections say that two concurrent `predictEntityKeys` + `executeBatch` batches from one
+wallet both succeed once the account has the nonce manager.
 
-* 5 of 6 runs: one call failed before broadcast with `EntityMutationError: Transaction failed: Execution error
-  without revert data`, whose cause is `Missing or invalid parameters.` (no `txHash`). Nothing in the message
-  mentions a nonce or a concurrent call.
-* 1 of 6 runs: **both calls resolved successfully with the same transaction hash**,
-  `0x049a0c7803ad264ea427d76be321628fbd2b5ec3623f6c8e390f8aa5d451c173` (block 660781), and one entity,
-  `0xc8bede00...b346`. Two writes were requested, one exists, and the SDK reported success for both. A caller that
-  trusts the return value has lost a message.
-* In the integration test the retries of such a failure also produced an on-chain revert (`no entity 0x...: it may
-  have been deleted, or have expired ... "execute" reverted`), which is a transaction that cost gas.
+**Actual.** `arkiv/repro/f6-concurrent-batches.mjs` starts two such batches with `Promise.all`.
 
-I did not find out which layer is responsible. My guess, unverified, is that both calls read the same pending nonce,
-so the second transaction replaces the first and `waitForTransactionReceipt` reports the replacement for both
-callers. The `predictEntityKeys` result depends on the same state, which would explain the second symptom.
+* **Without the nonce manager** (the case the docs describe; 6 runs,
+  [`evidence/f6-no-nonce-manager.txt`](../evidence/f6-no-nonce-manager.txt)): in 3 runs one call failed before broadcast
+  with `EntityMutationError: Transaction failed: Execution error without revert data`, whose cause is `Missing or invalid
+  parameters.` (no `txHash`, no mention of a nonce). In the other 3 runs **both calls resolved successfully with the same
+  transaction hash and the same entity key**, so one caller was told its entity exists when its own write had been
+  replaced. An earlier set of 6 runs gave the same two outcomes (5 failures, 1 shared hash,
+  `0x049a0c7803ad264ea427d76be321628fbd2b5ec3623f6c8e390f8aa5d451c173`). In all 12 runs exactly one entity was written.
+* **With the nonce manager** (`NONCE_MANAGER=1`, 5 runs,
+  [`evidence/f6-nonce-manager.txt`](../evidence/f6-nonce-manager.txt)): the collision is gone and two transactions with
+  different hashes are broadcast, but **in 5 of 5 runs the second one reverted on chain**:
+  `Reason: no entity 0x48ee0286…36ee7e — it may have been deleted, or have expired` (`"execute" reverted`). It cost gas and
+  its write is lost. In every run the batch that landed first has `entity == predicted`; the reverted one names its own
+  predicted key.
 
-**Reproduce.** `PRIVATE_KEY=0x... node arkiv/repro/f6-concurrent-batches.mjs` (a funded Tiramisu key; the recipient needs
-no funds). Result varies from run to run, as above.
+**Why (my reading, not verified in the contract).** `predictEntityKeys` is a plain `eth_call` that reads the wallet's entity
+counter. Both batches predict while the counter is n. The batch that lands first creates at n and matches its prediction; the
+second lands at n+1, so the entity it creates has a different key than the one it predicted, and its `ownershipChanges`
+entry names a key that does not exist.
+
+**Not in the docs.** That a prediction is only valid until another create from the same wallet lands, so batches that use
+`predictEntityKeys` have to be sent one at a time even with a nonce manager. The revert text ("may have been deleted, or have
+expired") does not hint at it. The docs also say the nonce manager covers one process only ("Two processes that write with
+the same private key still collide"), which rules it out for Sealdrop's demo mode: the shared demo key is used from many
+visitors' browsers.
+
+**Reproduce.** `PRIVATE_KEY=0x... node arkiv/repro/f6-concurrent-batches.mjs`, and again with `NONCE_MANAGER=1` (a funded
+Tiramisu key; the recipient needs no funds). Without the flag the mix of outcomes varies from run to run.
 
 **What Sealdrop does about it.** `sendTip` re-predicts the key on every attempt, reads the entity back (4 tries, 400 ms
-apart), compares its payload with the bytes it sent, and treats a mismatch as "replaced by a concurrent transaction"
-and retries with a bounded back-off. See `sendTip` in [`src/arkiv.ts`](../src/arkiv.ts).
+apart), compares its payload with the bytes it sent, treats a mismatch as "replaced by a concurrent transaction", and retries
+with a bounded back-off. The integration run shows both failure modes in one send: attempt 1 failed before broadcast, attempt
+2 reverted, a later attempt landed ([`evidence/integration.txt`](../evidence/integration.txt)). See `sendTip` in
+[`src/arkiv.ts`](../src/arkiv.ts). A real deployment would put a relayer in front of the shared key, so that one process
+sends one batch at a time.
 
-**Suggested fix.** The SDK serialises writes per wallet client (a nonce queue), or `executeBatch` verifies that the
-receipt's hash is the hash it sent and throws when a transaction was replaced. Either way the error for the
-overlapping case should say "another transaction from this account was pending".
+**Suggested fix.** In the docs: say under "Concurrent writes and nonces" that a predicted key is valid only until another
+create from the same wallet lands. In the SDK: either queue writes per wallet client, or let `executeBatch` compare the
+prediction with the current counter and fail before broadcast with "predicted key is stale", which also saves the gas of the
+reverting transaction; and when the receipt belongs to a replacement transaction, throw instead of returning it as the result.
+
+---
+
+## F7. The public RPC meters `arkiv_query` against an undocumented anonymous budget, and the SDK waits out the Retry-After instead of failing
+
+**Expected.** The Access Keys page says a key "raises the rate limits on your calls to the Arkiv RPC", that "each key has a
+monthly quota, measured in cost units", and that "you do not need a key to try Arkiv. The public RPC works without one, at the
+default rate limit." The same page warns that "anyone can read a key from the network requests of your website", so a static
+site has no safe place for a key. I read this as: anonymous use is limited by a requests-per-minute rate, which the `RateLimit`
+header shows, and a static site can query within that rate.
+
+**Actual.** There are two limits, and the headers describe only one.
+
+* Every successful `arkiv_query` response carries `ratelimit: limit=600, remaining=599, reset=60`: a per-minute request limit.
+* It also carries `arkiv-cost: 100`. The cost was 100 in all five shapes I tried (1 row or 16 rows, key only or with payload,
+  `*` or a `$creator` filter; [`evidence/f7-anon-budget.txt`](../evidence/f7-anon-budget.txt)), and in every query the app
+  made (its footer showed 6 queries = 600 units). `getEntity` is an `arkiv_query` and costs 100 as well. `eth_call` (which
+  `predictEntityKeys` uses), `eth_blockNumber` and plain transfers carried no `arkiv-cost` header.
+* Anonymous clients have a budget of 10,000 units, which is about 100 queries. That number appears **only on the 429**,
+  which I hit on 2026-10-16 at about 17:31 UTC, after a few scripted test runs of about 19 queries each:
+
+  ```
+  HTTP 429   ratelimit: limit=10000, remaining=0, reset=1751   retry-after: 1751
+  {"error":"ANON_COST_LIMITED","message":"unauthenticated query budget exhausted; get an API key at https://hub.arkiv.network for a monthly quota"}
+  ```
+
+  (Copied from my terminal at 17:32 UTC. Reproducing it takes the whole budget, so the repro script stops before that.)
+  Queries worked again at about 18:01 UTC, as `Retry-After` had said. No successful response says how much budget is left.
+  `Arkiv-Quota-Used-Percent` is in the `Access-Control-Expose-Headers` list, but I never saw it on an anonymous response.
+* None of the 17 documentation pages I downloaded and searched mentions the anonymous budget, the cost per query, `ANON_COST_LIMITED`,
+  `Arkiv-Cost` or `Retry-After`; two cookbook pages say only "Anonymous access to the RPC endpoint is rate limited."
+* I do not know how long the window is or what identifies an anonymous client (I did not test whether it is the IP address),
+  so I cannot say how many visitors a hosted demo supports.
+
+**The SDK waits.** `client.query()` goes through viem's HTTP transport, which honours `Retry-After` on a 429 and retries
+(default `retryCount` 3). The call therefore does not fail, it sleeps: a script of mine sat silent for about 27 minutes
+before I killed it. `node arkiv/repro/f7-anon-budget.mjs --local` shows the mechanism without touching Arkiv: a local server
+that answers `429` + `Retry-After: 2` makes `query()` reject after 6.0 s (three waits of 2 s); with the real header (1751 s)
+that would be about 88 minutes.
+
+**Unconfirmed.** Once, during an integration run, a query failed with `QueryError: Query rejected (cursor, -32005): Request
+exceeds defined limit.` and the rerun worked. -32005 is "limit exceeded" in EIP-1474, but I could not reproduce it and do not
+know whether it was this budget.
+
+**Reproduce.** `node arkiv/repro/f7-anon-budget.mjs` sends five small queries to the public RPC, prints the `arkiv-*`,
+`ratelimit` and `retry-after` headers, and stops at the first 429 without retrying (about 500 units). With `--local` it runs
+the fake-429 server and makes no request to Arkiv.
+
+**What Sealdrop does about it.** A custom `fetch` for the HTTP transport (`failFast` in [`src/arkiv.ts`](../src/arkiv.ts))
+counts `arkiv-cost` and throws on a 429, so nothing sleeps; `explainError` turns that into "The free query budget of the
+public Arkiv RPC is used up (it renews in about N min). Wait a little, or enter your own RPC URL under Settings." New tips
+arrive over a WebSocket instead of polling (one entity read per tip); the inbox is swept only when a page opens or the user
+presses refresh, and a reconnect asks only for `$createdAt >= <last seen block>` (F1). The footer shows how many queries the
+tab has made and what they cost, and Settings accepts a custom RPC URL.
+
+**Suggested fix.** Document the anonymous budget (units, cost per query, window, what identifies a client) next to the
+Access Keys text; send the remaining budget on every response (for example `Arkiv-Quota-Used-Percent`, which the CORS list
+already names); and make the SDK fail fast on a 429 whose `Retry-After` is longer than a few seconds, or expose the retry
+options, so a script reports `ANON_COST_LIMITED` instead of hanging.
 
 ---
 
@@ -210,4 +290,6 @@ These were verified with the same rigour as the problems above, so they count as
 | Deleted entity | `getEntity` throws "No live entity with key ... It was never created, or it has been deleted or has expired." |
 | Documented query limits | `!=` and `exists(...)` fail with a clear JSON-RPC error (-32002, "write NOT (attr = value)" / "the index has no per-attribute presence set in this version"), exactly as the Querying Data pages say the network behaves. |
 | Explorer deep links | `https://tiramisu.explorer.arkiv.network/tx/<hash>`, `/address/<addr>`, `https://data.arkiv.network/entity/<key>` and `/owner/<addr>` all render the object from the hash alone. |
-| WebSocket resilience | viem's `webSocket()` transport reconnects by default (5 attempts, 2 s delay, 30 s keep-alive) and re-subscribes after a reconnect. |
+| WebSocket resilience | viem's `webSocket()` transport reconnects by default (5 attempts, 2 s delay, 30 s keep-alive) and, per viem's source, re-establishes subscriptions after a reconnect (read from the source; I did not drop a connection to test it). |
+| WebSocket push in a browser | `watchEntityEvents` over a WebSocket works from a page in headless Chromium 154: a tip sent from one browser context showed up in the newsroom tab 2.9 s after the Send click (the sender's own page confirmed after 5.4 s), and the app marks it as arrived by push ([`evidence/smoke.txt`](../evidence/smoke.txt)). Browser, Node and the standalone reader all talk to the same public node without a proxy. |
+| Injected wallet | The SDK's wallet client works with an EIP-1193 provider on `window.ethereum`. This was tested with a scripted stand-in (`scripts/wallet-shim.ts`, signs with a Node-held key), not a real browser extension: the tip was created with the provider's address as `$creator`. |

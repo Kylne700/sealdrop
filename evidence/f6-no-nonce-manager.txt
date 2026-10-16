@@ -1,0 +1,37 @@
+# arkiv/repro/f6-concurrent-batches.mjs WITHOUT the nonce manager, 6 runs, started 2026-10-16T18:16:03Z
+## run 1
+B predicted 0x649152c59ef7f739c0fd778dcd1eba2fbbe25597196f57b19c3aae0092c7ed9e
+A predicted 0x686a3d1fc2062449c28dded47eb3c7b18f2b2791bb04a6c42fc14ee056d33c04
+B OK     0x08c38142bdb9e271b46827f826dd648a9cc2b4e297506e6c12eaebd9b2f20654 entity 0x649152c59ef7f739c0fd778dcd1eba2fbbe25597196f57b19c3aae0092c7ed9e (predicted 0x649152c59ef7f739c0fd778dcd1eba2fbbe25597196f57b19c3aae0092c7ed9e)
+A OK     0x08c38142bdb9e271b46827f826dd648a9cc2b4e297506e6c12eaebd9b2f20654 entity 0x649152c59ef7f739c0fd778dcd1eba2fbbe25597196f57b19c3aae0092c7ed9e (predicted 0x686a3d1fc2062449c28dded47eb3c7b18f2b2791bb04a6c42fc14ee056d33c04)
+## run 2
+A predicted 0x1b1312745aca5fe09be4b7d28f234ef4a7bd35fcece281ef78d461404a0306dd
+B predicted 0x9d64c4628c41390de6052d8cbbde04e2538c2073a4cef99363528eba4940601e
+B FAILED EntityMutationError | txHash: (none)
+        message: Transaction failed: Execution error without revert data
+        cause  : Missing or invalid parameters.
+A OK     0x1579dd221c1f55d31977b2b419b3b20d09c6ba8a8709192950652a84b2948f8c entity 0x1b1312745aca5fe09be4b7d28f234ef4a7bd35fcece281ef78d461404a0306dd (predicted 0x1b1312745aca5fe09be4b7d28f234ef4a7bd35fcece281ef78d461404a0306dd)
+## run 3
+B predicted 0xca069ae9c101eac63bdb5b1ae12601489cb9094a56d5af0205ae4b96e00dcc24
+A predicted 0x24a4f132448333df16c013f4321ee20d06050fda3740ac6a32ec9130c494234b
+B FAILED EntityMutationError | txHash: (none)
+        message: Transaction failed: Execution error without revert data
+        cause  : Missing or invalid parameters.
+A OK     0x60d7b514958cbcdee35e8c943345b6869cf86cd964b73b43a898516d57b1f163 entity 0x24a4f132448333df16c013f4321ee20d06050fda3740ac6a32ec9130c494234b (predicted 0x24a4f132448333df16c013f4321ee20d06050fda3740ac6a32ec9130c494234b)
+## run 4
+B predicted 0x59e886de4a147818179867077dc45d0f0551421186947e681502f38e5f39c73b
+A predicted 0x0f6a4825ae329138a34d989f68f23ba821acb1a39d182ad95d71998e05fe1757
+B FAILED EntityMutationError | txHash: (none)
+        message: Transaction failed: Execution error without revert data
+        cause  : Missing or invalid parameters.
+A OK     0x6cb9d69fce8130710379bdf9ead062e03e9fd410d3a8483d53877d35dbb14431 entity 0x0f6a4825ae329138a34d989f68f23ba821acb1a39d182ad95d71998e05fe1757 (predicted 0x0f6a4825ae329138a34d989f68f23ba821acb1a39d182ad95d71998e05fe1757)
+## run 5
+B predicted 0xd265f6ec08e44c4f00ae3c04606f1290465e4405a35b7e1c0f250e6a29da1ae0
+A predicted 0xc4a43de22760bede48b4b93b9f3a9d9f08a119ed995fa59a9125217c7ba21f14
+B OK     0xe75de97cd82020c163ec6558dc5764e084360018cce390e48d1ee2f3eb5b4417 entity 0xd265f6ec08e44c4f00ae3c04606f1290465e4405a35b7e1c0f250e6a29da1ae0 (predicted 0xd265f6ec08e44c4f00ae3c04606f1290465e4405a35b7e1c0f250e6a29da1ae0)
+A OK     0xe75de97cd82020c163ec6558dc5764e084360018cce390e48d1ee2f3eb5b4417 entity 0xd265f6ec08e44c4f00ae3c04606f1290465e4405a35b7e1c0f250e6a29da1ae0 (predicted 0xc4a43de22760bede48b4b93b9f3a9d9f08a119ed995fa59a9125217c7ba21f14)
+## run 6
+A predicted 0xb6223af037ce1f90fb721bfd9143dfebd75fa887fe9e7bdd921ddadcf8152ffd
+B predicted 0x5515ebc5962864d8ca5f82c00dc4bc4ee3c878c40c5c522a093db345541597bd
+B OK     0xc495ccfccc54aa7896ec718c5aa5978b87386c93fbe137aed839fc5e7232e199 entity 0x5515ebc5962864d8ca5f82c00dc4bc4ee3c878c40c5c522a093db345541597bd (predicted 0x5515ebc5962864d8ca5f82c00dc4bc4ee3c878c40c5c522a093db345541597bd)
+A OK     0xc495ccfccc54aa7896ec718c5aa5978b87386c93fbe137aed839fc5e7232e199 entity 0x5515ebc5962864d8ca5f82c00dc4bc4ee3c878c40c5c522a093db345541597bd (predicted 0xb6223af037ce1f90fb721bfd9143dfebd75fa887fe9e7bdd921ddadcf8152ffd)

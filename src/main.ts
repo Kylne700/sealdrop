@@ -33,6 +33,6 @@ route()
 const budgetEl = document.getElementById('budget')
 setInterval(() => {
   if (budgetEl && budget.queries > 0) {
-    budgetEl.textContent = `Public RPC: this tab has made ${budget.queries} queries (${budget.spent} cost units). The anonymous allowance is about ${ANON_BUDGET_UNITS} units per window; live tips arrive over a WebSocket and cost none.`
+    budgetEl.textContent = `Public RPC: this tab has made ${budget.queries} queries (${budget.spent} cost units). The anonymous allowance is about ${ANON_BUDGET_UNITS} units per window; live tips arrive over a WebSocket instead of polling (one entity read each).`
   }
 }, 1000)

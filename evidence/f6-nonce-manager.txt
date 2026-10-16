@@ -1,0 +1,36 @@
+# arkiv/repro/f6-concurrent-batches.mjs with NONCE_MANAGER=1 (the fix recommended by the docs), 5 runs, started 2026-10-16T18:14:58Z
+## run 1
+B predicted 0x282061ec78a99e284b5f34863f1b32096524264b3a33fa6c97457478a420f83b
+A predicted 0x48ee0286d633dcece005282832afb60bdcabe0808a070a67b1a51a641036ee7e
+B OK     0x1ad3986995a8732e532bb64b8bdaf93c2b68ee8e1fb9105429aba0469666b6fc entity 0x282061ec78a99e284b5f34863f1b32096524264b3a33fa6c97457478a420f83b (predicted 0x282061ec78a99e284b5f34863f1b32096524264b3a33fa6c97457478a420f83b)
+A FAILED EntityMutationError | txHash: 0x2f5a83a2ce0b7407a3dcf473191aec5d5d548b154decd542d07afa83e3ac39e2
+        message: Transaction 0x2f5a83a2ce0b7407a3dcf473191aec5d5d548b154decd542d07afa83e3ac39e2 reverted. Reason: no entity 0x48ee0286…36ee7e — it may have been deleted, or have expired
+        cause  : The contract function "execute" reverted.
+## run 2
+B predicted 0x22f00e34985b7af5fe100c122db655d5bacb4973b2b17cb366f32d27d481bb97
+A predicted 0x5835c60a65c9d0b1cb945ae13d73c4fd4b26be565470194ec92aca706a6a437a
+B OK     0xd10bd5b4b96d61ce854a8dd87b76f0602f1e4899d20317bf5f4dc67e6c4e0494 entity 0x22f00e34985b7af5fe100c122db655d5bacb4973b2b17cb366f32d27d481bb97 (predicted 0x22f00e34985b7af5fe100c122db655d5bacb4973b2b17cb366f32d27d481bb97)
+A FAILED EntityMutationError | txHash: 0x20065a6d0c0fcd05223fc21ebade3b787701f4e360498921153fe0a55cba3d70
+        message: Transaction 0x20065a6d0c0fcd05223fc21ebade3b787701f4e360498921153fe0a55cba3d70 reverted. Reason: no entity 0x5835c60a…6a437a — it may have been deleted, or have expired
+        cause  : The contract function "execute" reverted.
+## run 3
+A predicted 0x44fd889c04ee28ff10c75d1c72166578e5616ef57457c7a334557bc8519bde78
+B predicted 0xa8bd07e419de2803e47dfd337bf800ed88935d5d364e09973bbfa06fd94f4ae7
+A OK     0xd3556bfa140f5edad26791b00e674556ededd4ebc1e7a93553362dd2a8da1d21 entity 0x44fd889c04ee28ff10c75d1c72166578e5616ef57457c7a334557bc8519bde78 (predicted 0x44fd889c04ee28ff10c75d1c72166578e5616ef57457c7a334557bc8519bde78)
+B FAILED EntityMutationError | txHash: 0x2170b59b49ebff018dd66bb94b15c9febda749dc6b0b89a6da84a5cc1d7e3aa5
+        message: Transaction 0x2170b59b49ebff018dd66bb94b15c9febda749dc6b0b89a6da84a5cc1d7e3aa5 reverted. Reason: no entity 0xa8bd07e4…4f4ae7 — it may have been deleted, or have expired
+        cause  : The contract function "execute" reverted.
+## run 4
+B predicted 0x36919e4aef0834bbec1d92a2e762e6da8c7501ab9230b5f6e78f7461e0f203e6
+A predicted 0x4a993ff80b6fbae6f422e6a3cc6e4996e30e235122639c06826aa504eb395995
+B OK     0xb550c43d6c3be1a2fe95470773a4218ab1363c7ef270b9de30f2ff9499da7e47 entity 0x36919e4aef0834bbec1d92a2e762e6da8c7501ab9230b5f6e78f7461e0f203e6 (predicted 0x36919e4aef0834bbec1d92a2e762e6da8c7501ab9230b5f6e78f7461e0f203e6)
+A FAILED EntityMutationError | txHash: 0x5ab50859cc1b3a123dc7c58ee3789225c8df653db0c48d9798c03df2933c85e4
+        message: Transaction 0x5ab50859cc1b3a123dc7c58ee3789225c8df653db0c48d9798c03df2933c85e4 reverted. Reason: no entity 0x4a993ff8…395995 — it may have been deleted, or have expired
+        cause  : The contract function "execute" reverted.
+## run 5
+A predicted 0xb6e1ae2482044b545713380d9ec2e3cc5509c70eb73582afc3c856de30c70369
+B predicted 0xce46bf0e1379f5af492fd3482e4a436cfa7c1efa8a3cea3c26e43a9e31ec59b4
+A OK     0xa4590569b053ffda9479e12483e50ae432fbcc6849c06769203549d0cdfe11e0 entity 0xb6e1ae2482044b545713380d9ec2e3cc5509c70eb73582afc3c856de30c70369 (predicted 0xb6e1ae2482044b545713380d9ec2e3cc5509c70eb73582afc3c856de30c70369)
+B FAILED EntityMutationError | txHash: 0xde89a1586546e8455ef5ae56da20bca6c5305029d1d1468255f81387967e1429
+        message: Transaction 0xde89a1586546e8455ef5ae56da20bca6c5305029d1d1468255f81387967e1429 reverted. Reason: no entity 0xce46bf0e…ec59b4 — it may have been deleted, or have expired
+        cause  : The contract function "execute" reverted.
