@@ -87,12 +87,15 @@ Every query string below is shown verbatim in the app's "Queries this page runs"
 | 1 | Send page, newsroom console | `type = str('inbox') AND app = str('sealdrop-v1') AND inbox_id = str('<id>') AND $creator = addr(<creator>)` | Finds the inbox by on-chain creator. Limit 20, newest valid match wins. |
 | 2 | Newsroom console, on open | `type = str('inbox') AND app = str('sealdrop-v1') AND $expiresAt < u64(<head + 6 days>) AND $creator = addr(<newsroom>)` | Lease check: a range query on the protocol's `$expiresAt` finds every inbox of this creator that needs a Lifetime Extension. |
 | 3 | Newsroom console, on open and Refresh | `type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(<inbox key>) AND $owner = addr(<newsroom>)` | Cursor-paginated, 200 per page. |
-| 4 | Newsroom console, tab visible again after 30 s or more | query 3 `AND $createdAt >= u64(<last swept block - 2>)` | Incremental: only tips created since the last sweep. |
+| 4 | Newsroom console, tab visible again after 30 s or more, and once after the live feed has reconnected | query 3 `AND $createdAt >= u64(<last swept block - 2>)` | Incremental: only tips created since the last sweep. |
 | 5 | Send page, "What can anyone see" | `type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(<inbox key>)` | Limit 5, without the owner filter: the public view. |
 
 Live updates are not queries: the console opens `watchEntityEvents` over a WebSocket and reacts to
 `onOwnershipTransferred` where `newOwner` is the newsroom (the last step of the sender's batch). Events carry no
-attributes, so the handler then reads the entity by key.
+attributes, so the handler then reads the entity by key. Events are not replayed, so when the socket drops the console says
+"Reconnecting", retries on its own with a growing delay (1 s, 2 s, 4 s ... at most 30 s) and, once the new socket is
+subscribed, runs query 4 once to pick up the tips it missed. A 30-second heartbeat (`eth_blockNumber`) notices a socket that
+is still open but no longer delivers anything.
 
 ## Writes
 

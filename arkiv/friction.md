@@ -17,6 +17,7 @@ appended to as the build goes on; the last section lists what was checked and fo
 | F5 | Faucet | Low | Only usable from an interactive browser session, no scriptable path for CI or agents |
 | F6 | Concurrent batches from one wallet | Medium | The docs' nonce fix stops the collision, but the second `predictEntityKeys` + `executeBatch` batch then reverts on chain (5 of 5 runs) because its predicted key is stale; the docs do not say a prediction holds for one batch in flight only |
 | F7 | Public RPC anonymous budget | High | `arkiv_query` costs 100 units against an undocumented anonymous budget of 10,000; only the 429 says so, and the SDK (viem) sleeps through the `Retry-After` (about 30 min) instead of failing |
+| F8 | Writes from an account with no GLM | Low | An entity write from an empty account fails as `out of gas: gas required exceeds: N` ("Execution error without revert data" on top), a plain transfer from the same account as geth's `insufficient funds`; an app matching only the usual wording misses the first |
 
 ---
 
@@ -288,6 +289,46 @@ options, so a script reports `ANON_COST_LIMITED` instead of hanging.
 
 ---
 
+## F8. An entity write from an account with no GLM fails as "out of gas", a plain transfer as "insufficient funds"
+
+**Expected.** One account, one balance, one failure text, whatever it tries to send: geth's `insufficient funds for gas * price
++ value: have 0 want N`. Then an app that wants to tell the user "this wallet has no GLM, use the faucet" needs one check. (This is
+my expectation from other EVM nodes; I found no documented error text for this case, but I did not search every docs page for one.)
+
+**Actual.** Throwaway key with 0 GLM on Tiramisu, `@arkiv-network/sdk` 0.8.1, `viem` 2.57.7, nothing is mined either way:
+
+```
+plain transfer
+  #0 TransactionExecutionError: The total cost (gas * gas fee + value) of executing this transaction exceeds the balance of the account.
+      details: insufficient funds for gas * price + value: have 0 want 1
+  ...
+  #4 TransactionRejectedRpcError: Transaction creation failed.
+      details: insufficient funds for gas * price + value: have 0 want 1  (code -32003)
+createEntity
+  #0 EntityMutationError: Transaction failed: Execution error without revert data
+  #1 ContractFunctionExecutionError: Transaction creation failed.
+      details: out of gas: gas required exceeds: 0
+  ...
+  #4 TransactionRejectedRpcError: Transaction creation failed.
+      details: out of gas: gas required exceeds: 0  (code -32003)
+```
+
+Both are code -32003 from `eth_estimateGas`. For the entity write the number after `exceeds:` is the balance divided by the gas price
+(1 gwei), minus one: a key holding 0.000001 GLM got `exceeds: 999`, one holding 0.00002 GLM got `exceeds: 19999`, so a low but
+non-zero balance reads like a gas problem as well. The top-level SDK message, "Execution error without revert data", reads like
+a contract revert and says nothing about funds; only the deepest `cause` has the words. Sealdrop therefore matches both texts
+(`isOutOfFunds` in [`src/arkiv.ts`](../src/arkiv.ts), tested with these captured shapes in `test/errors.test.ts`) and shows
+"This wallet has no testnet GLM left" for either.
+
+**Reproduce.** `node arkiv/repro/f8-unfunded-write.mjs` (no funded key; it makes a throwaway one, mines nothing, makes no
+`arkiv_query`, so it costs no anonymous budget). Run on 2026-10-16.
+
+**Suggested fix.** Return the same `insufficient funds ... have X want Y` text for entity operations when the balance cannot pay
+for the estimate, or at least let `EntityMutationError` carry the deepest message instead of "Execution error without revert
+data". The Fundamentals page could list this error next to the revert cases.
+
+---
+
 ## Checked and found smooth
 
 These were verified with the same rigour as the problems above, so they count as documented paths.
@@ -302,6 +343,6 @@ These were verified with the same rigour as the problems above, so they count as
 | Deleted entity | `getEntity` throws "No live entity with key ... It was never created, or it has been deleted or has expired." |
 | Documented query limits | `!=` and `exists(...)` fail with a clear JSON-RPC error (-32002, "write NOT (attr = value)" / "the index has no per-attribute presence set in this version"), exactly as the Querying Data pages say the network behaves. |
 | Explorer deep links | `https://tiramisu.explorer.arkiv.network/tx/<hash>`, `/address/<addr>`, `https://data.arkiv.network/entity/<key>` and `/owner/<addr>` all render the object from the hash alone. |
-| WebSocket resilience | viem's `webSocket()` transport reconnects by default (5 attempts, 2 s delay, 30 s keep-alive) and, per viem's source, re-establishes subscriptions after a reconnect (read from the source; I did not drop a connection to test it). |
+| WebSocket resilience | Tested on 2026-10-16 by dropping the socket of a newsroom console in headless Chromium 154, through a local proxy in front of the public node: the socket killed and new handshakes refused for 15 s; CDP `offline` for 15 s; the socket left open but silent. With viem 2.57.7's default `webSocket()` reconnect (5 attempts, 2 s apart) the 15 s outage outlasted the retries: the subscription ended with "The socket has been closed" (the page said "Live updates stopped"), and tips sent during and after the outage had not appeared 30 s later; the page does not poll, so only a reload or Refresh would show them. Events are not replayed after a reconnect, so a catch-up read is needed whatever the transport does; `watchEntityEvents` only has `onError`. Sealdrop therefore supervises the socket itself (reconnect off, backoff, a heartbeat, one `$createdAt` query after each reconnect) and passes all three scenarios ([evidence/qa.md](../evidence/qa.md)). Chromium's CDP `offline` did not close an already open socket, so that scenario is not a real drop. I did not test outages shorter than viem's retry window. |
 | WebSocket push in a browser | `watchEntityEvents` over a WebSocket works from a page in headless Chromium 154: a tip sent from one browser context showed up in the newsroom tab 1.8 s after the Send click (the sender's own page confirmed after 5.5 s), and the app marks it as arrived by push ([`evidence/smoke.txt`](../evidence/smoke.txt)). Browser, Node and the standalone reader all talk to the same public node without a proxy. |
 | Injected wallet | The SDK's wallet client works with an EIP-1193 provider on `window.ethereum`. This was tested with a scripted stand-in (`scripts/wallet-shim.ts`, signs with a Node-held key), not a real browser extension: the tip was created with the provider's address as `$creator`. |

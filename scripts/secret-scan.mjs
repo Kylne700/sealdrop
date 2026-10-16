@@ -1,6 +1,7 @@
 // Fails if any secret value from .env.local appears in a tracked or staged file. Prints counts only.
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
+if (!existsSync(new URL('../.env.local', import.meta.url))) { console.log('secret scan: SKIP (no .env.local, so there are no secrets to look for)'); process.exit(0) }
 const env = readFileSync(new URL('../.env.local', import.meta.url), 'utf8').split('\n').filter((l) => l && !l.startsWith('#')).map((l) => l.split('=')).filter(([k]) => !k.startsWith('VITE_') || k.includes('PRIVATE'))
 let bad = 0
 for (const [name, ...rest] of env) {
