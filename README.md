@@ -147,8 +147,8 @@ The app is plain static files plus the three dependencies `@arkiv-network/sdk`, 
 repository; it is injected from `.env.local` and exists only in the bundle you build.
 
 *What a judge needs, exactly.* Node 22 (22.12 or newer), 24, or 26 and newer (run on 22.23 and 24.18; `package.json` `engines` is vitest's
-range, the strictest of vite, vitest and puppeteer-core, so 23 and 25 fall outside it) and npm. Node 20.19 is outside that range but
-did run `npm ci`, `npm test`, `npm run build` and `npm run dev` in a fresh clone, with `EBADENGINE` warnings. Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
+range, the strictest of vite, vitest and puppeteer-core, so 23 and 25 fall outside it) and npm. Node 20.19 is outside that range;
+it ran the same steps in a fresh clone too, with `EBADENGINE` warnings. Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
 (`npm run check:bundle` prints `SKIP`), but the site is wallet mode only: the shared-demo-key send and the throwaway
 newsroom answer that the build has no demo key. (npm 11.16 prints an `allow-scripts` warning about esbuild's postinstall
 during `npm ci`; ignore it, the install, tests and build pass without that script.) For demo mode put one line in
