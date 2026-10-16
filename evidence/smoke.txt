@@ -1,25 +1,25 @@
-Sealdrop smoke run 2026-10-16T18:08:43.176Z  Chromium Chrome/154.0.8037.92  served from dist/
+Sealdrop smoke run 2026-10-16T18:37:07.311Z  Chromium Chrome/154.0.8037.92  served from dist/
   throwaway newsroom created in the browser after 0.7 s (no network yet)
-  inbox created in 14.5 s: <site>/#/send/0x8b050A8922469Ddaa525Ab4D7c9811C33aE402c8/inbox-2pacye
+  inbox created in 14.4 s: <site>/#/send/0x5b57905aFAA735AcA9f5B6778782806a69Bd5278/inbox-ay65g9
 PASS  the inbox link points at #/send/<creator>/<inbox id>
 PASS  the key file can be exported
 PASS  the send page shows the newsroom as $creator (found by creator, not by a writable field)
 PASS  the tip decrypts in the newsroom tab to the exact text that was sent
 PASS  it arrived through the WebSocket subscription (data-source=live), not through a sweep
-  tip visible in the newsroom 2.9 s after Send was clicked; the sender's own page confirmed after 5.4 s
-  JUDGE PATH TOTAL: 19.1 s from opening the newsroom page to the decrypted live tip
-  tip entity https://data.arkiv.network/entity/0xf383c4054f5cb77edbc04a6591b0461ffd443f5aa757b71997693e8497702ccc
-  tx https://tiramisu.explorer.arkiv.network/tx/0x278fcb3af57221b3e2999e3ee895ef084a78a7d1ea87acd8655c45ce72d509dd
+  tip visible in the newsroom 2.8 s after Send was clicked; the sender's own page confirmed after 5.6 s
+  JUDGE PATH TOTAL: 19.0 s from opening the newsroom page to the decrypted live tip
+  tip entity https://data.arkiv.network/entity/0xcc140d3e34840f8469190a5cac80bc0d09f592a4a4d2ddf6ad8ed3705762d2b9
+  tx https://tiramisu.explorer.arkiv.network/tx/0xa35ab792d40615f92dc199b31846c0dcd2e97afb47d1f8ee753a50dbc415d389
 PASS  wallet mode is offered when an EIP-1193 wallet is injected
 PASS  wallet mode: the result shows the wallet address as $creator
 PASS  wallet mode: the second tip also arrived live
 PASS  a look-alike link (same inbox id, different creator) shows "no live inbox"
 PASS  the Demo Desk inbox is found on Arkiv by its creator and inbox id
-  Demo Desk tip entity https://data.arkiv.network/entity/0x4eccbaadea4061f6ee99b1c9d33a66eccfae046b95405244667f510cf561634d
+  Demo Desk tip entity https://data.arkiv.network/entity/0x62afd54d287fa2d430ee09264a7983fb57a24fe1d4dafdf69c9df0e966b960a8
 PASS  the desk operator (key not in the build) decrypts the Demo Desk tip with `ops desk-read`
-  newsroom tab: Public RPC: this tab has made 6 queries (600 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket and cost none.
-  source tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket and cost none.
-  desk tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket and cost none.
+  newsroom tab: Public RPC: this tab has made 6 queries (600 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+  source tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+  desk tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
 PASS  no uncaught errors or console errors in any tab
 
 smoke: all checks passed

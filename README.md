@@ -49,8 +49,8 @@ of this repository or the build. Open the entity link on the Data Explorer to se
 three attributes.
 
 Measured on 2026-10-16 by a headless Chromium run against the built site and the live testnet ([evidence/smoke.txt](evidence/smoke.txt)):
-creating the newsroom takes under a second (no network), creating the inbox 14.5 s (two transactions and the first look-up),
-and the decrypted tip appeared in the newsroom tab 2.9 s after Send was clicked. The whole path took 19.1 s.
+creating the newsroom takes under a second (no network), creating the inbox 14.4 s (two transactions and the first look-up),
+and the decrypted tip appeared in the newsroom tab 2.8 s after Send was clicked. The whole path took 19.0 s.
 
 ## What is on Arkiv, and what is not
 

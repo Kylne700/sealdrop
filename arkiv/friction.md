@@ -243,12 +243,15 @@ header shows, and a static site can query within that rate.
   ```
 
   (Copied from my terminal at 17:32 UTC. Reproducing it takes the whole budget, so the repro script stops before that.)
-  Queries worked again at about 18:01 UTC, as `Retry-After` had said. No successful response says how much budget is left.
+  Queries worked again at about 18:01 UTC, as `Retry-After` had said. I hit the budget a second time at 18:38 UTC, 37 minutes
+  after that reset, in the last step of an integration run (scripted runs of mine had been using it since the reset); my
+  `failFast` wrapper reported `retry after 1354 s`, which is a reset at about 19:01:24 UTC. The first one was at about 18:01:22,
+  so the window may be an hour long (two data points; not documented). No successful response says how much budget is left.
   `Arkiv-Quota-Used-Percent` is in the `Access-Control-Expose-Headers` list, but I never saw it on an anonymous response.
 * None of the 17 documentation pages I downloaded and searched mentions the anonymous budget, the cost per query, `ANON_COST_LIMITED`,
   `Arkiv-Cost` or `Retry-After`; two cookbook pages say only "Anonymous access to the RPC endpoint is rate limited."
-* I do not know how long the window is or what identifies an anonymous client (I did not test whether it is the IP address),
-  so I cannot say how many visitors a hosted demo supports.
+* I do not know for certain how long the window is (the two resets above suggest an hour) or what identifies an anonymous
+  client (I did not test whether it is the IP address), so I cannot say how many visitors a hosted demo supports.
 
 **The SDK waits.** `client.query()` goes through viem's HTTP transport, which honours `Retry-After` on a 429 and retries
 (default `retryCount` 3). The call therefore does not fail, it sleeps: a script of mine sat silent for about 27 minutes
@@ -293,5 +296,5 @@ These were verified with the same rigour as the problems above, so they count as
 | Documented query limits | `!=` and `exists(...)` fail with a clear JSON-RPC error (-32002, "write NOT (attr = value)" / "the index has no per-attribute presence set in this version"), exactly as the Querying Data pages say the network behaves. |
 | Explorer deep links | `https://tiramisu.explorer.arkiv.network/tx/<hash>`, `/address/<addr>`, `https://data.arkiv.network/entity/<key>` and `/owner/<addr>` all render the object from the hash alone. |
 | WebSocket resilience | viem's `webSocket()` transport reconnects by default (5 attempts, 2 s delay, 30 s keep-alive) and, per viem's source, re-establishes subscriptions after a reconnect (read from the source; I did not drop a connection to test it). |
-| WebSocket push in a browser | `watchEntityEvents` over a WebSocket works from a page in headless Chromium 154: a tip sent from one browser context showed up in the newsroom tab 2.9 s after the Send click (the sender's own page confirmed after 5.4 s), and the app marks it as arrived by push ([`evidence/smoke.txt`](../evidence/smoke.txt)). Browser, Node and the standalone reader all talk to the same public node without a proxy. |
+| WebSocket push in a browser | `watchEntityEvents` over a WebSocket works from a page in headless Chromium 154: a tip sent from one browser context showed up in the newsroom tab 2.8 s after the Send click (the sender's own page confirmed after 5.6 s), and the app marks it as arrived by push ([`evidence/smoke.txt`](../evidence/smoke.txt)). Browser, Node and the standalone reader all talk to the same public node without a proxy. |
 | Injected wallet | The SDK's wallet client works with an EIP-1193 provider on `window.ethereum`. This was tested with a scripted stand-in (`scripts/wallet-shim.ts`, signs with a Node-held key), not a real browser extension: the tip was created with the provider's address as `$creator`. |
