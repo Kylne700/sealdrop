@@ -49,8 +49,8 @@ of this repository or the build. Open the entity link on the Data Explorer to se
 three attributes.
 
 Measured on 2026-10-16 by a headless Chromium run against the built site and the live testnet ([evidence/smoke.txt](evidence/smoke.txt)):
-creating the newsroom takes under a second (no network), creating the inbox 14.4 s (two transactions and the first look-up),
-and the decrypted tip appeared in the newsroom tab 2.8 s after Send was clicked. The whole path took 19.0 s.
+creating the newsroom takes under a second (no network), creating the inbox 15.8 s (two transactions and the first look-up),
+and the decrypted tip appeared in the newsroom tab 1.8 s after Send was clicked. The whole path took 19.3 s.
 
 ## What is on Arkiv, and what is not
 
@@ -163,6 +163,7 @@ npm run build && npm run check:bundle
 | Unit tests (crypto round trip, padding, tamper rejection, codec) | `npm test` | console |
 | Integration against Tiramisu: create inbox, send, hand-over, WebSocket event, sweep, cursor, Lifetime Extension, pin, burn, forged-link refusal. Prints entity keys, tx hashes and explorer links. | `npm run integration` | [evidence/integration.txt](evidence/integration.txt) |
 | Headless Chromium on the built site: the 60-second judge path, wallet mode with a test wallet, forged link, Demo Desk. | `npm run build && npm run smoke` (set `CHROMIUM=/path/to/chromium` if it is not `/usr/bin/chromium`) | [evidence/smoke.txt](evidence/smoke.txt), [evidence/screens/](evidence/screens/) |
+| The same smoke checks against any served copy, here a `BASE_PATH=/sealdrop/` build behind a local static server (how GitHub Pages serves it). | `SMOKE_URL=http://127.0.0.1:8765/sealdrop/ npm run smoke` | [evidence/smoke-subpath.txt](evidence/smoke-subpath.txt) |
 | Independent reader: decrypts the Demo Desk with no Sealdrop code. | `INBOX=0x65a2… OWNER=0x6a3C… BOX_SECRET=… node arkiv/examples/read-tips.mjs` | [evidence/read-tips.txt](evidence/read-tips.txt) |
 | Friction repro scripts | `arkiv/repro/*.mjs` | see [arkiv/friction.md](arkiv/friction.md) |
 
@@ -170,7 +171,9 @@ Run the integration test and the smoke test one at a time: they share the demo s
 anonymous query budget.
 
 Not verified: wallet mode with a real browser wallet extension (the smoke test uses a scripted EIP-1193 stand-in that signs in
-Node), Firefox, Safari, mobile browsers and Tor Browser. The smoke test ran in Chromium 154 only.
+Node), Firefox, Safari, mobile browsers and Tor Browser. The smoke test ran in Chromium 154 only. The Settings panel was
+checked only against a scripted fake RPC: the URL is saved and the page sends its queries there, but I did not try a real second or
+access-key RPC node (the live-tip socket is derived from the same URL, `https` to `wss`, which a given node may not serve).
 
 ## Addresses and roles (Tiramisu testnet, chain id 7738577)
 

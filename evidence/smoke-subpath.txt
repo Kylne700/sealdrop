@@ -1,0 +1,26 @@
+Sealdrop smoke run 2026-10-16T19:03:37.812Z  Chromium Chrome/154.0.8037.92  served from http://127.0.0.1:8765/sealdrop/
+PASS  faked 429 on every query: the send page says the free budget is used up and offers Settings, after 0.6 s  (The free query budget of the public Arkiv RPC is used up. Wait a little, or ente)
+  throwaway newsroom created in the browser after 0.7 s (no network yet)
+  inbox created in 14.7 s: <site>/#/send/0xD962019f7962969c9B1D1567E44750851643Ed1e/inbox-qzszpt
+PASS  the inbox link points at #/send/<creator>/<inbox id>
+PASS  the key file can be exported
+PASS  the send page shows the newsroom as $creator (found by creator, not by a writable field)
+PASS  the tip decrypts in the newsroom tab to the exact text that was sent
+PASS  it arrived through the WebSocket subscription (data-source=live), not through a sweep
+  tip visible in the newsroom 3.4 s after Send was clicked; the sender's own page confirmed after 5.5 s
+  JUDGE PATH TOTAL: 19.7 s from opening the newsroom page to the decrypted live tip
+  tip entity https://data.arkiv.network/entity/0x716b736edc1274510c00b45721ad84d87ae0c203bed6f3d6f441d31a6d2b02b7
+  tx https://tiramisu.explorer.arkiv.network/tx/0x1b1a20335c61c780c0c015daf62d49f008b580e168abdf80218beeb1cfabf5b4
+PASS  wallet mode is offered when an EIP-1193 wallet is injected
+PASS  wallet mode: the result shows the wallet address as $creator
+PASS  wallet mode: the second tip also arrived live
+PASS  a look-alike link (same inbox id, different creator) shows "no live inbox"
+PASS  the Demo Desk inbox is found on Arkiv by its creator and inbox id
+  Demo Desk tip entity https://data.arkiv.network/entity/0xc70a2ae78c9434a6625fc148f98e01111570b15afa0991217e4a4d71a00c66ad
+PASS  the desk operator (key not in the build) decrypts the Demo Desk tip with `ops desk-read`
+  newsroom tab: Public RPC: this tab has made 6 queries (600 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+  source tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+  desk tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+PASS  no uncaught errors or console errors in any tab
+
+smoke: all checks passed

@@ -1,91 +1,91 @@
 Sealdrop integration test (all text sent is synthetic test data)
-date          2026-10-16T18:03:10.522Z
+date          2026-10-16T19:04:43.760Z
 chain         Arkiv Tiramisu, chain id 7738577, RPC https://rpc.tiramisu.db-chain.testnet.arkiv.network
-sdk           @arkiv-network/sdk 0.8.1, node v24.18.0, repo commit e8c799e
+sdk           @arkiv-network/sdk 0.8.1, node v24.18.0, repo commit 136172c
 demo sender   0xa05d5Bd99440d95526120062364518ddfe11797F   https://tiramisu.explorer.arkiv.network/address/0xa05d5Bd99440d95526120062364518ddfe11797F
-newsroom      0x2d8C15731B20820e1b16649549A66Ae14541f0EA (throwaway, key generated in this run and never printed)
-inbox id      inbox-prja45
+newsroom      0x826f1199300F54c88684E65e0CA90703B7e81fD1 (throwaway, key generated in this run and never printed)
+inbox id      inbox-uy39uu
 
-== 1. fund the throwaway newsroom from the demo sender (plain GLM transfer)   [+0.1s]
-  demo sender balance before: 2.98257223999514448 GLM
-  tx 0x5a7157e41ffb47fa15e0acf9cedc8e958c9abb9db87e3c671279667f2863e6f6
-  https://tiramisu.explorer.arkiv.network/tx/0x5a7157e41ffb47fa15e0acf9cedc8e958c9abb9db87e3c671279667f2863e6f6
+== 1. fund the throwaway newsroom from the demo sender (plain GLM transfer)   [+0.0s]
+  demo sender balance before: 2.924033055984066112 GLM
+  tx 0x1cf6a5d48e15cd097b244a3d3063f321eccefa41136b563f19dcab804161c8af
+  https://tiramisu.explorer.arkiv.network/tx/0x1cf6a5d48e15cd097b244a3d3063f321eccefa41136b563f19dcab804161c8af
   PASS  newsroom received the funds   balance 0.005 GLM
 
-== 2. create the inbox (Entity Expiration 7 days)   [+5.7s]
-  entity 0x508761c487660dadbbbfe3942eda2672551c3e445a0c7d118804a3b65a09876e
-  tx 0x64f74d383ff1a1d3cf1bc408c38936eaa928b8d61ccf07ce9ae569becbb78996
-  https://tiramisu.explorer.arkiv.network/tx/0x64f74d383ff1a1d3cf1bc408c38936eaa928b8d61ccf07ce9ae569becbb78996
-  https://data.arkiv.network/entity/0x508761c487660dadbbbfe3942eda2672551c3e445a0c7d118804a3b65a09876e
-  expires at block 964416 = 2026-10-23 18:03 UTC
+== 2. create the inbox (Entity Expiration 7 days)   [+5.6s]
+  entity 0xe9e0185cc57f287d0dabd6d01d412ab32fdbac2d0b2ba962434eb9276140ec84
+  tx 0x7a5f8ea5117bf82989a02b3794a25c53fcb16c8d68c5a6ff68067da56564788a
+  https://tiramisu.explorer.arkiv.network/tx/0x7a5f8ea5117bf82989a02b3794a25c53fcb16c8d68c5a6ff68067da56564788a
+  https://data.arkiv.network/entity/0xe9e0185cc57f287d0dabd6d01d412ab32fdbac2d0b2ba962434eb9276140ec84
+  expires at block 966263 = 2026-10-23 19:04 UTC
 
-== 3. a sender resolves the inbox by its on-chain creator   [+10.9s]
-  query: type = str('inbox') AND app = str('sealdrop-v1') AND inbox_id = str('inbox-prja45') AND $creator = addr(0x2d8C15731B20820e1b16649549A66Ae14541f0EA)
+== 3. a sender resolves the inbox by its on-chain creator   [+10.8s]
+  query: type = str('inbox') AND app = str('sealdrop-v1') AND inbox_id = str('inbox-uy39uu') AND $creator = addr(0x826f1199300F54c88684E65e0CA90703B7e81fD1)
   PASS  inbox found by $creator + inbox_id
   PASS  exactly one match
   PASS  $creator and $owner are the newsroom
   PASS  published public key matches
-  PASS  the same inbox id under another creator resolves to nothing   (type = str('inbox') AND app = str('sealdrop-v1') AND inbox_id = str('inbox-prja45') AND $creator = addr(0xa05d5Bd99440d95526120062364518ddfe11797F))
+  PASS  the same inbox id under another creator resolves to nothing   (type = str('inbox') AND app = str('sealdrop-v1') AND inbox_id = str('inbox-uy39uu') AND $creator = addr(0xa05d5Bd99440d95526120062364518ddfe11797F))
   PASS  listInboxes(creator) returns it
 
-== 4. live path: WebSocket subscription, then a sealed tip with atomic hand-over   [+11.3s]
-  tip 1 entity 0x2bf413543f160b72a3eca65c05eff743897de38c0ac7796a245cd107a989d7e8
-  tx 0x2ee272a8968667e25ff1aeb7ce95bd6014d36d74d788fe9d789eeac342bcb081
-  https://tiramisu.explorer.arkiv.network/tx/0x2ee272a8968667e25ff1aeb7ce95bd6014d36d74d788fe9d789eeac342bcb081
-  https://data.arkiv.network/entity/0x2bf413543f160b72a3eca65c05eff743897de38c0ac7796a245cd107a989d7e8
-  PASS  ownership event for the newsroom arrived over the WebSocket   2.25 s before sendTip returned
+== 4. live path: WebSocket subscription, then a sealed tip with atomic hand-over   [+11.2s]
+  tip 1 entity 0xf7d3462c84c12ad82579c52a7c4b86c5c59546df97c144c08c020f4ad7cfe8de
+  tx 0xbe3848aab7a6cf392b3ef0169caaedc0eecd829882a0c5d487e439f4b8f1655d
+  https://tiramisu.explorer.arkiv.network/tx/0xbe3848aab7a6cf392b3ef0169caaedc0eecd829882a0c5d487e439f4b8f1655d
+  https://data.arkiv.network/entity/0xf7d3462c84c12ad82579c52a7c4b86c5c59546df97c144c08c020f4ad7cfe8de
+  PASS  ownership event for the newsroom arrived over the WebSocket   3.41 s before sendTip returned
   PASS  getTip reads it back as a tip for this inbox
-  PASS  $creator is the sender, $owner is the newsroom   creator 0xa05d5Bd99440d95526120062364518ddfe11797F owner 0x2d8C15731B20820e1b16649549A66Ae14541f0EA
+  PASS  $creator is the sender, $owner is the newsroom   creator 0xa05d5Bd99440d95526120062364518ddfe11797F owner 0x826f1199300F54c88684E65e0CA90703B7e81fD1
   PASS  the newsroom decrypts it
   PASS  a stranger key cannot decrypt it
   PASS  created readonly
   PASS  only three attributes are public: type, app, inbox   app,inbox,type
   PASS  ciphertext is padded to a size bucket   1097 bytes on chain
-  sender delete rejected: Transaction failed: entity 0x2bf41354…89d7e8 is owned by 0x2d8C15731B20820e1b16649549A66Ae14541f0EA, not 0xa05d5Bd99440d95526120062364518ddfe11797F
+  sender delete rejected: Transaction failed: entity 0xf7d3462c…cfe8de is owned by 0x826f1199300F54c88684E65e0CA90703B7e81fD1, not 0xa05d5Bd99440d95526120062364518ddfe11797F
   PASS  after hand-over the sender can no longer delete the tip
 
-== 5. two concurrent sends with the shared demo key (nonce collision handling)   [+20.6s]
-  tip 2 0x8d3a6d1f7eb6f59428d0be22bbd9f5b10812b1202d3ee496ae06d4b36784423b  tx 0xd369394d868944cab05635e2ec3658d303469664f1dca3e5599658f43d4f99f6
-  tip 3 0xe9cd9babc709791aa789f1b94a219faa7593abcd0167a49db238adb4d81a1121  tx 0xcbbb1394769c69c10b617a9e96574088ca9a9fe1b8d3466b9172601ebcf4b9ed
-  retries needed: attempt 1: Transaction failed: Execution error without revert data Missing or invalid parameters. | attempt 2: Transaction 0x776d2f851b7015adfd0bac7a77e35d4f66e07d6369d2438d5ee9910fa8a2c359 reverted. Reason: no entity 0x3d9b78e1…c40d9a — it may have been deleted, or have expired The contract function "execute"
+== 5. two concurrent sends with the shared demo key (nonce collision handling)   [+20.5s]
+  tip 2 0x8006b8c8eb2f3eade57efd4818e6df5fd477f00e745612e43d8fd9d5fe698622  tx 0x4b7d4d7fe0af34d960298d1f8d8e04f858c3643d17bfc76548a2f3b2f64eda9e
+  tip 3 0x6366960162edcd221b4aa4dcb0f8e969fa7a30cf91fa0a4749fa6cc8e311502d  tx 0x56b8931b427cdfdf79f7b9ed32de4e3ba497dbbfcf792e628b286da8fc95bbee
+  retries needed: attempt 1: Transaction failed: Execution error without revert data Missing or invalid parameters. | attempt 2: Transaction failed: no entity 0xf837f908…a8a784 — it may have been deleted, or have expired The contract function "execute" reverted.
   PASS  both concurrent sends landed
 
-== 6. queries: cursor pagination and the $createdAt incremental query   [+32.9s]
-  query: type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(0x508761c487660dadbbbfe3942eda2672551c3e445a0c7d118804a3b65a09876e)
+== 6. queries: cursor pagination and the $createdAt incremental query   [+30.1s]
+  query: type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(0xe9e0185cc57f287d0dabd6d01d412ab32fdbac2d0b2ba962434eb9276140ec84)
   PASS  sweep with page size 2 follows the cursor over 2 pages and finds 3 tips   3 tips, 2 pages
   PASS  all three decrypt
-  query: type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(0x508761c487660dadbbbfe3942eda2672551c3e445a0c7d118804a3b65a09876e) AND $createdAt >= u64(662019)
+  query: type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(0xe9e0185cc57f287d0dabd6d01d412ab32fdbac2d0b2ba962434eb9276140ec84) AND $createdAt >= u64(663866)
   PASS  tips since the block before the first send: 3   3
   PASS  tips since a future block: 0
 
-== 7. Lifetime Extension of the inbox (lease renewed by activity)   [+33.6s]
-  query: type = str('inbox') AND app = str('sealdrop-v1') AND $expiresAt < u64(921229) AND $creator = addr(0x2d8C15731B20820e1b16649549A66Ae14541f0EA)
+== 7. Lifetime Extension of the inbox (lease renewed by activity)   [+30.7s]
+  query: type = str('inbox') AND app = str('sealdrop-v1') AND $expiresAt < u64(923074) AND $creator = addr(0x826f1199300F54c88684E65e0CA90703B7e81fD1)
   PASS  a fresh inbox (7 days left) is not due when the threshold is 6 days
   PASS  with a threshold of 8 days the range query on $expiresAt returns it
-  renew tx 0x8d12088e82ef728cd2146a1671ae910128abb99af44d933170ca56ad025bade4
-  https://tiramisu.explorer.arkiv.network/tx/0x8d12088e82ef728cd2146a1671ae910128abb99af44d933170ca56ad025bade4
-  PASS  expiry moved later   964416 -> 964434
+  renew tx 0xf32fdb0187c6d66bcaf3cf9bba6a0e906ee0e8b0460dcbd39886dd64451e9955
+  https://tiramisu.explorer.arkiv.network/tx/0xf32fdb0187c6d66bcaf3cf9bba6a0e906ee0e8b0460dcbd39886dd64451e9955
+  PASS  expiry moved later   966263 -> 966280
 
-== 8. the newsroom keeps one tip longer and burns another (owner-only actions)   [+47.0s]
-  pin tx 0xca34bbc2fd75985e6606548fb75005724673387c5620def11c407093fbf9b702
-  https://tiramisu.explorer.arkiv.network/tx/0xca34bbc2fd75985e6606548fb75005724673387c5620def11c407093fbf9b702
-  PASS  tip 1 expiry extended to 30 days   1266821 -> 1958037
-  burn tx 0x85273bdb50117d79f772b110570b363244032354de946f6b80d7e5ed9482826b
-  https://tiramisu.explorer.arkiv.network/tx/0x85273bdb50117d79f772b110570b363244032354de946f6b80d7e5ed9482826b
+== 8. the newsroom keeps one tip longer and burns another (owner-only actions)   [+45.7s]
+  pin tx 0x7a0f1aa56c7b5733946c000c0875942eaf1270b894cf3e473df6ef5c98929186
+  https://tiramisu.explorer.arkiv.network/tx/0x7a0f1aa56c7b5733946c000c0875942eaf1270b894cf3e473df6ef5c98929186
+  PASS  tip 1 expiry extended to 30 days   1268667 -> 1959883
+  burn tx 0xa544be22963ef050e54980a80b8f2278260cf7f1ca8c8a8d9ba9d22d527b07c9
+  https://tiramisu.explorer.arkiv.network/tx/0xa544be22963ef050e54980a80b8f2278260cf7f1ca8c8a8d9ba9d22d527b07c9
   PASS  burned tip is gone
-  query (newsroom view, ownedBy): type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(0x508761c487660dadbbbfe3942eda2672551c3e445a0c7d118804a3b65a09876e) AND $owner = addr(0x2d8C15731B20820e1b16649549A66Ae14541f0EA)
+  query (newsroom view, ownedBy): type = str('tip') AND app = str('sealdrop-v1') AND inbox = key(0xe9e0185cc57f287d0dabd6d01d412ab32fdbac2d0b2ba962434eb9276140ec84) AND $owner = addr(0x826f1199300F54c88684E65e0CA90703B7e81fD1)
   PASS  sweep for tips owned by the newsroom returns 2 tips   2
   PASS  sweep for tips owned by the sender returns none (everything was handed over)
 
-== 9. read without Sealdrop: raw JSON-RPC arkiv_query, no SDK and no app backend   [+57.6s]
+== 9. read without Sealdrop: raw JSON-RPC arkiv_query, no SDK and no app backend   [+56.1s]
   POST https://rpc.tiramisu.db-chain.testnet.arkiv.network  arkiv_query  ->  2 entities
   PASS  raw query returns the 2 remaining tips   ""
   PASS  and the payloads decrypt with the newsroom key
 
-== summary   [+57.7s]
-  demo sender spent 0.005552744001105488 GLM (incl. 0.005 GLM given to the throwaway newsroom)
+== summary   [+56.3s]
+  demo sender spent 0.005419808000839616 GLM (incl. 0.005 GLM given to the throwaway newsroom)
   newsroom left     0.004826857999653716 GLM
   public RPC query budget used by this run: 1900 cost units over 19 costed queries (anonymous allowance: about 10000 units per window)
   retries over the whole run: 2
-  checks: 30 passed, 0 failed, 57.9 s
+  checks: 30 passed, 0 failed, 56.5 s
   Entities above expire on their own (inbox 7 days, tips 1 to 30 days); the transaction links stay valid after that.
