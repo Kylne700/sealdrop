@@ -13,10 +13,10 @@ TAILN=2 t node scripts/secret-scan.mjs
 TAILN=2 t npm run check:bundle
 echo "dist: $(ls dist | tr '\n' ' ')"
 echo "--- npm run dev (no RPC): start, GET /, render the home page"
-/home/user/.config/nvm/versions/node/v24.18.0/bin/node /tmp/qa/dev-check.mjs dev "$D" 2>&1 | cut -c1-230
+$HOME/.config/nvm/versions/node/v24.18.0/bin/node /tmp/qa/dev-check.mjs dev "$D" 2>&1 | cut -c1-230
 if [ "${NOKEY:-0}" = 1 ]; then
   echo "--- built without .env.local: the no-demo-key answers (about 2 public arkiv_query)"
-  /home/user/.config/nvm/versions/node/v24.18.0/bin/node /tmp/qa/dev-check.mjs nokey "$D" 2>&1 | cut -c1-230
+  $HOME/.config/nvm/versions/node/v24.18.0/bin/node /tmp/qa/dev-check.mjs nokey "$D" 2>&1 | cut -c1-230
 fi
 echo "--- demo mode as the README says: npm run keys, then build and check the bundle (the keys are throwaway, testnet only)"
 TAILN=5 t npm run keys | cut -c1-120
