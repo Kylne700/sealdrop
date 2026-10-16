@@ -3,7 +3,7 @@ import { bytesToHex, type EIP1193Provider } from 'viem'
 import { DEFAULT_TIP_DAYS, DEMO_SENDER_ADDRESS, TIP_LIFETIME_CHOICES, addressUrl, entityUrl, ownerUrl, txUrl } from '../config'
 import { blockToUnix, formatDuration, formatUtc, inboxPublicKey, secondsLeft, type InboxRef } from '../codec'
 import { MAX_MESSAGE_BYTES, fitsInTip, sealText, textBytes } from '../crypto'
-import { explainError, findInbox, getTiming, injectedSigner, localSigner, sendTip, sweepTips, type InboxView, type Signer } from '../arkiv'
+import { explainError, findInbox, getTiming, injectedSigner, isOutOfFunds, localSigner, sendTip, sweepTips, type InboxView, type Signer } from '../arkiv'
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
 import { h, kib, link, queriesPanel, short, statusLine } from '../ui/dom'
@@ -129,7 +129,9 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
         h('button', { type: 'button', class: 'secondary', onclick: () => { textarea.value = ''; textarea.dispatchEvent(new Event('input')); result.hidden = true; progress.clear(); sendBtn.disabled = false; textarea.focus() } }, 'Send another'),
       )
     } catch (e) {
-      progress.error(explainError(e))
+      progress.error(mode === 'demo' && isOutOfFunds(e)
+        ? 'The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: hub.arkiv.network/faucet).'
+        : explainError(e))
       sendBtn.disabled = false
     }
   })

@@ -35,13 +35,23 @@ const failFast: typeof fetch = async (input, init) => {
 }
 const httpTransport = (url: string) => http(url, { fetchFn: failFast, timeout: 20_000, retryCount: 1 })
 
-export type Reader = { http: PublicArkivClient; ws: () => PublicArkivClient }
+export type Reader = { http: PublicArkivClient; ws: () => PublicArkivClient; dropWs: () => void }
 
 /** Queries go over HTTP; live events use a separate WebSocket client (created on first use). */
 export function createReader(opts: { rpcUrl?: string; wsUrl?: string } = {}): Reader {
   const httpClient = createPublicClient({ chain: tiramisu, transport: httpTransport(opts.rpcUrl ?? RPC_HTTP) })
   let wsClient: PublicArkivClient | undefined
-  return { http: httpClient, ws: () => (wsClient ??= createPublicClient({ chain: tiramisu, transport: webSocket(opts.wsUrl ?? RPC_WS) })) }
+  return {
+    http: httpClient,
+    // viem retries a dropped socket five times and then gives up for good, silently (see watchHandovers), so it is switched off here.
+    ws: () => (wsClient ??= createPublicClient({ chain: tiramisu, transport: webSocket(opts.wsUrl ?? RPC_WS, { reconnect: false }) })),
+    // viem keeps a dead socket client in a module cache until it is closed, so the next ws() would reuse it.
+    dropWs: () => {
+      const old = wsClient as { transport: { getRpcClient?: () => Promise<{ close(): void }> } } | undefined
+      wsClient = undefined
+      old?.transport.getRpcClient?.().then((c) => c.close(), () => {})
+    },
+  }
 }
 
 export type Signer = { address: Address; client: WalletArkivClient; kind: 'local' | 'injected' }
@@ -58,16 +68,19 @@ export async function injectedSigner(provider: EIP1193Provider): Promise<Signer>
   const accounts = (await provider.request({ method: 'eth_requestAccounts' })) as Address[]
   const address = accounts[0]
   if (!address) throw new Error('The wallet returned no account.')
-  const current = (await provider.request({ method: 'eth_chainId' })) as string
-  if (current.toLowerCase() !== CHAIN_HEX) {
+  const chainId = async () => ((await provider.request({ method: 'eth_chainId' })) as string).toLowerCase()
+  if ((await chainId()) !== CHAIN_HEX) {
     try {
       await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] })
-    } catch {
+    } catch (e) {
+      if ((e as { code?: number })?.code === 4001) throw e // the user said no: do not ask again with a second prompt
       await provider.request({
         method: 'wallet_addEthereumChain',
         params: [{ chainId: CHAIN_HEX, chainName: 'Arkiv Tiramisu', nativeCurrency: { name: 'GLM', symbol: 'GLM', decimals: 18 }, rpcUrls: [RPC_HTTP], blockExplorerUrls: ['https://tiramisu.explorer.arkiv.network'] }],
       })
     }
+    // Some wallets add the network without switching to it.
+    if ((await chainId()) !== CHAIN_HEX) throw new Error(`Your wallet is on a different network. Switch it to Arkiv Tiramisu (chain id ${CHAIN_ID}) and try again.`)
   }
   return { address, client: createWalletClient({ chain: tiramisu, transport: custom(provider), account: address }), kind: 'injected' }
 }
@@ -95,6 +108,14 @@ export async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<
   }
 }
 
+const errorText = (e: unknown) => {
+  const err = e as { shortMessage?: string; message?: string; cause?: { message?: string } }
+  return `${err?.shortMessage ?? ''} ${err?.message ?? ''} ${err?.cause?.message ?? ''}`
+}
+
+/** The signer cannot pay the gas. The pages say whose GLM ran out: the visitor's wallet or the shared demo key. */
+export const isOutOfFunds = (e: unknown) => /insufficient funds|exceeds the balance|have no (testnet )?GLM/i.test(errorText(e))
+
 /** One line a person can act on. */
 export function explainError(e: unknown): string {
   for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) {
@@ -104,9 +125,9 @@ export function explainError(e: unknown): string {
     }
   }
   const err = e as { code?: number; shortMessage?: string; message?: string; cause?: { code?: number; message?: string } }
-  const text = `${err?.shortMessage ?? ''} ${err?.message ?? ''} ${err?.cause?.message ?? ''}`
+  const text = errorText(e)
   if (err?.code === 4001 || err?.cause?.code === 4001 || /user rejected|denied/i.test(text)) return 'The request was rejected in the wallet.'
-  if (/insufficient funds|exceeds the balance|have no (testnet )?GLM/i.test(text)) return 'This wallet has no testnet GLM left. Get some at the Arkiv faucet (hub.arkiv.network/faucet).'
+  if (isOutOfFunds(e)) return 'This wallet has no testnet GLM left. Get some at the Arkiv faucet (hub.arkiv.network/faucet).'
   const first = (err?.shortMessage ?? err?.message ?? String(e)).split('\n')[0] ?? 'Unknown error'
   return first.length > 240 ? first.slice(0, 240) + '...' : first
 }
@@ -331,14 +352,57 @@ export async function getTip(reader: Reader, entityKey: Hex, inboxKeys: Hex[], t
  * Live: the sender's batch ends with an OwnershipTransferred to the newsroom, so that is the event to
  * wait for. Events carry no attributes, so the handler reads the entity with getEntity. Needs the
  * WebSocket transport and no fromBlock (friction F2), otherwise the SDK silently polls.
+ *
+ * A socket drops (Wi-Fi change, sleep, node restart) and events during the gap are not replayed, so this
+ * reconnects with backoff (1 s doubling to 30 s), reports 'live' / 'reconnecting', and calls `onReconnect`
+ * once the subscription is back so the caller can read what it missed with one query. A heartbeat over
+ * the same socket (eth_blockNumber every 30 s, not an arkiv_query) notices a socket that died silently.
  */
-export function watchHandovers(reader: Reader, newsroom: Address, h: { onHandover: (entityKey: Hex, blockNumber: bigint) => void; onError: (e: Error) => void }): () => void {
-  return reader.ws().watchEntityEvents({
-    onOwnershipTransferred: (e) => {
-      if (e.newOwner.toLowerCase() === newsroom.toLowerCase()) h.onHandover(e.entityKey, e.blockNumber)
-    },
-    onError: h.onError,
-  })
+export function watchHandovers(reader: Reader, newsroom: Address, h: {
+  onHandover: (entityKey: Hex, blockNumber: bigint) => void
+  onError: (e: Error) => void
+  onState?: (state: 'live' | 'reconnecting') => void
+  onReconnect?: () => void
+}): () => void {
+  let stopped = false
+  let dropped = false
+  let failures = 0
+  let unwatch = () => {}
+  let retry: ReturnType<typeof setTimeout> | undefined
+  let beat: ReturnType<typeof setInterval> | undefined
+  const connect = () => {
+    if (stopped) return
+    const ws = reader.ws()
+    let down = false
+    const lost = () => {
+      if (down || stopped) return
+      down = true
+      clearInterval(beat)
+      void Promise.resolve().then(unwatch).catch(() => {})
+      reader.dropWs()
+      dropped = true
+      h.onState?.('reconnecting')
+      retry = setTimeout(connect, Math.min(30_000, 1000 * 2 ** failures++))
+    }
+    unwatch = ws.watchEntityEvents({
+      onOwnershipTransferred: (e) => {
+        if (e.newOwner.toLowerCase() !== newsroom.toLowerCase()) return
+        try { h.onHandover(e.entityKey, e.blockNumber) } catch (err) { h.onError(err as Error) }
+      },
+      onError: lost, // the SDK only reports socket and subscription failures here
+    })
+    // Answers once the socket is open (after the subscribe request on it) and fails when it is not.
+    const probe = () => ws.getBlockNumber({ cacheTime: 0 }).then(() => undefined, lost)
+    void probe().then(() => {
+      if (down || stopped) return
+      failures = 0
+      h.onState?.('live')
+      if (dropped) h.onReconnect?.()
+      beat = setInterval(probe, 30_000)
+    })
+  }
+  connect()
+  return () => { stopped = true; clearTimeout(retry); clearInterval(beat); void Promise.resolve().then(unwatch).catch(() => {}) }
 }
 
 /** Burn after reading: only the owner (the newsroom after the hand-over) can delete. */

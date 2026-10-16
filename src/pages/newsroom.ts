@@ -4,7 +4,7 @@ import { DEMO_SENDER_ADDRESS, FAUCET_URL, PIN_DAYS, RENEW_BELOW_DAYS, addressUrl
 import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, type Timing } from '../codec'
 import { boxKeyPairFromSecret, fromB64, openText } from '../crypto'
 import {
-  balanceOf, burnTip, createInbox, explainError, findInbox, fundAccount, getTip, getTiming, inboxesDueForRenewal, injectedSigner,
+  balanceOf, burnTip, createInbox, explainError, findInbox, fundAccount, getTip, getTiming, inboxesDueForRenewal, injectedSigner, isOutOfFunds,
   localSigner, pinTip, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
 } from '../arkiv'
 import { getReader, rpcUrl } from '../app'
@@ -133,7 +133,12 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     if (identity.kind !== 'local') throw new Error(`This wallet has too little testnet GLM. Get some at ${FAUCET_URL} and try again.`)
     if (!DEMO_SENDER_KEY) throw new Error(`This build has no demo sender key. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
     status.info('Funding this throwaway address with a few cents of testnet GLM from the shared demo sender...')
-    await fundAccount(localSigner(DEMO_SENDER_KEY, rpcUrl()), identity.address)
+    try {
+      await fundAccount(localSigner(DEMO_SENDER_KEY, rpcUrl()), identity.address)
+    } catch (e) {
+      if (isOutOfFunds(e)) throw new Error(`The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
+      throw e
+    }
     await refreshBalance()
   }
 
@@ -222,32 +227,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   function listen(live: InboxView) {
     if (listening) return
     listening = true
-    const stop = watchHandovers(reader, identity.address, {
-      onHandover: async (entityKey) => {
-        try {
-          const tip = await getTip(reader, entityKey, [live.key])
-          if (!tip) return
-          addTips([tip], 'live')
-          status.info('A new tip just arrived.')
-        } catch (e) {
-          status.error(explainError(e))
-        }
-      },
-      onError: (e) => {
-        liveStatus.className = 'live error'
-        liveStatus.textContent = `Live updates stopped (${e.message}). Use Refresh to read the inbox.`
-      },
-    })
-    onLeave(stop)
-    liveStatus.className = 'live'
-    liveStatus.textContent = 'Live: listening for new tips on a WebSocket. This page does not poll.'
-
-    // A tab that slept may have missed events; ask only for tips created since the last sweep.
-    let hiddenAt = 0
-    const onVisibility = async () => {
-      if (document.hidden) { hiddenAt = Date.now(); return }
-      if (!hiddenAt || Date.now() - hiddenAt < 30_000) return
-      hiddenAt = 0
+    // Tips created since the last sweep, read in one query. Used after a long sleep and after a reconnect, because events are not replayed.
+    const catchUp = async () => {
       try {
         const t = await getTiming(reader)
         const since = (getLastSeen(live.key) ?? t.head) - 2n
@@ -259,6 +240,38 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       } catch (e) {
         status.error(explainError(e))
       }
+    }
+    const stop = watchHandovers(reader, identity.address, {
+      onHandover: async (entityKey) => {
+        try {
+          const tip = await getTip(reader, entityKey, [live.key])
+          if (!tip) return
+          addTips([tip], 'live')
+          status.info('A new tip just arrived.')
+        } catch (e) {
+          status.error(explainError(e))
+        }
+      },
+      onState: (state) => {
+        liveStatus.className = state === 'live' ? 'live' : 'live error'
+        liveStatus.textContent = state === 'live'
+          ? 'Live: listening for new tips on a WebSocket. This page does not poll.'
+          : 'Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now.'
+      },
+      onReconnect: catchUp,
+      onError: (e) => status.error(`A live update could not be shown (${e.message}). Use Refresh to read the inbox.`),
+    })
+    onLeave(stop)
+    liveStatus.className = 'live'
+    liveStatus.textContent = 'Connecting to the live feed...'
+
+    // A tab that slept may have missed events; ask only for tips created since the last sweep.
+    let hiddenAt = 0
+    const onVisibility = () => {
+      if (document.hidden) { hiddenAt = Date.now(); return }
+      if (!hiddenAt || Date.now() - hiddenAt < 30_000) return
+      hiddenAt = 0
+      void catchUp()
     }
     document.addEventListener('visibilitychange', onVisibility)
     onLeave(() => document.removeEventListener('visibilitychange', onVisibility))
@@ -283,7 +296,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
 
   // ---- screens ---------------------------------------------------------------------------------------------
   function showSetup() {
-    const name = h('input', { id: 'inbox-name', type: 'text', maxlength: INBOX_LIMITS.name, value: 'Synthetic demo newsroom', 'data-testid': 'inbox-name' })
+    const name = h('input', { id: 'inbox-name', type: 'text', required: true, maxlength: INBOX_LIMITS.name, value: 'Synthetic demo newsroom', 'data-testid': 'inbox-name' })
     const desc = h('textarea', { id: 'inbox-desc', rows: 3, maxlength: INBOX_LIMITS.description, 'data-testid': 'inbox-desc' }, 'Demo inbox. Please send made-up test messages only.')
     const submit = h('button', { type: 'submit', 'data-testid': 'create-inbox' }, 'Create the inbox')
     const form = h('form', { class: 'compose' },
