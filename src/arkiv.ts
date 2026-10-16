@@ -114,7 +114,7 @@ const errorText = (e: unknown) => {
 }
 
 /** The signer cannot pay the gas. The pages say whose GLM ran out: the visitor's wallet or the shared demo key. */
-export const isOutOfFunds = (e: unknown) => /insufficient funds|exceeds the balance|have no (testnet )?GLM/i.test(errorText(e))
+export const isOutOfFunds = (e: unknown) => /insufficient funds|exceeds the balance|out of gas|gas required exceeds|have no (testnet )?GLM/i.test(errorText(e))
 
 /** One line a person can act on. */
 export function explainError(e: unknown): string {
