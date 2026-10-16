@@ -66,7 +66,9 @@ expected to build a live inbox with polling and no way to avoid it.
 
 **Actual.** `AGENTS.md` says a real socket is opened "only with a WebSocket transport and no
 `fromBlock`; over HTTP it silently polls". That is correct and matters for a live UI, but none of the
-SDK pages say it. Measured over 10 seconds, same code, only the transport changed:
+SDK pages say it. (The JSON-RPC Mutating Entities page says watching "rides on the standard `eth_getLogs` and
+`eth_subscribe` methods" and that the SDK wraps this in `watchEntityEvents()`, but not that the transport you pass picks
+between them.) Measured over 10 seconds, same code, only the transport changed:
 
 ```
 http      10s: 6 events; RPC calls sent: {"eth_newFilter":1,"eth_blockNumber":3,"eth_getLogs":1}
