@@ -19,6 +19,10 @@ Block numbers: `$createdAt` and `$expiresAt` are block numbers (2 s blocks, 43,2
 | Entity Expiration | **7 days**, renewed by Lifetime Extension | **chosen by the source: 1, 7, 14 or 30 days** (default 14) |
 | Who may extend or delete | the owner (newsroom) | the owner (newsroom): "Keep 30 more days" or "Burn" |
 
+`permissionlessExtension` (anyone may extend an entity's expiry) is off for both types, which is the SDK default. So only
+the newsroom can renew its inbox, and a stranger cannot postpone the 7-day lapse; only the owner can extend a tip past
+the date its source chose. This is the SDK's own description of the flag (`CreationFlags`); it has not been tested against the node.
+
 ### Attributes (typed, all lowercase: the engine rejects uppercase names)
 
 Only what a query needs is an attribute; everything else is in the payload.
@@ -114,13 +118,13 @@ Plain JSON-RPC, no SDK, no Sealdrop server:
 ```sh
 curl -s https://rpc.tiramisu.db-chain.testnet.arkiv.network -H 'content-type: application/json' -d '{
   "jsonrpc":"2.0","id":1,"method":"arkiv_query",
-  "params":["type = str('"'"'tip'"'"') AND app = str('"'"'sealdrop-v1'"'"') AND inbox = key(0x65a2d0b97fe693af3916c4a954564dda4d44a584ee4ec206454ac9c0148c25a1)",
+  "params":["type = str('"'"'tip'"'"') AND app = str('"'"'sealdrop-v1'"'"') AND inbox = key(0x65a2d0b97fe693af3916c4a954564dda4d44a584ee4ec206454ac9c0148c25a1) AND $owner = addr(0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6)",
             {"limit":"0xc8","select":{"key":true,"owner":true,"creator":true,"payload":true}}]}'
 ```
 
-The result is `{ "data": [{ "key", "owner", "creator", "payload": "0x..." }], "cursor": ... }`; pass the cursor back as
-`params[1].cursor` for the next page. `arkiv/examples/read-tips.mjs` is a short reader that shares no code with the app:
-it queries as above and decrypts with tweetnacl from this document alone.
+The result is `{ "data": [{ "key", "owner", "creator", "payload": "0x..." }], "blockNumber": "0x..." }`, plus a
+`"cursor"` while more entities match than `limit`; pass the cursor back as `params[1].cursor` for the next page. `arkiv/examples/read-tips.mjs` is a short reader that shares no code with the app:
+it queries as above and decrypts with tweetnacl from this document alone. The `$owner` term is rule 2 of "What a reader must check": without it the answer also lists entities that only mention the inbox.
 
 The entities are also browsable without any code: `https://data.arkiv.network/entity/<key>` and
 `https://data.arkiv.network/owner/<address>`.
@@ -129,7 +133,7 @@ The entities are also browsable without any code: `https://data.arkiv.network/en
 
 * **A different newsroom UI or a notifier**: run queries 1 and 3, and subscribe to ownership events for the newsroom.
 * **Another sender** (a CLI, a browser extension, a relayer that pays the gas): seal as above, then send the batch from
-  "Writes". Anyone who follows this file produces tips the existing consoles open.
+  "Writes". The app's own sender follows exactly these steps and its tips open in the console; a sender written by someone else has not been tested yet.
 * **Fan-out tools** (one newsroom, several inboxes): query 2 shows how to find every inbox of a creator that is due.
 
 ## What is deliberately not on Arkiv

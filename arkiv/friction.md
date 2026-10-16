@@ -23,8 +23,9 @@ appended to as the build goes on; the last section lists what was checked and fo
 
 ## F1. `$createdAt` range filter: node accepts, SDK builder refuses, docs disagree
 
-**Expected.** The docs I started from say `$createdAt` can be filtered on: the repo `AGENTS.md`
-("no server-side ordering ... sort on the client, **or range-filter on `$createdAt`**"), Start
+**Expected.** The docs I started from say `$createdAt` can be filtered on: the hackathon repo's `AGENTS.md`
+(Arkiv-Network/global-tour-stop-pre-devcon, line 28:
+"no server-side ordering ... sort on the client, **or range-filter on `$createdAt`**"), Start
 here > Fundamentals ("`$owner`, `$creator`, `$createdAt`, `$updatedAt`, and `$expiresAt` ... You can
 query them") and the JSON-RPC Querying Data page (table of synthetic attributes: `$createdAt | u64 |
 Filterable: Yes`). A "tips since my last visit" query is the obvious use.
@@ -65,7 +66,7 @@ say the same thing.
 `transport: http()`, and the options table has `pollingInterval` ("Defaults to half a block"). I
 expected to build a live inbox with polling and no way to avoid it.
 
-**Actual.** `AGENTS.md` says a real socket is opened "only with a WebSocket transport and no
+**Actual.** The hackathon repo's `AGENTS.md` (line 33) says a real socket is opened "only with a WebSocket transport and no
 `fromBlock`; over HTTP it silently polls". That is correct and matters for a live UI, but none of the
 SDK pages say it. (The JSON-RPC Mutating Entities page says watching "rides on the standard `eth_getLogs` and
 `eth_subscribe` methods" and that the SDK wraps this in `watchEntityEvents()`, but not that the transport you pass picks
@@ -159,6 +160,10 @@ POST returned 202, `delivered: true` after about 5 s, tx
 `0x33de0cc6473a8325538252243687c653878e01d9c38775ca457ea5aedb29975f`. No e-mail step was shown in
 this flow. I claimed once and did not retry.
 
+**Reproduce.** `node -e 'fetch("https://hub.arkiv.network/api/faucet").then(async r=>console.log(r.status, await r.text()))'`
+prints `401 {"error":"Unauthorized"}` (checked 2026-10-16). The claim itself needs a browser: sign in with an Ethereum
+wallet at https://hub.arkiv.network/faucet and pass the human check; the page then sends the POST to `/api/faucet`.
+
 **Suggested fix.** A documented, rate-limited faucet API (or CLI) for test automation, or a line in the
 docs saying the Hub login and Cap widget are browser-only.
 
@@ -184,7 +189,7 @@ wallet both succeed once the account has the nonce manager.
   parameters.` (no `txHash`, no mention of a nonce). In the other 3 runs **both calls resolved successfully with the same
   transaction hash and the same entity key**, so one caller was told its entity exists when its own write had been
   replaced. An earlier set of 6 runs gave the same two outcomes (5 failures, 1 shared hash,
-  `0x049a0c7803ad264ea427d76be321628fbd2b5ec3623f6c8e390f8aa5d451c173`). In all 12 runs exactly one entity was written.
+  `0x049a0c7803ad264ea427d76be321628fbd2b5ec3623f6c8e390f8aa5d451c173`). In each of the 6 runs saved in `evidence/f6-no-nonce-manager.txt` exactly one entity was written; the output of the earlier runs is not in `evidence/`.
 * **With the nonce manager** (`NONCE_MANAGER=1`, 5 runs,
   [`evidence/f6-nonce-manager.txt`](../evidence/f6-nonce-manager.txt)): the collision is gone and two transactions with
   different hashes are broadcast, but **in 5 of 5 runs the second one reverted on chain**:
@@ -254,7 +259,7 @@ header shows, and a static site can query within that rate.
   one metered query (100 units) succeeded. I do not know why (I saw it once, with a throwaway script whose output I did not
   keep). No successful response says how much budget is left.
   `Arkiv-Quota-Used-Percent` is in the `Access-Control-Expose-Headers` list, but I never saw it on an anonymous response.
-* None of the 17 documentation pages I downloaded and searched mentions the anonymous budget, the cost per query, `ANON_COST_LIMITED`,
+* None of the documentation pages I downloaded and searched mentions the anonymous budget, the cost per query, `ANON_COST_LIMITED`,
   `Arkiv-Cost` or `Retry-After`; two cookbook pages say only "Anonymous access to the RPC endpoint is rate limited."
 * I do not know for certain how long the window is (the two resets above suggest an hour) or what identifies an anonymous
   client (I did not test whether it is the IP address), so I cannot say how many visitors a hosted demo supports.
