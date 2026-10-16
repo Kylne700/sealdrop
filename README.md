@@ -38,7 +38,7 @@ the [threat model](#threat-model-read-this-before-sending-anything-real).
 
 ## Try it in 60 seconds (no wallet, no account)
 
-1. Open the app and choose **Open a newsroom**, then **Create a throwaway newsroom**. The page makes a key in your
+1. Open the app and choose **Start: open a newsroom**, then **Create a throwaway newsroom**. The page makes a key in your
    browser and funds it with 0.005 testnet GLM from the shared demo key. Name the inbox; copy the inbox link.
 2. Open that link in **another tab** (it is a different "source"). Write a made-up message and press **Seal and send**.
 3. Switch back to the first tab. The tip appears within seconds, pushed over a WebSocket (the console does not poll),
