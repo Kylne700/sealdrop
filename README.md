@@ -163,7 +163,7 @@ npm run build && npm run check:bundle
 | Unit tests (crypto round trip, padding, tamper rejection, codec) | `npm test` | console |
 | Integration against Tiramisu: create inbox, send, hand-over, WebSocket event, sweep, cursor, Lifetime Extension, pin, burn, forged-link refusal. Prints entity keys, tx hashes and explorer links. | `npm run integration` | [evidence/integration.txt](evidence/integration.txt) |
 | Headless Chromium on the built site: the 60-second judge path, wallet mode with a test wallet, forged link, Demo Desk. | `npm run build && npm run smoke` (set `CHROMIUM=/path/to/chromium` if it is not `/usr/bin/chromium`) | [evidence/smoke.txt](evidence/smoke.txt), [evidence/screens/](evidence/screens/) |
-| The same smoke checks against any served copy, here a `BASE_PATH=/sealdrop/` build behind a local static server (how GitHub Pages serves it). | `SMOKE_URL=http://127.0.0.1:8765/sealdrop/ npm run smoke` | [evidence/smoke-subpath.txt](evidence/smoke-subpath.txt) |
+| The same smoke checks against any served copy, here a `BASE_PATH=/sealdrop/` build behind a local static server rooted one level above `/sealdrop/` (how GitHub Pages serves it). The script writes `evidence/smoke-live.txt`; this run was renamed so that name stays free for the deployed site. | `SMOKE_URL=http://127.0.0.1:8765/sealdrop/ npm run smoke` | [evidence/smoke-subpath.txt](evidence/smoke-subpath.txt) |
 | Independent reader: decrypts the Demo Desk with no Sealdrop code. | `INBOX=0x65a2… OWNER=0x6a3C… BOX_SECRET=… node arkiv/examples/read-tips.mjs` | [evidence/read-tips.txt](evidence/read-tips.txt) |
 | Friction repro scripts | `arkiv/repro/*.mjs` | see [arkiv/friction.md](arkiv/friction.md) |
 
