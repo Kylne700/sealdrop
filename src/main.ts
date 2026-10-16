@@ -23,7 +23,10 @@ function route() {
   } else if (hash === '#/demo') {
     location.replace(`#/send/${DESK_ADDRESS}/${DEMO_DESK.inboxId}`)
   } else {
-    renderHome(root)
+    // A mistyped or truncated link must not look like the page simply ignored it.
+    const notice = hash.startsWith('#/send') ? 'That inbox link is not valid. A Sealdrop link looks like https://.../#/send/0x<40 hex characters>/<inbox-id>. Ask the newsroom for the link again, or paste it below.'
+      : /^#?\/?$/.test(hash) ? undefined : 'There is no such page. Here is the start page.'
+    renderHome(root, notice)
   }
 }
 window.addEventListener('hashchange', route)

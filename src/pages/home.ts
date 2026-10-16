@@ -3,7 +3,8 @@ import { parseInboxInput, formatSendHash } from '../codec'
 import { DESK_ADDRESS } from '../env'
 import { h, link, statusLine } from '../ui/dom'
 
-export function renderHome(root: HTMLElement) {
+/** `notice` explains why an unknown or malformed link landed here. */
+export function renderHome(root: HTMLElement, notice?: string) {
   document.title = 'Sealdrop: an anonymous tip line with no server'
   const input = h('input', { id: 'paste', type: 'text', placeholder: 'https://.../#/send/0x.../inbox-abc123', autocomplete: 'off' })
   const status = statusLine()
@@ -13,28 +14,27 @@ export function renderHome(root: HTMLElement) {
     location.hash = formatSendHash(ref)
   }
   root.append(
+    ...(notice ? [h('p', { class: 'status error', role: 'alert', 'data-testid': 'route-notice' }, notice)] : []),
     h('section', { class: 'hero' },
       h('h1', null, 'An anonymous tip line with no server to seize'),
-      h('p', { class: 'lead' }, 'Sealdrop is a SecureDrop-style inbox that lives on Arkiv, the Web3 database. A source seals a message in the browser, a newsroom opens it with a key only it holds, and every tip expires on its own. There is no operator, no account and no backend.'),
+      h('p', { class: 'lead' }, 'Sealdrop lets a source send a newsroom an encrypted tip, stored on Arkiv (the Web3 database), that only the newsroom can open and that deletes itself on a date the source picks: no server, no account, no operator.'),
     ),
-    h('section', { class: 'cards', 'aria-label': 'Start here' },
-      h('div', { class: 'card' },
-        h('h2', null, 'I run a newsroom'),
-        h('p', null, 'Open an inbox in about 30 seconds. No wallet, no account: the page creates a throwaway key and funds it with testnet GLM.'),
-        h('a', { class: 'button', href: '#/newsroom', 'data-testid': 'open-newsroom' }, 'Open a newsroom'),
+    h('section', { class: 'card', 'aria-labelledby': 'try' },
+      h('h2', { id: 'try' }, 'Try it in 60 seconds, no wallet needed'),
+      h('ol', null,
+        h('li', null, h('strong', null, 'Open a newsroom'), ' and create an inbox (about 15 seconds).'),
+        h('li', null, h('strong', null, 'Open the inbox link in a second tab'), ' and send a made-up message. You are the source.'),
+        h('li', null, h('strong', null, 'Switch back to the first tab.'), ' The tip arrives within seconds and is decrypted in your browser only.'),
       ),
-      h('div', { class: 'card' },
-        h('h2', null, 'I have a tip'),
-        h('p', null, 'Try the flagship Demo Desk: seal a made-up message and watch it become an Arkiv entity that only the desk can read.'),
-        h('a', { class: 'button', href: `#/send/${DESK_ADDRESS}/${DEMO_DESK.inboxId}`, 'data-testid': 'open-desk' }, 'Send to the Demo Desk'),
-      ),
-      h('div', { class: 'card' },
-        h('h2', null, 'I got an inbox link'),
-        h('label', { for: 'paste' }, 'Paste the link'),
-        input,
-        h('button', { type: 'button', onclick: open }, 'Open'),
-        status.el,
-      ),
+      h('p', null, h('a', { class: 'button', href: '#/newsroom', 'data-testid': 'open-newsroom' }, 'Start: open a newsroom')),
+      h('p', { class: 'hint' }, 'Short on time? ', h('a', { href: `#/send/${DESK_ADDRESS}/${DEMO_DESK.inboxId}`, 'data-testid': 'open-desk' }, 'Send a made-up tip to the Demo Desk'), ' or ', link(REPO_URL, 'read the source code'), '.'),
+    ),
+    h('section', { class: 'card' },
+      h('h2', null, 'Got an inbox link?'),
+      h('label', { for: 'paste' }, 'Paste the link'),
+      input,
+      h('button', { type: 'button', class: 'secondary', onclick: open }, 'Open'),
+      status.el,
     ),
     h('section', null,
       h('h2', null, 'How it works'),
