@@ -135,9 +135,10 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
       progress.clear()
       form.hidden = true
       result.hidden = false
+      const done = h('h2', { tabindex: '-1' }, 'Sealed and sent ✓')
       result.replaceChildren(
         h('div', { class: 'result-head' },
-          h('h2', null, 'Sealed and sent ✓'),
+          done,
           h('button', { type: 'button', class: 'secondary', onclick: () => { textarea.value = ''; showBucket(); result.hidden = true; form.hidden = false; sendBtn.disabled = false; textarea.focus() } }, 'Send another'),
         ),
         h('p', null, 'Your message was sealed in this browser and handed to the inbox owner. Only the newsroom\'s decryption key opens it.'),
@@ -157,6 +158,9 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
           ),
         ),
       )
+      // The focused button left with the form: put focus on the result so a screen reader announces it and the next Tab is "Send another".
+      done.focus()
+      done.addEventListener('blur', () => done.removeAttribute('tabindex'), { once: true })
     } catch (e) {
       progress.error(mode === 'demo' && isOutOfFunds(e)
         ? 'The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: hub.arkiv.network/faucet).'

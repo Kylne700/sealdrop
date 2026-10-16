@@ -39,12 +39,13 @@ function inboxView(creator: Address, kind: string): InboxView {
   }
 }
 
+let created = false // createInbox() flips the 'setup' state to a live inbox, so the keyboard script can walk the whole flow
 export async function findInbox(_r: Reader, ref: { creator: Address; inboxId: string }) {
   const c = cfg()
   const query = `type = "inbox" && app = "sealdrop-v1" && inbox_id = "${ref.inboxId}" && $creator = ${ref.creator}`
   if (c.inbox === 'hang') await new Promise(() => {})
   if (c.inbox === 'limited') throw new RateLimitedError(1354)
-  if (c.inbox === 'none' || c.inbox === 'setup') return { inbox: null, matches: 0, query }
+  if (c.inbox === 'none' || (c.inbox === 'setup' && !created)) return { inbox: null, matches: 0, query }
   return { inbox: inboxView(ref.creator, c.inbox), matches: 1, query }
 }
 export const listInboxes = async () => ({ inboxes: [] as InboxView[], query: 'mock' })
@@ -83,7 +84,7 @@ export async function sendTip(_r: Reader, _s: Signer, _i: InboxView, _sealed: Ui
   if (cfg().sendFail) throw new Error(cfg().sendFail)
   return { entityKey: fake(200), txHash: fake(201), expiresAt: HEAD + daysToBlocks(days) }
 }
-export const createInbox = async () => { await wait(300) }
+export const createInbox = async () => { await wait(300); created = true }
 export const renewInbox = async () => { await wait(300) }
 export const burnTip = async () => { await wait(300) }
 export const pinTip = async () => { await wait(300) }

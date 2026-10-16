@@ -39,6 +39,7 @@ body { margin: 0; background: var(--paper); color: var(--ink); -webkit-text-size
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 a:hover { color: var(--accent-hover); text-decoration-thickness: 2px; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+[tabindex='-1']:focus-visible { outline: none; } /* a heading that gets focus from script (not in the Tab order) */
 ::selection { background: var(--accent-soft); color: var(--ink); }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
