@@ -157,7 +157,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       ),
       text === null
         ? h('p', { class: 'undecryptable', 'data-testid': 'tip-text' }, 'This entity could not be decrypted with your key. It is not a tip sealed for this inbox.')
-        : h('p', { class: 'tip-text', 'data-testid': 'tip-text' }, text),
+        : h('p', { class: 'tip-text', dir: 'auto', 'data-testid': 'tip-text' }, text),
       h('p', { class: 'hint' },
         '$creator ', link(addressUrl(tip.creator), short(tip.creator)),
         viaDemo ? ' (the shared demo sender: it says nothing about who wrote this)' : ' (a wallet address, public)',

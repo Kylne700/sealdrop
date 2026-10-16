@@ -55,7 +55,7 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
   )
 
   // ---- compose -------------------------------------------------------------------------------------
-  const textarea = h('textarea', { id: 'msg', rows: 8, 'data-testid': 'message', placeholder: 'Write a made-up test message. Nothing real, please: this is a testnet demo.' })
+  const textarea = h('textarea', { id: 'msg', rows: 8, dir: 'auto', 'data-testid': 'message', placeholder: 'Write a made-up test message. Nothing real, please: this is a testnet demo.' })
   const counter = h('span', { 'data-testid': 'counter' }, `0 / ${MAX_MESSAGE_BYTES.toLocaleString('en-US')} bytes`)
   textarea.addEventListener('input', () => (counter.textContent = `${textBytes(textarea.value).toLocaleString('en-US')} / ${MAX_MESSAGE_BYTES.toLocaleString('en-US')} bytes`))
   const days = h('select', { id: 'days', 'data-testid': 'days' }, ...TIP_LIFETIME_CHOICES.map((d) => h('option', { value: d, selected: d === DEFAULT_TIP_DAYS }, d === 1 ? '1 day' : `${d} days`)))
