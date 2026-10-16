@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "private": true,
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=20.12" },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
@@ -16,7 +16,7 @@
     "ops": "tsx scripts/ops.ts",
     "integration": "tsx scripts/integration.ts",
     "check:bundle": "node scripts/check-bundle.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "tsx scripts/smoke.ts"
   },
   "dependencies": {
     "@arkiv-network/sdk": "^0.8.1",
