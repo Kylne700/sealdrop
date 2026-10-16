@@ -44,7 +44,7 @@ the [threat model](#threat-model-read-this-before-sending-anything-real).
 3. Switch back to the first tab. The tip appears within seconds, pushed over a WebSocket (the console does not poll),
    and is decrypted locally. The source's tab shows the entity and transaction links.
 
-Or press **Send to the Demo Desk** on the home page: a flagship inbox run by a separate address whose key is not part
+Or follow **Send a made-up tip to the Demo Desk** on the home page: a flagship inbox run by a separate address whose key is not part
 of this repository or the build. Open the entity link on the Data Explorer to see what anyone can see: ciphertext and
 three attributes.
 
@@ -135,7 +135,7 @@ says so at once and offers Settings, where a visitor can paste their own RPC URL
 
 ```sh
 npm ci
-npm run dev        # http://localhost:5173, wallet mode works as is
+npm run dev        # http://localhost:5173; without .env.local this is wallet mode only (see Demo mode)
 npm test           # unit tests: crypto and codec
 npm run build      # type check, then static dist/ for any static host
 BASE_PATH=/sealdrop/ npm run build   # when served below a path, e.g. GitHub Pages /<repo>/
@@ -145,6 +145,21 @@ The app is plain static files plus the three dependencies `@arkiv-network/sdk`, 
 
 **Demo mode** (no wallet for the source) needs a funded testnet-only sender key *at build time*. The key is not in this
 repository; it is injected from `.env.local` and exists only in the bundle you build.
+
+*What a judge needs, exactly.* Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
+(`npm run check:bundle` prints `SKIP`), but the site is wallet mode only: the shared-demo-key send and the throwaway
+newsroom answer that the build has no demo key. For demo mode put one line in `.env.local` at the repository root and restart
+`npm run dev`:
+
+```
+VITE_DEMO_SENDER_PRIVATE_KEY=0x<64 hex characters>
+```
+
+Use the private key of a testnet account that holds a little testnet GLM (claim some at the faucet below) and nothing
+else: the key ships in the bundle. Measured on 2026-10-16: a throwaway newsroom costs that key 0.005021 GLM (0.005
+funding plus the transfer's gas) and each tip about 0.00013 GLM, so a full try-out is about 0.0053 GLM. The Demo Desk
+needs nothing more (`VITE_DEMO_DESK_ADDRESS` is optional and defaults to the hosted one). `npm run keys` below writes
+such a file with fresh keys.
 
 ```sh
 npm run keys                  # writes .env.local (git-ignored, mode 600) with fresh testnet keys; prints addresses only
