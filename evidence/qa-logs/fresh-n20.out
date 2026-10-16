@@ -1,0 +1,55 @@
+node v20.19.2, npm 9.2.0, HEAD 7fdb6d8
+clone HEAD: 7fdb6d8; .env.local present: no
+npm ci                             exit 0  3.3 s
+    
+    found 0 vulnerabilities
+npm test                           exit 0  1.6 s
+    
+     Test Files  3 passed (3)
+          Tests  23 passed (23)
+       Start at  00:38:17
+       Duration  848ms (import 48%, tests 43%, transform 8%, worker 1%)
+    
+npm run build                      exit 0  1.5 s
+    dist/assets/ccip-BSxIWc0L.js      2.83 kB │ gzip:   1.30 kB
+    dist/assets/index-Bq-HLeyP.js   409.50 kB │ gzip: 128.35 kB
+    
+    ✓ built in 160ms
+node scripts/secret-scan.mjs       exit 0  0.1 s
+    secret scan: SKIP (no .env.local, so there are no secrets to look for)
+npm run check:bundle               exit 0  0.4 s
+    
+    SKIP  bundle check: there is no .env.local, so there are no secret values to look for in dist/ (`npm run keys` creates it).
+dist: assets index.html 
+--- npm run dev (no RPC): start, GET /, render the home page
+PASS  npm run dev prints a Local URL  (http://localhost:5173/)
+PASS  GET / is 200 and is the app shell  (status 200, 1263 bytes)
+PASS  GET /src/main.ts (dev module) is 200  (status 200)
+PASS  home renders (h1, title, one primary button)  (primary buttons 1, title "Sealdrop: an anonymous tip line with no server", h1 "An anonymous tip line with no server to seize", lang en)
+PASS  no request left localhost on the home page (0 RPC)  (0 external requests)
+PASS  0 console/page errors on the home page  (0)
+ALL PASSED
+--- demo mode as the README says: npm run keys, then build and check the bundle (the keys are throwaway, testnet only)
+npm run keys                       exit 0  0.7 s
+    
+    FUNDER_PRIVATE_KEY             address    0xdA60782351B2b1a176015b8a7937E7d35BA8fEC7
+    VITE_DEMO_SENDER_PRIVATE_KEY   address    0xB9Ad193Ee04456850B2aFc044841B3Ff6b3ece47
+    DEMO_DESK_PRIVATE_KEY          address    0xD2383e75fF2E3505633f77aAd60f7050873c724e
+    DEMO_DESK_BOX_SECRET           public key GMZJRzovfi6bvxvT9xCSwRkGadNtoedpQ3mUJAilzxs=
+mode 600 | names: FUNDER_PRIVATE_KEY VITE_DEMO_SENDER_PRIVAT
+git check-ignore: .env.local
+node scripts/secret-scan.mjs       exit 0  0.1 s
+    secret scan: clean (4 secrets checked against tracked and staged files)
+npm run build                      exit 0  1.1 s
+    dist/assets/index-B61TxH1Q.js   410.41 kB │ gzip: 128.65 kB
+    
+    ✓ built in 139ms
+npm run check:bundle               exit 0  0.5 s
+    
+    PASS  dist/ has 5 files
+    PASS  demo-sender key is in the bundle (public testnet-only demo affordance, by design)
+    PASS  FUNDER_PRIVATE_KEY is NOT in the bundle
+    PASS  DEMO_DESK_PRIVATE_KEY is NOT in the bundle
+    PASS  DEMO_DESK_BOX_SECRET is NOT in the bundle
+    PASS  no .env file in dist/
+    bundle check: all rules pass

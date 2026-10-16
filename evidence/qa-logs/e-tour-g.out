@@ -1,4 +1,4 @@
-   G newsroom console with 19 tips: lang=en title="Newsroom console: Sealdrop" fields=2 unlabeled=0 actions=93 unnamed=0 tab stops walked=80 (focusable elements 95) noRing=0
+   G newsroom console with 19 tips: lang=en title="Newsroom console: Sealdrop" fields=2 unlabeled=0 actions=93 unnamed=0 tab stops walked=93 (focusable elements 95) noRing=0
    [G newsroom console keyboard walk (many tips)] console/page problems: 0; queries to the public RPC: 3
 
 proxy: 3 arkiv_query reached the public RPC (300 units), 0 served from the test cache, 0 injected 429s; eth_sendRawTransaction 0

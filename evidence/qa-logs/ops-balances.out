@@ -1,0 +1,7 @@
+
+> sealdrop@0.1.0 ops
+> tsx scripts/ops.ts balances
+
+funder       0x9606dB647383Bf71604B6C855aB3B3D92675cD64 3.99996 GLM
+demo-sender  0xa05d5Bd99440d95526120062364518ddfe11797F 2.87545 GLM
+demo-desk    0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6 2.99985 GLM

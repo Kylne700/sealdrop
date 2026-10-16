@@ -29,7 +29,7 @@ export async function auditPage(page) {
   await page.evaluate(() => { document.activeElement instanceof HTMLElement && document.activeElement.blur(); window.scrollTo(0, 0) })
   const stops = []
   const noRing = []
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 200; i++) {
     await page.keyboard.press('Tab')
     const s = await page.evaluate(() => {
       const el = document.activeElement

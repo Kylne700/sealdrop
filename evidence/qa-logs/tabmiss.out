@@ -1,0 +1,5 @@
+candidates 95 (links/buttons/summaries/[tabindex]/fields), reached by Tab 93 in 94 presses
+  NOT REACHED: <input type=url> "" disabled=false tabindex=null
+  NOT REACHED: <button type=button> "Save and reload" disabled=false tabindex=null
+Settings opened with Enter on the summary: true; the next two Tab stops: <input type=url> "https://... (optional)" then <button type=button> "Save and reload"
+console/page problems: 0; queries: 3

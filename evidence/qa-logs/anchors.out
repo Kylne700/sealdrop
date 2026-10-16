@@ -1,0 +1,13 @@
+findInbox              #L165 -> #L165   export async function findInbox(reader: Reader, ref: InboxRef): Promis
+sendTip                #L252 -> #L252   export function sendTip(reader: Reader, signer: Signer, inbox: InboxVi
+sweepTips              #L297 -> #L297   export function sweepTips(reader: Reader, inboxKey: Hex, opts: { maxPa
+sendTip                #L252 -> #L252   export function sendTip(reader: Reader, signer: Signer, inbox: InboxVi
+createInbox            #L200 -> #L200   export function createInbox(signer: Signer, p: { inboxId: string; name
+renewInbox             #L210 -> #L210   export function renewInbox(signer: Signer, entityKey: Hex) {
+pinTip                 #L412 -> #L412   export const pinTip = (signer: Signer, entityKey: Hex, days: number) =
+inboxesDueForRenewal   #L189 -> #L189   export async function inboxesDueForRenewal(reader: Reader, creator: Ad
+watchHandovers         #L361 -> #L361   export function watchHandovers(reader: Reader, newsroom: Address, h: {
+sweepTips              #L297 -> #L297   export function sweepTips(reader: Reader, inboxKey: Hex, opts: { maxPa
+tipsSince              #L323 -> #L323   export function tipsSince(reader: Reader, inboxKey: Hex, sinceBlock: b
+sendTip                #L252 -> #L252   export function sendTip(reader: Reader, signer: Signer, inbox: InboxVi
+all anchors resolve to their declaration (dry run)

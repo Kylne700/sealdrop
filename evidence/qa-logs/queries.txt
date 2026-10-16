@@ -11,3 +11,9 @@
 2026-10-16T21:13:23.342Z e-tour g: 3 queries, 300 units
 2026-10-16T21:13:27.587Z wallet-checks: 2 queries, 200 units
 2026-10-16T21:21:15.948Z ff-judge: 9 queries, 900 units
+2026-10-16T22:02:43.461Z e-tour g: 3 queries, 300 units
+2026-10-16T22:02:50.325Z dev-check nokey /tmp/qa-fresh-final: 2 queries, 200 units
+2026-10-16T22:04:39.610Z dev-check nokey /tmp/qa-fresh-final2: 2 queries, 200 units
+2026-10-16T22:05:42.899Z tabmiss: 3 queries, 300 units
+2026-10-16T22:06:15.718Z tabmiss: 3 queries, 300 units
+2026-10-16T22:06:28.399Z tabmiss: 3 queries, 300 units

@@ -1,0 +1,61 @@
+clone HEAD: c362b24; .env.local present: no
+npm ci                             exit 0  1.6 s
+    npm warn allow-scripts
+    npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+npm test                           exit 0  0.7 s
+    
+     Test Files  3 passed (3)
+          Tests  23 passed (23)
+       Start at  01:02:45
+       Duration  457ms (tests 54%, import 33%, transform 11%, worker 1%)
+    
+npm run build                      exit 0  0.7 s
+    dist/assets/ccip-BSxIWc0L.js      2.83 kB │ gzip:   1.30 kB
+    dist/assets/index-Bq-HLeyP.js   409.50 kB │ gzip: 128.35 kB
+    
+    ✓ built in 145ms
+node scripts/secret-scan.mjs       exit 0  0.0 s
+    secret scan: SKIP (no .env.local, so there are no secrets to look for)
+npm run check:bundle               exit 0  0.1 s
+    
+    SKIP  bundle check: there is no .env.local, so there are no secret values to look for in dist/ (`npm run keys` creates it).
+dist: assets index.html 
+--- npm run dev (no RPC): start, GET /, render the home page
+PASS  npm run dev prints a Local URL  (http://localhost:5173/)
+PASS  GET / is 200 and is the app shell  (status 200, 1263 bytes)
+PASS  GET /src/main.ts (dev module) is 200  (status 200)
+PASS  home renders (h1, title, one primary button)  (primary buttons 1, title "Sealdrop: an anonymous tip line with no server", h1 "An anonymous tip line with no server to seize", lang en)
+PASS  no request left localhost on the home page (0 RPC)  (0 external requests)
+PASS  0 console/page errors on the home page  (0)
+ALL PASSED
+--- built without .env.local: the no-demo-key answers (about 2 public arkiv_query)
+PASS  throwaway newsroom, no .env.local: clear "no demo sender key" answer  (This build has no demo sender key. Send testnet GLM to 0x... from the faucet at https://hub.arkiv.network/faucet, then try again.)
+PASS  send page says "This build has no demo key." next to the shared-key option
+FAIL  send with the shared demo key, no .env.local: clear answer, nothing sent
+PASS  0 console/page errors  (0)
+arkiv_query forwarded: 2 (200 units)
+FAILED: 1 check(s)
+--- demo mode as the README says: npm run keys, then build and check the bundle (the keys are throwaway, testnet only)
+npm run keys                       exit 0  0.1 s
+    
+    FUNDER_PRIVATE_KEY             address    0x22c08368359923E07870c4d6e18F0CFED2Fb7Df1
+    VITE_DEMO_SENDER_PRIVATE_KEY   address    0x1e4D04Dc688445a5B131aE4E120D6c1270F5D52A
+    DEMO_DESK_PRIVATE_KEY          address    0xa6F6Ef685f1f08831c6f6C821F0D993fba45b67c
+    DEMO_DESK_BOX_SECRET           public key j78AFWMXaPBOH/qgn1sRFcqEfO6a+Hrr5aFP8bVeYHE=
+mode 600 | names: FUNDER_PRIVATE_KEY VITE_DEMO_SENDER_PRIVAT
+git check-ignore: .env.local
+node scripts/secret-scan.mjs       exit 0  0.1 s
+    secret scan: clean (4 secrets checked against tracked and staged files)
+npm run build                      exit 0  0.7 s
+    dist/assets/index-Cyi3wlED.js   410.41 kB │ gzip: 128.65 kB
+    
+    ✓ built in 141ms
+npm run check:bundle               exit 0  0.1 s
+    
+    PASS  dist/ has 5 files
+    PASS  demo-sender key is in the bundle (public testnet-only demo affordance, by design)
+    PASS  FUNDER_PRIVATE_KEY is NOT in the bundle
+    PASS  DEMO_DESK_PRIVATE_KEY is NOT in the bundle
+    PASS  DEMO_DESK_BOX_SECRET is NOT in the bundle
+    PASS  no .env file in dist/
+    bundle check: all rules pass

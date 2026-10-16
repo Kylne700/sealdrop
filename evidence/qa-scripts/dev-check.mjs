@@ -1,6 +1,6 @@
 // B: a fresh clone WITHOUT .env.local.
 //  dev    <clone>  `npm run dev` starts, serves 200, the home page renders, 0 console errors, no request leaves localhost (0 RPC)
-//  nokey  <clone>  the built dist (clone/dist) answers "no demo key" for the throwaway newsroom and for a demo-key send (about 2 arkiv_query)
+//  nokey  <clone>  the built dist (clone/dist) answers "no demo key" for the throwaway newsroom, marks the shared-key option unavailable, and says "No browser wallet found." on Send (about 2 arkiv_query)
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { launch, watch, sleep, ledgerNote } from './lib.mjs'
@@ -58,10 +58,13 @@ if (mode === 'nokey') {
   const hint = await page.$eval('fieldset', (el) => el.textContent ?? '')
   check('send page says "This build has no demo key." next to the shared-key option', /This build has no demo key\./.test(hint), '')
   await page.type('[data-testid=message]', 'SYNTHETIC TEST TIP (no demo key check, never sent)')
+  // Without a demo key the shared-key option is disabled and "My wallet" is the selected one, so Send takes the wallet path.
+  const radios = await page.evaluate(() => ({ demoDisabled: document.querySelector('[data-testid=mode-demo]').disabled, demoChecked: document.querySelector('[data-testid=mode-demo]').checked, walletChecked: document.querySelector('[data-testid=mode-wallet]').checked }))
+  check('no demo key: the shared-key option is disabled and not selected', radios.demoDisabled && !radios.demoChecked && radios.walletChecked, JSON.stringify(radios))
   await page.click('[data-testid=send]')
-  await page.waitForFunction(() => /no demo key/i.test(document.body.textContent ?? ''), { timeout: 15_000 }).catch(() => {})
-  const body = await page.evaluate(() => document.body.textContent ?? '')
-  check('send with the shared demo key, no .env.local: clear answer, nothing sent', /This build has no demo key; send with your wallet\./.test(body), '')
+  await page.waitForFunction(() => /No browser wallet found\./.test(document.querySelector('[data-testid=progress]')?.textContent ?? ''), { timeout: 15_000 }).catch(() => {})
+  const prog = await page.$eval('[data-testid=progress]', (el) => ({ text: el.textContent ?? '', role: el.getAttribute('role'), btn: !document.querySelector('[data-testid=send]').disabled }))
+  check('send, no .env.local and no wallet: clear alert "No browser wallet found.", button usable again, nothing sent', prog.text === 'No browser wallet found.' && prog.role === 'alert' && prog.btn && !proxy.st.methods.eth_sendRawTransaction, JSON.stringify(prog) + ' sent=' + (proxy.st.methods.eth_sendRawTransaction ?? 0))
   check('0 console/page errors', problems.length === 0, problems.join(' | ').slice(0, 300) || '0')
   say(`arkiv_query forwarded: ${proxy.st.forwarded} (${proxy.st.units} units)`)
   ledgerNote(`dev-check nokey ${dir}`, { queries: proxy.st.forwarded, units: proxy.st.units })
