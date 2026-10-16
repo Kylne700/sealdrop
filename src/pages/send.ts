@@ -7,6 +7,7 @@ import { explainError, findInbox, getTiming, injectedSigner, localSigner, sendTi
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
 import { h, kib, link, queriesPanel, short, statusLine } from '../ui/dom'
+import { rpcSettings } from '../ui/settings'
 
 const wallet = () => (window as unknown as { ethereum?: EIP1193Provider }).ethereum
 
@@ -27,6 +28,7 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
     timing = await getTiming(reader)
   } catch (e) {
     status.error(explainError(e))
+    root.append(rpcSettings())
     return
   }
   if (!inbox) {
@@ -151,5 +153,5 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
       world.replaceChildren(h('li', { class: 'status error', role: 'alert' }, explainError(e)))
     }
   })
-  root.append(worldPanel, queries.el)
+  root.append(worldPanel, queries.el, rpcSettings())
 }

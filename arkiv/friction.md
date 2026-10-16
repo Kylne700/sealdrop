@@ -272,7 +272,9 @@ counts `arkiv-cost` and throws on a 429, so nothing sleeps; `explainError` turns
 public Arkiv RPC is used up (it renews in about N min). Wait a little, or enter your own RPC URL under Settings." New tips
 arrive over a WebSocket instead of polling (one entity read per tip); the inbox is swept only when a page opens or the user
 presses refresh, and a reconnect asks only for `$createdAt >= <last seen block>` (F1). The footer shows how many queries the
-tab has made and what they cost, and Settings accepts a custom RPC URL.
+tab has made and what they cost, and Settings (on the newsroom console and on the send page) accepts a custom RPC URL, https only
+because the page's Content-Security-Policy blocks anything else. `npm run smoke` checks the message with a faked 429, which costs no
+query budget ([`evidence/screens/rate-limited-send.png`](../evidence/screens/rate-limited-send.png)).
 
 **Suggested fix.** Document the anonymous budget (units, cost per query, window, what identifies a client) next to the
 Access Keys text; send the remaining budget on every response (for example `Arkiv-Quota-Used-Percent`, which the CORS list

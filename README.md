@@ -92,7 +92,8 @@ each of those becomes an operator you have to trust:
 | Plain JSON-RPC (`arkiv_query`) | Anyone can read and decrypt a newsroom's tips with a 43-line script and no Sealdrop code. | [arkiv/examples/read-tips.mjs](arkiv/examples/read-tips.mjs) |
 
 Every page has a **Queries this page runs** panel showing the exact query strings, and the footer shows how much of the
-public RPC's anonymous query budget the tab has used (see [friction F7](arkiv/friction.md)).
+public RPC's anonymous query budget the tab has used (see [friction F7](arkiv/friction.md)). When that budget is spent the page
+says so at once and offers Settings, where a visitor can paste their own RPC URL.
 
 ## Threat model (read this before sending anything real)
 

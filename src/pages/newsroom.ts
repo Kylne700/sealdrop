@@ -10,10 +10,11 @@ import {
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
 import {
-  downloadIdentity, forgetIdentity, getLastSeen, getRpcOverride, loadIdentity, newLocalIdentity, newWalletIdentity, parseIdentity,
-  saveIdentity, setLastSeen, setRpcOverride, type Identity,
+  downloadIdentity, forgetIdentity, getLastSeen, loadIdentity, newLocalIdentity, newWalletIdentity, parseIdentity,
+  saveIdentity, setLastSeen, type Identity,
 } from '../store'
 import { copyButton, h, kib, link, onLeave, queriesPanel, runCleanups, short, statusLine } from '../ui/dom'
+import { rpcSettings } from '../ui/settings'
 
 /** About 16 writes. Below this a throwaway newsroom is topped up from the shared demo sender. */
 const MIN_BALANCE = parseEther('0.002')
@@ -364,25 +365,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   }
 
   // ---- page ---------------------------------------------------------------------------------------------------
-  const settings = h('details', { class: 'settings' },
-    h('summary', null, 'Settings'),
-    h('p', { class: 'hint' }, 'Anonymous queries share a cost budget on the public RPC. If it runs out, paste your own RPC URL, for example one with an access key from hub.arkiv.network. It stays in this browser.'),
-  )
-  const rpcInput = h('input', { id: 'rpc', type: 'url', placeholder: 'https://... (optional)', value: getRpcOverride() ?? '' })
-  settings.append(
-    h('label', { for: 'rpc' }, 'Custom RPC URL'),
-    rpcInput,
-    h('button', {
-      type: 'button',
-      class: 'secondary',
-      onclick: () => {
-        const v = rpcInput.value.trim()
-        if (v && !/^https?:\/\//.test(v)) return status.error('The RPC URL must start with http:// or https://.')
-        setRpcOverride(v)
-        location.reload()
-      },
-    }, 'Save and reload'),
-  )
+  const settings = rpcSettings()
 
   root.append(
     h('h1', null, 'Newsroom console'),

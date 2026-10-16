@@ -50,6 +50,24 @@ let step = 'start'
 try {
   log(`Sealdrop smoke run ${new Date().toISOString()}  Chromium ${await browser.version()}  served from ${REMOTE ? base : 'dist/'}`)
 
+  // ---- 0. the anonymous query budget is spent (friction F7): every RPC query is answered with a faked 429, so this costs nothing ----
+  step = 'a spent query budget shows a message and the Settings panel instead of hanging'
+  const R = await (await browser.createBrowserContext()).newPage() // not watch()ed: the 429 is logged as a console error on purpose
+  R.setDefaultTimeout(30_000)
+  await R.setRequestInterception(true)
+  R.on('request', (req) => {
+    if (req.url().includes('rpc.tiramisu') && req.method() === 'POST') {
+      return void req.respond({ status: 429, contentType: 'application/json', headers: { 'access-control-allow-origin': '*', 'retry-after': '1354' }, body: '{"error":"ANON_COST_LIMITED","message":"unauthenticated query budget exhausted"}' })
+    }
+    void req.continue()
+  })
+  const tBudget = Date.now()
+  await R.goto(base + '#/demo')
+  await R.waitForFunction(() => /free query budget/.test(document.querySelector('[data-testid=status]')?.textContent ?? ''))
+  check((await R.$('details.settings')) !== null, `faked 429 on every query: the send page says the free budget is used up and offers Settings, after ${secs(Date.now() - tBudget)}`, (await textOf(R, '[data-testid=status]')).slice(0, 80))
+  await R.screenshot({ path: join(SHOTS, 'rate-limited-send.png'), fullPage: true })
+  await R.close()
+
   // ---- 1. the newsroom ---------------------------------------------------------------------------------------
   step = 'open the newsroom page and create a throwaway newsroom'
   const t0 = Date.now()
