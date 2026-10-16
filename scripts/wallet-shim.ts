@@ -5,8 +5,23 @@ import type { Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { CHAIN_ID, RPC_HTTP } from '../src/config'
 
-export async function installWallet(page: Page, privateKey: Hex) {
+/** Ways a real wallet misbehaves, for the error-state checks. The default is a well-behaved wallet on Tiramisu. */
+export type WalletQuirks = {
+  /** The network the wallet starts on (hex chain id). Default: Tiramisu. */
+  chainId?: string
+  /** What wallet_switchEthereumChain does: 'reject' = the user declines (4001), 'unknown' = chain not added (4902). */
+  switch?: 'reject' | 'unknown'
+  /** wallet_addEthereumChain adds the network but does not switch to it. */
+  addWithoutSwitch?: boolean
+  /** The user declines every request that needs approval (accounts, transactions). */
+  rejectApprovals?: boolean
+}
+
+export async function installWallet(page: Page, privateKey: Hex, quirks: WalletQuirks = {}) {
   const account = privateKeyToAccount(privateKey)
+  const tiramisu = '0x' + CHAIN_ID.toString(16)
+  let chainId = quirks.chainId ?? tiramisu
+  const fail = (code: number, message: string) => JSON.stringify({ __error: { code, message } })
   const rpc = async (method: string, params: unknown[]) => {
     const res = await fetch(RPC_HTTP, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) })
     const body = (await res.json()) as { result?: unknown; error?: { message: string } }
@@ -17,14 +32,23 @@ export async function installWallet(page: Page, privateKey: Hex) {
     const params = JSON.parse(paramsJson) as unknown[]
     switch (method) {
       case 'eth_requestAccounts':
+        if (quirks.rejectApprovals) return fail(4001, 'User rejected the request.')
+        return JSON.stringify([account.address])
       case 'eth_accounts':
         return JSON.stringify([account.address])
       case 'eth_chainId':
-        return JSON.stringify('0x' + CHAIN_ID.toString(16))
+        return JSON.stringify(chainId)
       case 'wallet_switchEthereumChain':
+        if (quirks.switch === 'reject') return fail(4001, 'User rejected the request.')
+        if (quirks.switch === 'unknown') return fail(4902, 'Unrecognized chain ID. Try adding the chain using wallet_addEthereumChain first.')
+        chainId = tiramisu
+        return 'null'
       case 'wallet_addEthereumChain':
+        if (quirks.rejectApprovals) return fail(4001, 'User rejected the request.')
+        if (!quirks.addWithoutSwitch) chainId = tiramisu
         return 'null'
       case 'eth_sendTransaction': {
+        if (quirks.rejectApprovals) return fail(4001, 'User rejected the request.')
         const tx = params[0] as { to?: Hex; data?: Hex; value?: Hex; gas?: Hex; nonce?: Hex; gasPrice?: Hex; maxFeePerGas?: Hex }
         const nonce = tx.nonce ?? ((await rpc('eth_getTransactionCount', [account.address, 'pending'])) as Hex)
         const gas = tx.gas ?? ((await rpc('eth_estimateGas', [{ from: account.address, to: tx.to, data: tx.data, value: tx.value }])) as Hex)
@@ -42,7 +66,11 @@ export async function installWallet(page: Page, privateKey: Hex) {
     const w = window as unknown as { __walletCall: (m: string, p: string) => Promise<string>; ethereum?: unknown }
     const listeners: Record<string, ((...a: unknown[]) => void)[]> = {}
     const provider = {
-      request: async ({ method, params }: { method: string; params?: unknown[] }) => JSON.parse(await w.__walletCall(method, JSON.stringify(params ?? []))),
+      request: async ({ method, params }: { method: string; params?: unknown[] }) => {
+        const out = JSON.parse(await w.__walletCall(method, JSON.stringify(params ?? [])))
+        if (out && out.__error) throw Object.assign(new Error(out.__error.message), { code: out.__error.code })
+        return out
+      },
       on(ev: string, fn: () => void) { (listeners[ev] ||= []).push(fn); return provider },
       removeListener(ev: string, fn: () => void) { listeners[ev] = (listeners[ev] || []).filter((f) => f !== fn); return provider },
     }
