@@ -1,0 +1,59 @@
+PASS E1 forged link (other creator) shows a clear message and no form  (There is no live inbox with this id created by this address. The link may be wrong, or the newsroom stopped renewing it )
+   G send-not-found: title="Send a tip: Sealdrop" lang=en unlabeled=0 unnamed=0 noRing=0
+   [E1 forged link: right inbox id, other creator] console/page problems: 0; queries to the public RPC: 1
+PASS E2 missing/expired inbox: message mentions the link and the expiry  (There is no live inbox with this id created by this address. The link may be wrong, or the newsroom stopped renewing it and it expired. Only trust links you got)
+   [E2 missing or expired inbox] console/page problems: 0; queries to the public RPC: 1
+PASS E3 #/send/0x123/abc -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS E3 #/send/0x3A3E324E0001162e6CeA6cF4a2ee3728Ba9 -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS E3 #/send//x -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS E3 #/send/not-an-address/with spaces -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS E3 #/nope -> start page with a notice  (There is no such page. Here is the start page.)
+PASS E3 #/send/0xggggggggggggggggggggggggggggggggggg -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+   [E3 malformed hashes] console/page problems: 0; queries to the public RPC: 0
+   G newsroom console: title="Newsroom console: Sealdrop" lang=en fields=2 unlabeled=0 unnamed=0 stops=10/59 noRing=0
+FAIL C mobile 390x844 DPR 2 touch: newsroom console and send page: threw __name is not defined
+   [C mobile 390x844 DPR 2 touch: newsroom console and send page] console/page problems: 0; queries to the public RPC: 3
+   G send page: title="Send a tip: Sealdrop" lang=en fields=5 unlabeled=0 unnamed=0 stops=5/17 noRing=0
+PASS E4 empty message -> "Write a message first."  (Write a message first.)
+PASS E4b whitespace-only message -> same message, button still usable  (Write a message first.)
+FAIL E5 over the limit (65,534 bytes, 32,767 characters) -> clear message, nothing sent  (counter "65,551 / 65,532 bytes"; The message is too long (limit 65532 bytes).)
+PASS E7 double click on Send -> exactly one transaction  (1 eth_sendRawTransaction)
+PASS E6 Hebrew/RTL + emoji round trip: the newsroom shows exactly the text sent, once  (copies 1; {"direction":"ltr","attrDir":null,"unicodeBidi":"isolate","textAlign":"start"})
+FAIL E5b message at the limit (65,532 bytes) is accepted and sent  (counter "65,549 / 65,532 bytes", error:The message is too long (limit 65532 bytes)., 0.0 s)
+FAIL E5b the newsroom decrypts the 64 KiB tip
+FAIL E5b burning the 64 KiB tip works from the console  (A new tip just arrived.)
+   [E4-E7 desktop send page: empty, over the limit, Hebrew+emoji, double click] console/page problems: 0; queries to the public RPC: 7
+PASS E8 demo key without GLM on the send page -> clear message, button usable again  (The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: hub)
+PASS E8b throwaway newsroom with an empty demo key -> says who ran out and where to get GLM  (The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to 0xf501336C77E5e968f48bdBCf9A78c4ADbA99900F from the faucet at https://hub.ar)
+   E8 queries through the second proxy: 2
+   [E8 demo key without GLM (real node answer, unfunded key build)] console/page problems: 0; queries to the public RPC: 0
+PASS E9 429 -> "free query budget used up", renewal time, Settings offered  (The free query budget of the public Arkiv RPC is used up (it renews in about 23 min). Wait a little, or enter your own RPC URL under Settings.)
+   E9 console messages: console: Failed to load resource: the server responded with a status of 429 (Too Many Requests) | console: Failed to load resource: the server responded with a status of 429 (Too Many Requests) (Chromium itself logs every non-2xx response as a console error; the app threw nothing: 0 page errors)
+   [E9 429 from the public RPC (injected by the proxy)] console/page problems: 0; queries to the public RPC: 0
+PASS E10 wallet declines -> "The request was rejected in the wallet.", nothing sent, button usable  (The request was rejected in the wallet.)
+   [E10 wallet declines a send (send page, wallet mode)] console/page problems: 0; queries to the public RPC: 1
+
+proxy: 13 arkiv_query reached the public RPC (1300 units), 0 served from the test cache, 2 injected 429s; eth_sendRawTransaction 1
+ALL console/page problems: 0
+
+PASS  E1 forged link (other creator) shows a clear message and no form  (There is no live inbox with this id created by this address. The link may be wrong, or the newsroom stopped renewing it )
+PASS  E2 missing/expired inbox: message mentions the link and the expiry  (There is no live inbox with this id created by this address. The link may be wrong, or the newsroom stopped renewing it and it expired. Only trust links you got)
+PASS  E3 #/send/0x123/abc -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS  E3 #/send/0x3A3E324E0001162e6CeA6cF4a2ee3728Ba9 -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS  E3 #/send//x -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS  E3 #/send/not-an-address/with spaces -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+PASS  E3 #/nope -> start page with a notice  (There is no such page. Here is the start page.)
+PASS  E3 #/send/0xggggggggggggggggggggggggggggggggggg -> start page with a notice  (That inbox link is not valid. A Sealdrop link looks like https://.../#)
+FAIL  C mobile 390x844 DPR 2 touch: newsroom console and send page: threw __name is not defined
+PASS  E4 empty message -> "Write a message first."  (Write a message first.)
+PASS  E4b whitespace-only message -> same message, button still usable  (Write a message first.)
+FAIL  E5 over the limit (65,534 bytes, 32,767 characters) -> clear message, nothing sent  (counter "65,551 / 65,532 bytes"; The message is too long (limit 65532 bytes).)
+PASS  E7 double click on Send -> exactly one transaction  (1 eth_sendRawTransaction)
+PASS  E6 Hebrew/RTL + emoji round trip: the newsroom shows exactly the text sent, once  (copies 1; {"direction":"ltr","attrDir":null,"unicodeBidi":"isolate","textAlign":"start"})
+FAIL  E5b message at the limit (65,532 bytes) is accepted and sent  (counter "65,549 / 65,532 bytes", error:The message is too long (limit 65532 bytes)., 0.0 s)
+FAIL  E5b the newsroom decrypts the 64 KiB tip
+FAIL  E5b burning the 64 KiB tip works from the console  (A new tip just arrived.)
+PASS  E8 demo key without GLM on the send page -> clear message, button usable again  (The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: hub)
+PASS  E8b throwaway newsroom with an empty demo key -> says who ran out and where to get GLM  (The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to 0xf501336C77E5e968f48bdBCf9A78c4ADbA99900F from the faucet at https://hub.ar)
+PASS  E9 429 -> "free query budget used up", renewal time, Settings offered  (The free query budget of the public Arkiv RPC is used up (it renews in about 23 min). Wait a little, or enter your own RPC URL under Settings.)
+PASS  E10 wallet declines -> "The request was rejected in the wallet.", nothing sent, button usable  (The request was rejected in the wallet.)

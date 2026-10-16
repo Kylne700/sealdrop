@@ -1,0 +1,4 @@
+handshakes refused in 70 s: 35, in 7 clusters
+cluster start (s) x handshakes: 0.1x9  2.1x5  4.1x1  7.1x5  15.1x5  31.1x5  61.1x5
+state reports (7): 0.1 s reconnecting | 1.1 s reconnecting | 3.1 s reconnecting | 7.1 s reconnecting | 15.1 s reconnecting | 31.1 s reconnecting | 61.1 s reconnecting
+onReconnect calls (must be 0 while the node refuses): 0

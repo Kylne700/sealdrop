@@ -1,0 +1,11 @@
+ccip-CBZB9M-9.js: 2835 B raw, 1305 B gzip
+index-BHoWWcl2.js: 410412 B raw, 127607 B gzip
+index-BvNQ8wwd.css: 3814 B raw, 1387 B gzip
+native-BKj27wfc.js: 306 B raw, 173 B gzip
+index.html: 1514 B raw, 765 B gzip
+cpu x1: load event 1.90 s, h1 visible 1.90 s, FCP 1.18 s, 3 requests, 129759 B over the wire
+cpu x1: load event 1.88 s, h1 visible 1.89 s, FCP 1.18 s, 3 requests, 129759 B over the wire
+cpu x1: load event 1.89 s, h1 visible 1.89 s, FCP 1.19 s, 3 requests, 129759 B over the wire
+cpu x4: load event 1.95 s, h1 visible 1.97 s, FCP 1.21 s, 3 requests, 129759 B over the wire
+cpu x4: load event 1.94 s, h1 visible 1.96 s, FCP 1.22 s, 3 requests, 129759 B over the wire
+cpu x4: load event 1.92 s, h1 visible 1.94 s, FCP 1.19 s, 3 requests, 129759 B over the wire

@@ -1,0 +1,7 @@
+PASS  wrong chain, switch works: calls=[eth_requestAccounts, eth_chainId, wallet_switchEthereumChain, eth_chainId] message="" console=opened
+PASS  wrong chain, chain unknown (4902), add works: calls=[eth_requestAccounts, eth_chainId, wallet_switchEthereumChain, wallet_addEthereumChain, eth_chainId] message="" console=opened
+PASS  wrong chain, add does not switch: calls=[eth_requestAccounts, eth_chainId, wallet_switchEthereumChain, wallet_addEthereumChain, eth_chainId] message="Your wallet is on a different network. Switch it to Arkiv Tiramisu (chain id 7738577) and try again." console=not opened
+PASS  user rejects the network switch: calls=[eth_requestAccounts, eth_chainId, wallet_switchEthereumChain] message="The request was rejected in the wallet." console=not opened
+PASS  user rejects the account request: calls=[eth_requestAccounts] message="The request was rejected in the wallet." console=not opened
+queries 2, units 200
+console/page errors: 0

@@ -49,8 +49,8 @@ of this repository or the build. Open the entity link on the Data Explorer to se
 three attributes.
 
 Measured on 2026-10-16 by a headless Chromium run against the built site and the live testnet ([evidence/smoke.txt](evidence/smoke.txt)):
-creating the newsroom takes under a second (no network), creating the inbox 15.8 s (two transactions and the first look-up),
-and the decrypted tip appeared in the newsroom tab 1.8 s after Send was clicked. The whole path took 19.3 s.
+creating the newsroom takes under a second (no network), creating the inbox 15.0 s (two transactions and the first look-up),
+and the decrypted tip appeared in the newsroom tab 3.1 s after Send was clicked. The whole path took 20.4 s.
 
 ## What is on Arkiv, and what is not
 
@@ -85,7 +85,7 @@ each of those becomes an operator you have to trust:
 | Entity Expiration per type | The source picks 1, 7, 14 or 30 days and sees the exact expiry on the result screen. The inbox itself lives for 7 days. | `sendTip`, `createInbox` |
 | Lifetime Extension as a lease | The console renews the inbox whenever the newsroom opens it, so an abandoned or seized inbox falls off by itself and sources see "no live inbox" instead of writing into it. "Keep 30 more days" extends a single tip. | `renewInbox`, `pinTip` |
 | Range query on `$expiresAt` | One query finds every inbox of this creator that has less than 6 days left. | `inboxesDueForRenewal` |
-| `watchEntityEvents` over WebSocket | The tip shows up in the open console within seconds, with no polling (the socket itself costs no queries; reading the new tip afterwards is one). | `watchHandovers` |
+| `watchEntityEvents` over WebSocket | The tip shows up in the open console within seconds, with no polling (the socket itself costs no queries; reading the new tip afterwards is one). If the connection drops the page says "Reconnecting", retries with a growing delay and, once it is back, makes one catch-up query, so a tip sent during the outage still appears without a refresh. | `watchHandovers` |
 | Cursor pagination | The console loads inboxes with more than 200 tips. | `sweepTips` |
 | Range query on `$createdAt` | When you return to the tab it fetches only tips created since the last sweep. | `tipsSince` |
 | `readonly` creation flag | The sealed bytes of a tip cannot be rewritten by anyone, including the key that created it. | `sendTip` |
@@ -148,8 +148,9 @@ repository; it is injected from `.env.local` and exists only in the bundle you b
 
 *What a judge needs, exactly.* Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
 (`npm run check:bundle` prints `SKIP`), but the site is wallet mode only: the shared-demo-key send and the throwaway
-newsroom answer that the build has no demo key. For demo mode put one line in `.env.local` at the repository root and restart
-`npm run dev`:
+newsroom answer that the build has no demo key. (npm 11.16 prints an `allow-scripts` warning about esbuild's postinstall
+during `npm ci`; ignore it, the install, tests and build pass without that script.) For demo mode put one line in
+`.env.local` at the repository root and restart `npm run dev`:
 
 ```
 VITE_DEMO_SENDER_PRIVATE_KEY=0x<64 hex characters>
@@ -181,14 +182,18 @@ npm run build && npm run check:bundle
 | The same smoke checks against any served copy, here a `BASE_PATH=/sealdrop/` build behind a local static server rooted one level above `/sealdrop/` (how GitHub Pages serves it). The script writes `evidence/smoke-live.txt`; this run was renamed so that name stays free for the deployed site. | `SMOKE_URL=http://127.0.0.1:8765/sealdrop/ npm run smoke` | [evidence/smoke-subpath.txt](evidence/smoke-subpath.txt) |
 | Independent reader: decrypts the Demo Desk with no Sealdrop code. | `INBOX=0x65a2… OWNER=0x6a3C… BOX_SECRET=… node arkiv/examples/read-tips.mjs` | [evidence/read-tips.txt](evidence/read-tips.txt) |
 | Friction repro scripts | `arkiv/repro/*.mjs` | see [arkiv/friction.md](arkiv/friction.md) |
+| QA pass: GLM costs, fresh clone, Firefox, a phone-sized screen, a dropped WebSocket, error states, keyboard and labels, Fast 3G load, wallet-mode failures. | the scripts in [evidence/qa-scripts/](evidence/qa-scripts/) (they use absolute paths of the author's machine and a git-ignored fixture identity) | [evidence/qa.md](evidence/qa.md), [evidence/qa-logs/](evidence/qa-logs/) |
 
 Run the integration test and the smoke test one at a time: they share the demo sender key and the public RPC's
 anonymous query budget.
 
-Not verified: wallet mode with a real browser wallet extension (the smoke test uses a scripted EIP-1193 stand-in that signs in
-Node), Firefox, Safari, mobile browsers and Tor Browser. The smoke test ran in Chromium 154 only. The Settings panel was
-checked only against a scripted fake RPC: the URL is saved and the page sends its queries there, but I did not try a real second or
-access-key RPC node (the live-tip socket is derived from the same URL, `https` to `wss`, which a given node may not serve).
+Not verified: wallet mode with a real browser wallet extension (the smoke test and the QA wallet checks use a scripted EIP-1193
+stand-in that signs in Node), Safari, a real phone (the mobile check is Chromium's 390x844 touch emulation), Tor Browser, and
+a reconnect after a real network change, sleep or node restart (the drops were injected by a local proxy). Firefox 153
+(WebDriver BiDi) ran the judge path once, Chromium 154 runs the smoke test. The Settings panel was checked only against a scripted fake RPC: the URL is saved
+and the page sends its queries there, but I did not try a real second or access-key RPC node (the live-tip socket is derived
+from the same URL, `https` to `wss`, which a given node may not serve). The QA pass (what was run, with numbers, and what was
+not) is in [evidence/qa.md](evidence/qa.md).
 
 ## Addresses and roles (Tiramisu testnet, chain id 7738577)
 

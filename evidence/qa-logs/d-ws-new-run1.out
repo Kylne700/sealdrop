@@ -1,0 +1,42 @@
+[+  0.0 s] build under test: new; fixture newsroom 0x3A3E324E0001162e6CeA6cF4a2ee3728Ba9942c7
+[+  0.2 s] status line: "Live updates start once the inbox exists."
+[+  4.4 s] status line: "Connecting to the live feed..."
+[+  5.0 s] console loaded; sockets open at the proxy: 1; queries so far 4
+[+  5.0 s] --- s1: socket killed, new sockets refused for 15 s
+[+  5.0 s] PASS s1 status turned to "Reconnecting" after the drop after 0.0 s
+[+  5.0 s] status line: "Reconnecting: the live connection dropped and is being retried. Tips a"
+[+ 10.4 s] tip D1 sent while the socket is down
+[+ 20.0 s] network restored (new sockets accepted again)
+[+ 20.6 s] PASS s1 status is back to "Live" without any click 0.6 s after restore
+[+ 20.6 s] status line: "Live: listening for new tips on a WebSocket. This page does not poll."
+[+ 21.2 s] PASS s1 tip sent DURING the outage shows up with no refresh data-source=sweep, 0.6 s after restore
+[+ 21.2 s] queries used by the catch-up: 1 (includes the tip read)
+[+ 26.5 s] tip D2 sent after the restore
+[+ 26.5 s] PASS s1 tip sent AFTER the restore arrives data-source=live, 0.0 s
+[+ 26.5 s] --- s2: CDP offline for 15 s
+[+ 26.5 s] offline on; sockets at the proxy 1
+[+ 41.5 s] still offline after 15 s; sockets at the proxy 1; wsOpened total 2
+[+ 41.5 s] offline off
+[+ 47.0 s] PASS s2 tip sent after CDP offline appears with no refresh data-source=live, 0.0 s
+[+ 47.0 s] --- s3: socket silently dead (open, but nothing is delivered)
+[+ 52.1 s] tip D4 sent while the socket is silent (the page cannot hear about it)
+[+ 91.5 s] PASS s3 heartbeat noticed the silent socket and showed "Reconnecting" 44.5 s after the freeze
+[+ 91.7 s] status line: "Reconnecting: the live connection dropped and is being retried. Tips a"
+[+ 94.5 s] freeze lifted
+[+ 96.7 s] status line: "Live: listening for new tips on a WebSocket. This page does not poll."
+[+ 96.7 s] PASS s3 back to "Live" on its own 2.2 s after the unfreeze
+[+ 97.3 s] PASS s3 tip sent while silent shows up with no refresh data-source=sweep, 0.6 s
+[+102.6 s] PASS s3 next tip arrives data-source=live, 0.0 s
+[+102.6 s] sockets opened at the proxy during s3: 2
+[+102.6 s] console/page problems: newsroom console.error: WebSocket connection to 'ws://127.0.0.1:35407/' failed: Error during WebSocket handshake: Unexpected response code: 503 | newsroom console.error: WebSocket connection to 'ws://127.0.0.1:35407/' failed: Error during WebSocket handshake: Unexpected response code: 503 | newsroom console.error: WebSocket connection to 'ws://127.0.0.1:35407/' failed: Error during WebSocket handshake: Unexpected response code: 503 | newsroom console.error: WebSocket connection to 'ws://127.0.0.
+[+102.6 s] proxy: 14 arkiv_query forwarded (1400 units), 4 sockets accepted, 15 refused; notes: 20:06:37 ws client connected ; 20:06:37 dropping 1 socket(s) ; 20:06:52 ws client connected ; 20:08:05 ws client connected ; 20:08:07 dropping 1 socket(s) ; 20:08:07 ws client connected
+
+PASS  s1 status turned to "Reconnecting" after the drop  (after 0.0 s)
+PASS  s1 status is back to "Live" without any click  (0.6 s after restore)
+PASS  s1 tip sent DURING the outage shows up with no refresh  (data-source=sweep, 0.6 s after restore)
+PASS  s1 tip sent AFTER the restore arrives  (data-source=live, 0.0 s)
+PASS  s2 tip sent after CDP offline appears with no refresh  (data-source=live, 0.0 s)
+PASS  s3 heartbeat noticed the silent socket and showed "Reconnecting"  (44.5 s after the freeze)
+PASS  s3 back to "Live" on its own  (2.2 s after the unfreeze)
+PASS  s3 tip sent while silent shows up with no refresh  (data-source=sweep, 0.6 s)
+PASS  s3 next tip arrives  (data-source=live, 0.0 s)

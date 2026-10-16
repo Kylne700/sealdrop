@@ -1,0 +1,33 @@
+   G newsroom console: title="Newsroom console: Sealdrop" lang=en fields=2 unlabeled=0 unnamed=0 stops=10/63 noRing=0
+   C newsroom console overflow: {"vw":390,"docScroll":390,"off":[],"minButtonHeight":46}
+   C send page overflow: {"vw":390,"docScroll":390,"off":[],"minButtonHeight":46}
+   C send result overflow: {"vw":390,"docScroll":390,"off":[],"minButtonHeight":46}
+   C onboarding overflow: {"vw":390,"docScroll":390,"off":[],"minButtonHeight":46}
+   C not-found overflow: {"vw":390,"docScroll":390,"off":[],"minButtonHeight":null}
+   C home+notice overflow: {"vw":390,"docScroll":390,"off":[],"minButtonHeight":46}
+   [C mobile 390x844 DPR 2 touch: newsroom console and send page] console/page problems: 0; queries to the public RPC: 7
+   G send page: title="Send a tip: Sealdrop" lang=en fields=5 unlabeled=0 unnamed=0 stops=5/17 noRing=0
+PASS E4 empty message -> "Write a message first."  (Write a message first.)
+PASS E4b whitespace-only message -> same message, button still usable  (Write a message first.)
+PASS E5 over the limit (32,767 Hebrew letters = 65,534 text bytes, 65,551 with the JSON wrapper) -> clear message, nothing sent  (counter "65,551 / 65,532 bytes"; The message is too long (limit 65532 bytes).)
+PASS E5c one byte over the limit -> refused, nothing sent  (counter "65,533 / 65,532 bytes")
+PASS E7 double click on Send -> exactly one transaction  (1 eth_sendRawTransaction)
+PASS E6 Hebrew/RTL + emoji round trip: the newsroom shows exactly the text sent, once, laid out right-to-left  (copies 1; {"direction":"rtl","attrDir":"auto","unicodeBidi":"isolate","textAlign":"start"})
+   E6 message field dir attribute: auto
+PASS E5b message at the limit (65,515 text bytes = 65,532 with the JSON wrapper) is accepted and sent  (counter "65,532 / 65,532 bytes", sent, 5.8 s)
+PASS E5b the newsroom decrypts the 64 KiB tip
+PASS E5b burning the 64 KiB tip works from the console  (Burned.)
+   [E4-E7 desktop send page: empty, over the limit, Hebrew+emoji, double click] console/page problems: 0; queries to the public RPC: 10
+
+proxy: 17 arkiv_query reached the public RPC (1700 units), 0 served from the test cache, 0 injected 429s; eth_sendRawTransaction 4
+ALL console/page problems: 0
+
+PASS  E4 empty message -> "Write a message first."  (Write a message first.)
+PASS  E4b whitespace-only message -> same message, button still usable  (Write a message first.)
+PASS  E5 over the limit (32,767 Hebrew letters = 65,534 text bytes, 65,551 with the JSON wrapper) -> clear message, nothing sent  (counter "65,551 / 65,532 bytes"; The message is too long (limit 65532 bytes).)
+PASS  E5c one byte over the limit -> refused, nothing sent  (counter "65,533 / 65,532 bytes")
+PASS  E7 double click on Send -> exactly one transaction  (1 eth_sendRawTransaction)
+PASS  E6 Hebrew/RTL + emoji round trip: the newsroom shows exactly the text sent, once, laid out right-to-left  (copies 1; {"direction":"rtl","attrDir":"auto","unicodeBidi":"isolate","textAlign":"start"})
+PASS  E5b message at the limit (65,515 text bytes = 65,532 with the JSON wrapper) is accepted and sent  (counter "65,532 / 65,532 bytes", sent, 5.8 s)
+PASS  E5b the newsroom decrypts the 64 KiB tip
+PASS  E5b burning the 64 KiB tip works from the console  (Burned.)

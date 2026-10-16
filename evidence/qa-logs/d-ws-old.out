@@ -1,0 +1,18 @@
+[+  0.0 s] build under test: old; fixture newsroom 0x3A3E324E0001162e6CeA6cF4a2ee3728Ba9942c7
+[+  0.2 s] status line: "Live updates start once the inbox exists."
+[+  4.4 s] console loaded; sockets open at the proxy: 1; queries so far 3
+[+  4.4 s] --- s1: socket killed, new sockets refused for 15 s
+[+  4.4 s] status line: "Live updates stopped (The socket has been closed.
+
+URL: ws://127.0.0.1"
+[+  9.8 s] tip D1 sent while the socket is down
+[+ 19.4 s] network restored (new sockets accepted again)
+[+ 49.6 s] FAIL s1 tip sent DURING the outage shows up with no refresh not shown within 30 s
+[+ 49.6 s] queries used by the catch-up: 0 (includes the tip read)
+[+ 55.0 s] tip D2 sent after the restore
+[+ 85.2 s] FAIL s1 tip sent AFTER the restore arrives not shown within 30 s
+[+ 85.2 s] console/page problems: newsroom console.error: WebSocket connection to 'ws://127.0.0.1:45317/' failed: Error during WebSocket handshake: Unexpected response code: 503 | newsroom console.error: [object Event] | newsroom console.error: WebSocket connection to 'ws://127.0.0.1:45317/' failed: Error during WebSocket handshake: Unexpected response code: 503 | newsroom console.error: [object Event] | newsroom console.error: WebSocket connection to 'ws://127.0.0.1:45317/' failed: Error during WebSocket handshake: Unexpected r
+[+ 85.2 s] proxy: 6 arkiv_query forwarded (600 units), 1 sockets accepted, 5 refused; notes: 20:05:04 ws client connected ; 20:05:04 dropping 1 socket(s)
+
+FAIL  s1 tip sent DURING the outage shows up with no refresh  (not shown within 30 s)
+FAIL  s1 tip sent AFTER the restore arrives  (not shown within 30 s)

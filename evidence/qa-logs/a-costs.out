@@ -1,0 +1,10 @@
+funder 3.999957999999916 GLM | demo sender 2.918529246983100496 GLM | Demo Desk 2.999850017999700036 GLM   (before)
+1. throwaway newsroom 0x3A3E324E0001162e6CeA6cF4a2ee3728Ba9942c7: ready in 15.4 s; demo sender paid 0.005021000000042 GLM (0.005 funding + the transfer's gas); the newsroom kept 0.004902183999804368 GLM, so creating the inbox cost it 0.000097816000195632 GLM
+2. one tip to the own inbox: demo sender paid 0.000132936000265872 GLM; send took 5.6 s
+   the newsroom tab showed the tip live, text identical
+3. one renew (Renew now): the newsroom paid 0.00002524000005048 GLM; lease "6 d 23 h" -> "6 d 23 h"
+4. one tip to the Demo Desk: demo sender paid 0.000132936000265872 GLM
+full judge run (newsroom + tip to own inbox + tip to Demo Desk) costs the demo key 0.005286872000573744 GLM; with 2.913242374982526752 GLM left it covers 551 runs
+queries that reached the public RPC: 10 arkiv_query (1000 units); other calls: {"arkiv_getBlockTiming":7,"arkiv_query":10,"eth_getBalance":4,"eth_fillTransaction":4,"eth_getTransactionCount":5,"eth_getBlockByNumber":10,"eth_maxPriorityFeePerGas":5,"eth_estimateGas":5,"eth_sendRawTransaction":5,"eth_getTransactionReceipt":15,"eth_blockNumber":14,"eth_getTransactionByHash":5,"eth_call":2}
+console/page errors: 0
+demo sender after: 2.913242374982526752 GLM | funder 3.999957999999916 GLM | Demo Desk 2.999850017999700036 GLM

@@ -1,0 +1,53 @@
+[+  0.0 s] build under test: new; fixture newsroom 0x3A3E324E0001162e6CeA6cF4a2ee3728Ba9942c7
+[+  0.2 s] status line: "Live updates start once the inbox exists."
+[+  4.6 s] status line: "Connecting to the live feed..."
+[+  5.0 s] status line: "Live: listening for new tips on a WebSocket. This page does not poll."
+[+  5.1 s] console loaded; sockets open at the proxy: 1; queries so far 4
+[+  5.1 s] --- s1: socket killed, new sockets refused for 15 s
+[+  5.1 s] PASS s1 status turned to "Reconnecting" after the drop after 0.0 s
+[+  5.2 s] status line: "Reconnecting: the live connection dropped and is being retried. Tips a"
+[+ 10.5 s] tip D1 sent while the socket is down
+[+ 20.1 s] network restored (new sockets accepted again)
+[+ 20.6 s] status line: "Live: listening for new tips on a WebSocket. This page does not poll."
+[+ 20.7 s] PASS s1 status is back to "Live" without any click 0.6 s after restore
+[+ 21.3 s] PASS s1 tip sent DURING the outage shows up with no refresh data-source=sweep, 0.6 s after restore
+[+ 21.3 s] queries used by the catch-up: 1 (includes the tip read)
+[+ 26.6 s] tip D2 sent after the restore
+[+ 26.6 s] PASS s1 tip sent AFTER the restore arrives data-source=live, 0.0 s
+[+ 26.6 s] --- s2: CDP offline for 15 s
+[+ 26.6 s] offline on; sockets at the proxy 1
+[+ 41.6 s] still offline after 15 s; sockets at the proxy 1; wsOpened total 2
+[+ 41.6 s] offline off
+[+ 47.1 s] PASS s2 tip sent after CDP offline appears with no refresh data-source=live, 0.0 s
+[+ 47.1 s] --- s3: socket silently dead (open, but nothing is delivered)
+[+ 52.4 s] tip D4 sent while the socket is silent (the page cannot hear about it)
+[+ 91.8 s] status line: "Reconnecting: the live connection dropped and is being retried. Tips a"
+[+ 91.8 s] PASS s3 heartbeat noticed the silent socket and showed "Reconnecting" 44.6 s after the freeze
+[+ 94.8 s] freeze lifted
+[+ 97.0 s] status line: "Live: listening for new tips on a WebSocket. This page does not poll."
+[+ 97.0 s] PASS s3 back to "Live" on its own 2.2 s after the unfreeze
+[+ 97.6 s] PASS s3 tip sent while silent shows up with no refresh data-source=sweep, 0.6 s
+[+102.9 s] PASS s3 next tip arrives data-source=live, 0.0 s
+[+102.9 s] sockets opened at the proxy during s3: 2
+[+102.9 s] --- s4: tab hidden for 31 s with a silent socket, then visible again
+[+108.1 s] tip D6 sent while the tab is hidden and the socket is silent (the page cannot hear about it)
+[+133.9 s] tab visible again after 31 s
+[+134.5 s] PASS s4 tip sent while hidden shows up after the tab is visible again, from the catch-up query before unhide: not shown; data-source=sweep, 0.6 s after unhide; queries 1
+[+134.5 s] freeze lifted
+[+134.6 s] status line: "Reconnecting: the live connection dropped and is being retried. Tips a"
+[+135.6 s] status line: "Live: listening for new tips on a WebSocket. This page does not poll."
+[+135.7 s] PASS s4 back to "Live" on its own 1.2 s after the unfreeze
+[+135.7 s] console/page problems: 15x newsroom console.error: WebSocket connection to 'ws://proxy/' failed: Error during WebSocket handshake: Unexpected response code: 503
+[+135.7 s] proxy: 16 arkiv_query forwarded (1600 units), 5 sockets accepted, 15 refused; notes: 21:02:06 ws client connected ; 21:02:06 dropping 1 socket(s) ; 21:02:21 ws client connected ; 21:03:34 ws client connected ; 21:03:36 dropping 1 socket(s) ; 21:03:36 ws client connected ; 21:04:16 dropping 1 socket(s) ; 21:04:16 ws client connected
+
+PASS  s1 status turned to "Reconnecting" after the drop  (after 0.0 s)
+PASS  s1 status is back to "Live" without any click  (0.6 s after restore)
+PASS  s1 tip sent DURING the outage shows up with no refresh  (data-source=sweep, 0.6 s after restore)
+PASS  s1 tip sent AFTER the restore arrives  (data-source=live, 0.0 s)
+PASS  s2 tip sent after CDP offline appears with no refresh  (data-source=live, 0.0 s)
+PASS  s3 heartbeat noticed the silent socket and showed "Reconnecting"  (44.6 s after the freeze)
+PASS  s3 back to "Live" on its own  (2.2 s after the unfreeze)
+PASS  s3 tip sent while silent shows up with no refresh  (data-source=sweep, 0.6 s)
+PASS  s3 next tip arrives  (data-source=live, 0.0 s)
+PASS  s4 tip sent while hidden shows up after the tab is visible again, from the catch-up query  (before unhide: not shown; data-source=sweep, 0.6 s after unhide; queries 1)
+PASS  s4 back to "Live" on its own  (1.2 s after the unfreeze)

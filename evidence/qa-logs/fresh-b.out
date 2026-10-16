@@ -1,0 +1,22 @@
+clone HEAD: c797c65; .env.local present: no
+npm ci                             exit 0  5.7 s
+    npm warn allow-scripts
+    npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+npm test                           exit 0  2.5 s
+    
+     Test Files  3 passed (3)
+          Tests  23 passed (23)
+       Start at  23:27:34
+       Duration  1.69s (tests 43%, import 30%, transform 26%, worker 1%)
+    
+npm run build                      exit 0  2.5 s
+    dist/assets/ccip-BSxIWc0L.js      2.83 kB │ gzip:   1.30 kB
+    dist/assets/index-Bq-HLeyP.js   409.50 kB │ gzip: 128.35 kB
+    
+    ✓ built in 674ms
+node scripts/secret-scan.mjs       exit 0  0.0 s
+    secret scan: SKIP (no .env.local, so there are no secrets to look for)
+npm run check:bundle               exit 0  0.2 s
+    
+    SKIP  bundle check: there is no .env.local, so there are no secret values to look for in dist/ (`npm run keys` creates it).
+dist: assets index.html 

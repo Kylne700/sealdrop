@@ -1,0 +1,10 @@
+browser firefox/153.4.0 (puppeteer-core 25.14.0, WebDriver BiDi), served from dist/ with the production CSP, public RPC
+PASS  home: one primary button leads to the newsroom page
+PASS  newsroom: funded, inbox created, live feed connected  (inbox ready in 15.9 s)
+PASS  source: sealed and sent with the demo key  (send took 5.6 s)
+PASS  newsroom tab shows the tip, decrypted, with no refresh  (data-source=live)
+PASS  ...and it came through the WebSocket
+PASS  Demo Desk: inbox found by creator + id
+PASS  Demo Desk: tip sent
+PASS  Firefox console and page errors
+whole judge path in Firefox: 30.8 s; arkiv_query calls 9 (900 units)
