@@ -5,7 +5,7 @@ import { blockToUnix, daysToBlocks, decodeInbox, encodeInbox, formatDuration, fo
 import { newBoxKeyPair } from '../src/crypto'
 
 const creator = '0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6'
-const inboxKey = '0x' + 'ab'.repeat(32)
+const inboxKey: `0x${string}` = `0x${'ab'.repeat(32)}`
 
 describe('inbox payload', () => {
   it('round-trips and exposes the public key', () => {

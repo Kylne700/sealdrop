@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 
 // BASE_PATH lets the same build run at the root of a domain or under /<repo>/ on GitHub Pages.
 // Routing is hash based, so no server rewrite rules are needed anywhere.

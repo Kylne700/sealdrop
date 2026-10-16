@@ -14,7 +14,7 @@ export const SEAL_OVERHEAD = HEADER + nacl.box.overheadLength
 /** Plaintext is padded up to one of these sizes so the ciphertext length leaks little. */
 const BUCKETS = [1024, 4096, 16384, 65536] as const
 const LEN_BYTES = 4
-export const MAX_MESSAGE_BYTES = BUCKETS[BUCKETS.length - 1] - LEN_BYTES
+export const MAX_MESSAGE_BYTES = BUCKETS[3] - LEN_BYTES
 
 export const newBoxKeyPair = (): BoxKeyPair => nacl.box.keyPair()
 export const boxKeyPairFromSecret = (secretKey: Uint8Array): BoxKeyPair => nacl.box.keyPair.fromSecretKey(secretKey)
