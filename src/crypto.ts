@@ -15,13 +15,14 @@ export const SEAL_OVERHEAD = HEADER + nacl.box.overheadLength
 const BUCKETS = [1024, 4096, 16384, 65536] as const
 const LEN_BYTES = 4
 export const MAX_MESSAGE_BYTES = BUCKETS[3] - LEN_BYTES
+/** The padding bucket (bytes) a message of this size is sealed into, or undefined if it does not fit. */
+export const bucketFor = (messageBytes: number) => BUCKETS.find((b) => b >= messageBytes + LEN_BYTES)
 
 export const newBoxKeyPair = (): BoxKeyPair => nacl.box.keyPair()
 export const boxKeyPairFromSecret = (secretKey: Uint8Array): BoxKeyPair => nacl.box.keyPair.fromSecretKey(secretKey)
 
 export function pad(message: Uint8Array): Uint8Array {
-  const need = message.length + LEN_BYTES
-  const bucket = BUCKETS.find((b) => b >= need)
+  const bucket = bucketFor(message.length)
   if (bucket === undefined) throw new RangeError(`message too large (${message.length} bytes, max ${MAX_MESSAGE_BYTES})`)
   const out = new Uint8Array(bucket)
   new DataView(out.buffer).setUint32(0, message.length)

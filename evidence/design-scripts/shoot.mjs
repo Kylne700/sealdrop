@@ -79,6 +79,13 @@ for (const st of STATES) {
       await sleep(150)
       const file = join(out, `${st.id}-${vp}-${theme}.png`)
       await page.screenshot({ path: file, fullPage: true })
+      const wide = await page.evaluate(() => {
+        const w = innerWidth, over = document.documentElement.scrollWidth - w
+        if (over <= 0) return ''
+        const who = [...document.body.querySelectorAll('*')].filter((e) => e.getBoundingClientRect().right > w + 0.5 && e.getClientRects().length).slice(0, 3).map((e) => `${e.tagName.toLowerCase()}.${e.className && e.className.baseVal === undefined ? e.className : ''}`)
+        return `${over}px wider than the viewport: ${who.join(', ')}`
+      })
+      if (wide) problems.push(`${st.id} ${vp} ${theme} overflow ${wide}`)
       execFileSync('magick', [file, '-dither', 'None', '-colors', '64', '-strip', '-define', 'png:compression-level=9', `PNG8:${file}`])
     }
   }

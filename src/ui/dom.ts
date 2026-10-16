@@ -15,7 +15,7 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, props: Record<s
 }
 
 export const link = (href: string, text: string) => h('a', { href, target: '_blank', rel: 'noopener noreferrer' }, text)
-export const short = (hex: string) => (hex.length > 14 ? `${hex.slice(0, 8)}...${hex.slice(-6)}` : hex)
+export const short = (hex: string) => (hex.length > 12 ? `${hex.slice(0, 6)}…${hex.slice(-4)}` : hex)
 export const kib = (bytes: number) => (bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KiB`)
 
 /** A status line for screen readers and the smoke test. kind 'error' uses role=alert. */
@@ -24,18 +24,80 @@ export function statusLine(testid = 'status') {
   return {
     el,
     info(text: string) { el.className = 'status'; el.setAttribute('role', 'status'); el.textContent = text },
+    busy(text: string) { el.className = 'status busy'; el.setAttribute('role', 'status'); el.textContent = text },
     error(text: string) { el.className = 'status error'; el.setAttribute('role', 'alert'); el.textContent = text },
     clear() { el.className = 'status'; el.textContent = '' },
   }
 }
 
-export function copyButton(getText: () => string, label = 'Copy') {
-  const b = h('button', { type: 'button', class: 'secondary' }, label)
+export function copyButton(getText: () => string, label = 'Copy', cls = 'secondary') {
+  const b = h('button', { type: 'button', class: cls }, label)
   b.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(getText()); b.textContent = 'Copied' } catch { b.textContent = 'Select and copy manually' }
+    try { await navigator.clipboard.writeText(getText()); b.textContent = 'Copied ✓' } catch { b.textContent = 'Select and copy manually' }
     setTimeout(() => (b.textContent = label), 1800)
   })
   return b
+}
+
+// ---- SVG, chips, bars, hex values ----------------------------------------------------------------------------
+const SVG_NS = 'http://www.w3.org/2000/svg'
+type SvgChild = Node | string | null | undefined | false
+
+/** SVG elements need their namespace; attributes only (CSS classes style them), never a style attribute (CSP). */
+export function svg<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> | null = null, ...children: SvgChild[]): SVGElementTagNameMap[K] {
+  const el = document.createElementNS(SVG_NS, tag)
+  for (const [k, v] of Object.entries(attrs ?? {})) el.setAttribute(k, String(v))
+  for (const c of children) if (c) el.append(c)
+  return el
+}
+
+const ICONS = {
+  copy: ['M9 9h11v11H9z', 'M5 15V5h10'],
+  check: ['M5 12.5l4.5 4.5L19 7.5'],
+} as const
+export const icon = (name: keyof typeof ICONS) =>
+  svg('svg', { viewBox: '0 0 24 24', class: 'icon', 'aria-hidden': 'true', focusable: 'false' }, ...ICONS[name].map((d) => svg('path', { d })))
+
+/** The brand mark (same drawing as in index.html), for empty states. */
+export const mark = () => svg('svg', { viewBox: '0 0 32 32', class: 'mark', 'aria-hidden': 'true', focusable: 'false' },
+  svg('rect', { class: 'mark-box', x: 3, y: 7, width: 26, height: 19, rx: 4.5 }), svg('path', { class: 'mark-flap', d: 'M5 10 16 18.5 27 10' }), svg('circle', { class: 'mark-seal', cx: 16, cy: 18.5, r: 3.6 }))
+
+/** A status pill. kind: live (teal, pulsing dot), ok (teal), neutral, warn (danger hue). */
+export const chip = (kind: 'live' | 'ok' | 'neutral' | 'warn', ...children: Child[]) =>
+  h('span', { class: `chip ${kind}` }, kind === 'live' ? h('span', { class: 'dot', 'aria-hidden': 'true' }) : null, ...children)
+
+/** Sets a bar's fill (0..1) through the CSSOM, which the production CSP allows (inline style attributes it does not). */
+export function setFill(barEl: Element, fraction: number) {
+  const f = Math.min(1, Math.max(0, Number.isFinite(fraction) ? fraction : 0))
+  ;(barEl.firstElementChild as HTMLElement | null)?.style.setProperty('--fill', `${Math.round(f * 100)}%`)
+}
+
+/** A decorative bar; the text next to it carries the value. */
+export function bar(fraction: number, cls = '') {
+  const el = h('span', { class: `bar ${cls}`.trim(), 'aria-hidden': 'true' }, h('i'))
+  setFill(el, fraction)
+  return el
+}
+
+/**
+ * A hex value (address, key, hash): mono, middle-truncated like 0x3A3E…42c7, the explorer link, a copy button.
+ * The whole value stays in the DOM (the hidden middle), in the title and for assistive technology; full=true prints it all.
+ */
+export function hex(value: string, o: { href?: string; label?: string; full?: boolean } = {}) {
+  const parts = value.length > 12 && !o.full
+    ? [h('span', { class: 'hex-head' }, value.slice(0, 6)), h('span', { class: 'hex-mid' }, value.slice(6, -4)), h('span', { class: 'hex-tail' }, value.slice(-4))]
+    : [value]
+  const v = o.href ? h('a', { class: 'hex-v', href: o.href, target: '_blank', rel: 'noopener noreferrer', title: value }, ...parts) : h('code', { class: 'hex-v', title: value }, ...parts)
+  const done = h('span', { class: 'vh', role: 'status' })
+  const copy = h('button', { type: 'button', class: 'icon-btn', title: 'Copy', 'aria-label': `Copy ${o.label ?? 'value'}` }, icon('copy'))
+  copy.addEventListener('click', async () => {
+    let ok = true
+    try { await navigator.clipboard.writeText(value) } catch { ok = false }
+    done.textContent = ok ? 'Copied' : 'Select and copy manually'
+    copy.replaceChildren(icon(ok ? 'check' : 'copy'))
+    setTimeout(() => { done.textContent = ''; copy.replaceChildren(icon('copy')) }, 1800)
+  })
+  return h('span', { class: o.full ? 'hex full' : 'hex' }, v, copy, done)
 }
 
 // Resources owned by the current page (WebSocket subscription, timers) are released when the route changes.

@@ -1,8 +1,8 @@
 // #/newsroom: create a throwaway newsroom (or use a wallet), open an inbox, receive and decrypt tips.
 import { formatEther, parseEther, type EIP1193Provider } from 'viem'
-import { DEMO_SENDER_ADDRESS, FAUCET_URL, PIN_DAYS, RENEW_BELOW_DAYS, addressUrl, entityUrl, ownerUrl } from '../config'
+import { DEMO_SENDER_ADDRESS, FAUCET_URL, INBOX_LIFETIME_DAYS, PIN_DAYS, RENEW_BELOW_DAYS, addressUrl, entityUrl, ownerUrl } from '../config'
 import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, type Timing } from '../codec'
-import { boxKeyPairFromSecret, fromB64, openText } from '../crypto'
+import { SEAL_OVERHEAD, boxKeyPairFromSecret, fromB64, openText } from '../crypto'
 import {
   balanceOf, burnTip, createInbox, explainError, findInbox, fundAccount, getTip, getTiming, inboxesDueForRenewal, injectedSigner, isOutOfFunds,
   localSigner, pinTip, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
@@ -13,7 +13,7 @@ import {
   downloadIdentity, forgetIdentity, getLastSeen, loadIdentity, newLocalIdentity, newWalletIdentity, parseIdentity,
   saveIdentity, setLastSeen, type Identity,
 } from '../store'
-import { copyButton, h, kib, link, onLeave, queriesPanel, runCleanups, short, statusLine } from '../ui/dom'
+import { bar, chip, copyButton, h, hex, kib, link, mark, onLeave, queriesPanel, runCleanups, statusLine } from '../ui/dom'
 import { rpcSettings } from '../ui/settings'
 
 /** About 16 writes. Below this a throwaway newsroom is topped up from the shared demo sender. */
@@ -68,7 +68,7 @@ function renderOnboarding(root: HTMLElement, again: () => void) {
       h('div', { class: 'card' },
         h('h2', null, 'My wallet'),
         h('p', null, 'Sign with an injected wallet on Arkiv Tiramisu. Your wallet address becomes the public $creator of the inbox.'),
-        h('button', { type: 'button', 'data-testid': 'use-wallet', disabled: !wallet(), onclick: useWallet }, wallet() ? 'Use my wallet' : 'No wallet found'),
+        h('button', { type: 'button', class: 'secondary', 'data-testid': 'use-wallet', disabled: !wallet(), onclick: useWallet }, wallet() ? 'Use my wallet' : 'No wallet found'),
       ),
       h('div', { class: 'card' },
         h('h2', null, 'Saved newsroom'),
@@ -96,10 +96,14 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
 
   const balanceEl = h('span', { 'data-testid': 'balance' }, 'checking...')
   const body = h('div')
-  const liveStatus = h('p', { class: 'live', 'data-testid': 'live-status', role: 'status' }, 'Live updates start once the inbox exists.')
+  const liveStatus = h('p', { class: 'live', 'data-testid': 'live-status', role: 'status' })
+  // The chip carries the state word; the hidden separator keeps the sentence whole for screen readers ("Live: listening ...").
+  const setLive = (kind: 'live' | 'neutral', word: string, sep: string, note: string) =>
+    liveStatus.replaceChildren(chip(kind, kind === 'neutral' ? h('span', { class: 'dot', 'aria-hidden': 'true' }) : null, word), h('span', { class: 'vh' }, sep), h('span', { class: 'live-note' }, note))
+  setLive('neutral', 'Live updates', ' ', 'start once the inbox exists.')
   const refreshBtn = h('button', { type: 'button', class: 'secondary', 'data-testid': 'refresh' }, 'Refresh (full sweep)')
   const tipList = h('ul', { class: 'tips', 'data-testid': 'tips' })
-  const emptyEl = h('p', { class: 'hint', 'data-testid': 'no-tips' }, 'No tips yet. Open your inbox link in another tab and send one.')
+  const emptyEl = h('div', { class: 'empty', 'data-testid': 'no-tips' }, mark(), h('strong', null, 'Waiting for tips.'), h('p', null, 'Share your inbox link. To try it yourself, open it in another tab and send one.'))
 
   // ---- signing --------------------------------------------------------------------------------------------
   let local: Signer | undefined
@@ -149,19 +153,24 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     const text = openText(tip.sealed, box)
     const mine = tip.owner.toLowerCase() === me
     const viaDemo = tip.creator.toLowerCase() === DEMO_SENDER_ADDRESS.toLowerCase()
+    const left = untilSeconds(tip.expiresAt)
+    const total = timing ? blockToUnix(tip.expiresAt, timing) - blockToUnix(tip.createdAt, timing) : 0
+    const bucket = tip.sealed.length - SEAL_OVERHEAD
+    const sized = [1024, 4096, 16384, 65536].includes(bucket) ? `${kib(tip.sealed.length)} sealed (${bucket / 1024} KiB bucket)` : `${kib(tip.sealed.length)} sealed`
     return h('li', { class: 'tip', 'data-testid': 'tip', 'data-source': source, 'data-key': tip.key },
       h('div', { class: 'meta' },
         h('strong', null, timing ? formatUtc(blockToUnix(tip.createdAt, timing)) : `block ${tip.createdAt}`),
-        ` . ${kib(tip.sealed.length)} sealed . deletes itself in ${formatDuration(untilSeconds(tip.expiresAt))} `,
+        chip('neutral', sized),
+        chip(left < 86400 ? 'warn' : 'neutral', `Expires in ${formatDuration(left)}`, total > 0 ? ' ' : null, total > 0 ? bar(left / total) : null),
         h('span', { class: 'badge' }, mine ? 'owned by you' : 'sender still owns it'),
       ),
       text === null
         ? h('p', { class: 'undecryptable', 'data-testid': 'tip-text' }, 'This entity could not be decrypted with your key. It is not a tip sealed for this inbox.')
         : h('p', { class: 'tip-text', dir: 'auto', 'data-testid': 'tip-text' }, text),
       h('p', { class: 'hint' },
-        '$creator ', link(addressUrl(tip.creator), short(tip.creator)),
+        '$creator ', hex(tip.creator, { href: addressUrl(tip.creator), label: 'creator address' }),
         viaDemo ? ' (the shared demo sender: it says nothing about who wrote this)' : ' (a wallet address, public)',
-        ' . ', link(entityUrl(tip.key), 'entity on Data Explorer'),
+        link(entityUrl(tip.key), 'entity on Data Explorer'),
       ),
       mine ? h('div', { class: 'actions' },
         h('button', { type: 'button', class: 'secondary', onclick: () => pin(tip) }, `Keep ${PIN_DAYS} more days`),
@@ -253,17 +262,14 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         }
       },
       onState: (state) => {
-        liveStatus.className = state === 'live' ? 'live' : 'live error'
-        liveStatus.textContent = state === 'live'
-          ? 'Live: listening for new tips on a WebSocket. This page does not poll.'
-          : 'Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now.'
+        if (state === 'live') setLive('live', 'Live', ': ', 'listening for new tips on a WebSocket. This page does not poll.')
+        else setLive('neutral', 'Reconnecting', ': ', 'the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now.')
       },
       onReconnect: catchUp,
       onError: (e) => status.error(`A live update could not be shown (${e.message}). Use Refresh to read the inbox.`),
     })
     onLeave(stop)
-    liveStatus.className = 'live'
-    liveStatus.textContent = 'Connecting to the live feed...'
+    setLive('neutral', 'Connecting', ' ', 'to the live feed...')
 
     // A tab that slept may have missed events; ask only for tips created since the last sweep.
     let hiddenAt = 0
@@ -347,13 +353,15 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       h('section', { class: 'inbox', 'data-testid': 'inbox' },
         h('h2', null, live.payload.name),
         h('p', { class: 'desc' }, live.payload.description || 'No description.'),
-        h('label', { for: 'inbox-link' }, 'Your inbox link: give it to sources'),
-        h('div', { class: 'row' }, field, copyButton(() => url)),
-        h('dl', null,
-          h('dt', null, '$creator'), h('dd', null, link(addressUrl(live.creator), live.creator)),
-          h('dt', null, '$owner'), h('dd', null, link(ownerUrl(live.owner), live.owner)),
-          h('dt', null, 'Inbox entity'), h('dd', null, link(entityUrl(live.key), live.key)),
-          h('dt', null, 'Lease'), h('dd', null, `alive for ${formatDuration(left)}${timing ? ` (until ${formatUtc(blockToUnix(live.expiresAt, timing))})` : ''}. It expires after 7 days; opening this console renews it.`, ' ', renew),
+        h('div', null,
+          h('label', { for: 'inbox-link' }, 'Your inbox link: give it to sources'),
+          h('div', { class: 'row linkrow' }, field, copyButton(() => url, 'Copy inbox link', 'big')),
+        ),
+        h('dl', { class: 'facts' },
+          h('dt', null, '$creator'), h('dd', null, hex(live.creator, { href: addressUrl(live.creator), label: 'creator address' })),
+          h('dt', null, '$owner'), h('dd', null, hex(live.owner, { href: ownerUrl(live.owner), label: 'owner address' })),
+          h('dt', null, 'Inbox entity'), h('dd', null, hex(live.key, { href: entityUrl(live.key), label: 'inbox entity key' })),
+          h('dt', null, 'Lease'), h('dd', null, `alive for ${formatDuration(left)}${timing ? ` (until ${formatUtc(blockToUnix(live.expiresAt, timing))})` : ''}. It expires after ${INBOX_LIFETIME_DAYS} days; opening this console renews it.`, bar(left / (INBOX_LIFETIME_DAYS * 86400), 'wide'), h('div', { class: 'row' }, renew)),
         ),
       ),
     )
@@ -385,7 +393,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     status.el,
     h('section', { class: 'me' },
       h('dl', null,
-        h('dt', null, 'Address'), h('dd', null, link(addressUrl(identity.address), identity.address), identity.kind === 'wallet' ? ' (your wallet)' : ' (throwaway, generated in this browser)'),
+        h('dt', null, 'Address'), h('dd', null, hex(identity.address, { href: addressUrl(identity.address), label: 'newsroom address' }), h('span', { class: 'hint' }, identity.kind === 'wallet' ? ' (your wallet)' : ' (throwaway, generated in this browser)')),
         h('dt', null, 'Balance'), h('dd', null, balanceEl, ' ', link(FAUCET_URL, 'faucet')),
       ),
       h('div', { class: 'row' },
@@ -402,7 +410,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       ),
     ),
     body,
-    h('section', { class: 'tips-section' }, h('h2', null, 'Tips'), liveStatus, h('div', { class: 'row' }, refreshBtn), emptyEl, tipList),
+    h('section', { class: 'tips-section' }, h('div', { class: 'tips-head' }, h('h2', null, 'Tips'), refreshBtn), liveStatus, emptyEl, tipList),
     queries.el,
     settings,
   )
