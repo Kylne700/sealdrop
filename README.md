@@ -146,8 +146,8 @@ The app is plain static files plus the three dependencies `@arkiv-network/sdk`, 
 **Demo mode** (no wallet for the source) needs a funded testnet-only sender key *at build time*. The key is not in this
 repository; it is injected from `.env.local` and exists only in the bundle you build.
 
-*What a judge needs, exactly.* Node 22.12 or newer (run on 22.23 and 24.18; `package.json` `engines` follows what vite, vitest and
-puppeteer-core declare) and npm. Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
+*What a judge needs, exactly.* Node 22 (22.12 or newer), 24, or 26 and newer (run on 22.23 and 24.18; `package.json` `engines` is vitest's
+range, the strictest of vite, vitest and puppeteer-core, so 23 and 25 fall outside it) and npm. Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
 (`npm run check:bundle` prints `SKIP`), but the site is wallet mode only: the shared-demo-key send and the throwaway
 newsroom answer that the build has no demo key. (npm 11.16 prints an `allow-scripts` warning about esbuild's postinstall
 during `npm ci`; ignore it, the install, tests and build pass without that script.) For demo mode put one line in
@@ -180,7 +180,7 @@ npm run build && npm run check:bundle
 | Unit tests (crypto round trip, padding, tamper rejection, codec) | `npm test` | console |
 | Integration against Tiramisu: create inbox, send, hand-over, WebSocket event, sweep, cursor, Lifetime Extension, pin, burn, forged-link refusal. Prints entity keys, tx hashes and explorer links. | `npm run integration` | [evidence/integration.txt](evidence/integration.txt) |
 | Headless Chromium on the built site: the 60-second judge path, wallet mode with a test wallet, forged link, Demo Desk. | `npm run build && npm run smoke` (set `CHROMIUM=/path/to/chromium` if it is not `/usr/bin/chromium`) | [evidence/smoke.txt](evidence/smoke.txt), [evidence/screens/](evidence/screens/) |
-| The same smoke checks against any served copy, here a `BASE_PATH=/sealdrop/` build behind a local static server rooted one level above `/sealdrop/` (how GitHub Pages serves it). The script writes `evidence/smoke-live.txt`; this run was renamed so that name stays free for the deployed site. | `SMOKE_URL=http://127.0.0.1:8765/sealdrop/ npm run smoke` | [evidence/smoke-subpath.txt](evidence/smoke-subpath.txt) |
+| The same smoke checks against any served copy, here a `BASE_PATH=/sealdrop/` build behind a local static server rooted one level above `/sealdrop/` (how GitHub Pages serves it). The script writes `evidence/smoke-live.txt`; this run was renamed so that name stays free for the deployed site. | `SMOKE_URL=http://127.0.0.1:<port>/sealdrop/ npm run smoke` | [evidence/smoke-subpath.txt](evidence/smoke-subpath.txt) |
 | Independent reader: decrypts the Demo Desk with no Sealdrop code. | `INBOX=0x65a2… OWNER=0x6a3C… BOX_SECRET=… node arkiv/examples/read-tips.mjs` | [evidence/read-tips.txt](evidence/read-tips.txt) |
 | Friction repro scripts | `arkiv/repro/*.mjs` | see [arkiv/friction.md](arkiv/friction.md) |
 | QA pass: GLM costs, fresh clone, Firefox, a phone-sized screen, a dropped WebSocket, error states, keyboard and labels, Fast 3G load, wallet-mode failures. | the scripts in [evidence/qa-scripts/](evidence/qa-scripts/) (they use absolute paths of the author's machine and a git-ignored fixture identity) | [evidence/qa.md](evidence/qa.md), [evidence/qa-logs/](evidence/qa-logs/) |
