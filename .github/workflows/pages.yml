@@ -1,0 +1,38 @@
+name: pages
+# Builds the static site with the shared demo-sender key taken from a repository secret and deploys it to GitHub Pages.
+# The key exists only in the Actions secret and in the deployed bundle, never in git.
+# One-time setup: gh secret set VITE_DEMO_SENDER_PRIVATE_KEY, and Settings > Pages > Source: GitHub Actions.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+          VITE_DEMO_SENDER_PRIVATE_KEY: ${{ secrets.VITE_DEMO_SENDER_PRIVATE_KEY }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v5

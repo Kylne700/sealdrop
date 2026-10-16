@@ -15,6 +15,7 @@ appended to as the build goes on; the last section lists what was checked and fo
 | F3 | SDK validator vs engine | Medium | The SDK accepts uppercase attribute names and its error text lists `A-Z` as valid; the engine rejects them |
 | F4 | Fundamentals page | Low | "Every other transaction reverts" is not what happens for a plain GLM transfer |
 | F5 | Faucet | Low | Only usable from an interactive browser session, no scriptable path for CI or agents |
+| F6 | SDK writes from one account | High | Two overlapping batches: one fails before broadcast with an unhelpful error, or both report success with the same tx hash and one write is lost |
 
 ---
 
@@ -156,6 +157,42 @@ this flow. I claimed once and did not retry.
 
 **Suggested fix.** A documented, rate-limited faucet API (or CLI) for test automation, or a line in the
 docs saying the Hub login and Cap widget are browser-only.
+
+---
+
+## F6. Two batches from one account at the same time: failures before broadcast, and one write that silently vanishes
+
+**Expected.** Two `predictEntityKeys` + `executeBatch` calls started together from the same account either both
+succeed with different entities, or one fails with an error that says why. This is what a shared sender key
+(Sealdrop's demo mode, a relayer) does whenever two people send at once.
+
+**Actual.** `arkiv/repro/f6-concurrent-batches.mjs` starts two such batches with `Promise.all`. Over 6 runs on
+Tiramisu:
+
+* 5 of 6 runs: one call failed before broadcast with `EntityMutationError: Transaction failed: Execution error
+  without revert data`, whose cause is `Missing or invalid parameters.` (no `txHash`). Nothing in the message
+  mentions a nonce or a concurrent call.
+* 1 of 6 runs: **both calls resolved successfully with the same transaction hash**,
+  `0x049a0c7803ad264ea427d76be321628fbd2b5ec3623f6c8e390f8aa5d451c173` (block 660781), and one entity,
+  `0xc8bede00...b346`. Two writes were requested, one exists, and the SDK reported success for both. A caller that
+  trusts the return value has lost a message.
+* In the integration test the retries of such a failure also produced an on-chain revert (`no entity 0x...: it may
+  have been deleted, or have expired ... "execute" reverted`), which is a transaction that cost gas.
+
+I did not find out which layer is responsible. My guess, unverified, is that both calls read the same pending nonce,
+so the second transaction replaces the first and `waitForTransactionReceipt` reports the replacement for both
+callers. The `predictEntityKeys` result depends on the same state, which would explain the second symptom.
+
+**Reproduce.** `PRIVATE_KEY=0x... node arkiv/repro/f6-concurrent-batches.mjs` (a funded Tiramisu key; the recipient needs
+no funds). Result varies from run to run, as above.
+
+**What Sealdrop does about it.** `sendTip` re-predicts the key on every attempt, reads the entity back (4 tries, 400 ms
+apart), compares its payload with the bytes it sent, and treats a mismatch as "replaced by a concurrent transaction"
+and retries with a bounded back-off. See `sendTip` in [`src/arkiv.ts`](../src/arkiv.ts).
+
+**Suggested fix.** The SDK serialises writes per wallet client (a nonce queue), or `executeBatch` verifies that the
+receipt's hash is the hash it sent and throws when a transaction was replaced. Either way the error for the
+overlapping case should say "another transaction from this account was pending".
 
 ---
 
