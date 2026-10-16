@@ -36,6 +36,8 @@ export async function installWallet(page: Page, privateKey: Hex) {
         return JSON.stringify(await rpc(method, params))
     }
   })
+  // tsx compiles with esbuild's keepNames, which wraps functions in __name(); the page has no such helper.
+  await page.evaluateOnNewDocument('globalThis.__name = (fn) => fn')
   await page.evaluateOnNewDocument(() => {
     const w = window as unknown as { __walletCall: (m: string, p: string) => Promise<string>; ethereum?: unknown }
     const listeners: Record<string, ((...a: unknown[]) => void)[]> = {}

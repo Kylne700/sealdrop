@@ -12,7 +12,7 @@ import { INBOX_CONTENT_TYPE, TIP_CONTENT_TYPE, daysToBlocks, decodeInbox, encode
 // ---- clients ----------------------------------------------------------------------------------------
 
 /** Cost units the public RPC reports for the queries this page has run (headers `Arkiv-Cost` and `RateLimit`). */
-export const budget = { spent: 0, queries: 0, limit: 0, remaining: 0 }
+export const budget = { spent: 0, queries: 0 }
 
 /** Thrown instead of waiting: see failFast. */
 export class RateLimitedError extends Error {
@@ -30,8 +30,6 @@ const failFast: typeof fetch = async (input, init) => {
   const res = await fetch(input, init)
   const cost = Number(res.headers.get('arkiv-cost'))
   if (cost > 0) { budget.spent += cost; budget.queries++ }
-  const m = /limit=(\d+), remaining=(\d+)/.exec(res.headers.get('ratelimit') ?? '')
-  if (m && cost > 0) { budget.limit = Number(m[1]); budget.remaining = Number(m[2]) }
   if (res.status === 429) throw new RateLimitedError(Number(res.headers.get('retry-after')) || 0)
   return res
 }

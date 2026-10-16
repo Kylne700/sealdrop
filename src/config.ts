@@ -23,6 +23,8 @@ export const DEFAULT_TIP_DAYS = 14
 export const PIN_DAYS = 30
 
 export const PAGE_SIZE = 200
+/** Cost units the public RPC lets an anonymous client spend per window. Read off a 429 response, not documented (friction F7). */
+export const ANON_BUDGET_UNITS = 10_000
 /** What a throwaway newsroom is given by the shared demo key (about 40 writes). */
 export const FUND_AMOUNT_GLM = '0.005'
 

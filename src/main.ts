@@ -1,6 +1,6 @@
 import './style.css'
 import { parseSendHash } from './codec'
-import { DEMO_DESK, REPO_URL } from './config'
+import { ANON_BUDGET_UNITS, DEMO_DESK, REPO_URL } from './config'
 import { DESK_ADDRESS } from './env'
 import { budget } from './arkiv'
 import { h, runCleanups } from './ui/dom'
@@ -33,6 +33,6 @@ route()
 const budgetEl = document.getElementById('budget')
 setInterval(() => {
   if (budgetEl && budget.queries > 0) {
-    budgetEl.textContent = `Public RPC query budget used by this tab: ${budget.spent} units in ${budget.queries} queries${budget.limit ? ` (${budget.remaining} of ${budget.limit} left)` : ''}.`
+    budgetEl.textContent = `Public RPC: this tab has made ${budget.queries} queries (${budget.spent} cost units). The anonymous allowance is about ${ANON_BUDGET_UNITS} units per window; live tips arrive over a WebSocket and cost none.`
   }
 }, 1000)

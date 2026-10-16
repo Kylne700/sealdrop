@@ -105,6 +105,7 @@ try {
   await fundAccount(localSigner(needKey('VITE_DEMO_SENDER_PRIVATE_KEY')), walletAccount.address, '0.003')
   await W.goto(inboxLink)
   await W.waitForSelector('[data-testid=inbox]')
+  check(await W.$eval('[data-testid=mode-wallet]', (el) => !(el as HTMLInputElement).disabled), 'wallet mode is offered when an EIP-1193 wallet is injected')
   await W.click('[data-testid=mode-wallet]')
   const text2 = `SYNTHETIC TEST TIP (smoke run, wallet mode ${new Date().toISOString()}): sent through an injected wallet.`
   await W.type('[data-testid=message]', text2)

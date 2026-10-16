@@ -43,7 +43,7 @@ const cases = [
   ['inboxes, 5 rows, key only', "type = str('inbox') AND app = str('sealdrop-v1')", { limit: '0x5', select: KEY_ONLY }],
   ['inboxes, 5 rows, with payload', "type = str('inbox') AND app = str('sealdrop-v1')", { limit: '0x5', select: WITH_PAYLOAD }],
   ['one creator, key only', `type = str('inbox') AND app = str('sealdrop-v1') AND $creator = addr(${DESK})`, { limit: '0x14', select: KEY_ONLY }],
-  ['tips, 200 rows, with payload', "type = str('tip') AND app = str('sealdrop-v1')", { limit: '0xc8', select: WITH_PAYLOAD }],
+  ['tips, 20 rows, with payload', "type = str('tip') AND app = str('sealdrop-v1')", { limit: '0x14', select: WITH_PAYLOAD }],
 ]
 const pick = (h, re) => [...h.entries()].filter(([k]) => re.test(k)).map(([k, v]) => `${k}: ${v}`).join(' | ')
 

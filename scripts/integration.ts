@@ -6,7 +6,7 @@ import { execSync } from 'node:child_process'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { formatEther, type Hex } from 'viem'
 import { generatePrivateKey } from 'viem/accounts'
-import { CHAIN_ID, FUND_AMOUNT_GLM, RPC_HTTP, addressUrl, entityUrl, txUrl } from '../src/config'
+import { ANON_BUDGET_UNITS, CHAIN_ID, FUND_AMOUNT_GLM, RPC_HTTP, addressUrl, entityUrl, txUrl } from '../src/config'
 import { blockToUnix, formatUtc, inboxPublicKey, newInboxId } from '../src/codec'
 import { newBoxKeyPair, openText, sealText } from '../src/crypto'
 import {
@@ -172,7 +172,7 @@ async function main() {
   const senderAfter = await balanceOf(reader, demo.address)
   log(`  demo sender spent ${glm(senderBefore - senderAfter)} (incl. ${FUND_AMOUNT_GLM} GLM given to the throwaway newsroom)`)
   log(`  newsroom left     ${glm(await balanceOf(reader, newsroom.address))}`)
-  log(`  public RPC query budget used by this run: ${budget.spent} cost units over ${budget.queries} costed queries (${budget.remaining} of ${budget.limit} left in the window)`)
+  log(`  public RPC query budget used by this run: ${budget.spent} cost units over ${budget.queries} costed queries (anonymous allowance: about ${ANON_BUDGET_UNITS} units per window)`)
   log(`  retries over the whole run: ${retries.length === 0 ? 'none' : retries.length}`)
   log(`  checks: ${passed} passed, ${failed} failed, ${((Date.now() - start) / 1000).toFixed(1)} s`)
   log('  Entities above expire on their own (inbox 7 days, tips 1 to 30 days); the transaction links stay valid after that.')
