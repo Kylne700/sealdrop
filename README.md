@@ -146,7 +146,8 @@ The app is plain static files plus the three dependencies `@arkiv-network/sdk`, 
 **Demo mode** (no wallet for the source) needs a funded testnet-only sender key *at build time*. The key is not in this
 repository; it is injected from `.env.local` and exists only in the bundle you build.
 
-*What a judge needs, exactly.* Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
+*What a judge needs, exactly.* Node 22.12 or newer (run on 22.23 and 24.18; `package.json` `engines` follows what vite, vitest and
+puppeteer-core declare) and npm. Without `.env.local`, `npm ci`, `npm test`, `npm run build` and `npm run dev` all work
 (`npm run check:bundle` prints `SKIP`), but the site is wallet mode only: the shared-demo-key send and the throwaway
 newsroom answer that the build has no demo key. (npm 11.16 prints an `allow-scripts` warning about esbuild's postinstall
 during `npm ci`; ignore it, the install, tests and build pass without that script.) For demo mode put one line in
