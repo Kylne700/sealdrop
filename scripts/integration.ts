@@ -148,7 +148,10 @@ async function main() {
   const burned = await burnTip(newsroom, a.entityKey)
   log(`  burn tx ${burned.txHash}\n  ${txUrl(burned.txHash)}`)
   check('burned tip is gone', (await getTip(reader, a.entityKey, [inbox.key], 1)) === null)
-  check('sweep now returns 2 tips', (await sweepTips(reader, inbox.key)).tips.length === 2)
+  const owned = await sweepTips(reader, inbox.key, { owner: newsroom.address })
+  log(`  query (newsroom view, ownedBy): ${owned.query}`)
+  check('sweep for tips owned by the newsroom returns 2 tips', owned.tips.length === 2, `${owned.tips.length}`)
+  check('sweep for tips owned by the sender returns none (everything was handed over)', (await sweepTips(reader, inbox.key, { owner: demo.address })).tips.length === 0)
 
   step('9. read without Sealdrop: raw JSON-RPC arkiv_query, no SDK and no app backend')
   const res = await fetch(RPC_HTTP, {

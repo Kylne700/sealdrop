@@ -1,0 +1,88 @@
+:root {
+  color-scheme: light dark;
+  --bg: #fbfaf7;
+  --fg: #16181d;
+  --muted: #4a505c;
+  --card: #ffffff;
+  --line: #c9ccd3;
+  --accent: #0b5cad;
+  --accent-fg: #ffffff;
+  --danger: #a1181d;
+  --ok: #176334;
+  font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121418;
+    --fg: #f2f3f5;
+    --muted: #b4bac5;
+    --card: #1b1e24;
+    --line: #3a3f4a;
+    --accent: #7db7f5;
+    --accent-fg: #07121f;
+    --danger: #ff8d90;
+    --ok: #7fd9a0;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.top { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: baseline; justify-content: space-between; max-width: 52rem; margin: 0 auto; padding: 1rem 1rem .5rem; }
+.brand { font-weight: 700; font-size: 1.3rem; text-decoration: none; color: var(--fg); }
+nav { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; }
+main, footer { max-width: 52rem; margin: 0 auto; padding: 0 1rem 2rem; }
+footer { border-top: 1px solid var(--line); padding-top: 1rem; color: var(--muted); font-size: .9rem; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 1.2rem 0 .6rem; }
+h2 { font-size: 1.25rem; margin: 1.4rem 0 .4rem; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+.hint { color: var(--muted); font-size: .92rem; }
+
+.cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin: 1.2rem 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: .6rem; padding: 1rem; }
+.card h2 { margin-top: 0; }
+
+button, .button {
+  display: inline-block; min-height: 2.75rem; padding: .55rem 1rem; border: 2px solid var(--accent); border-radius: .5rem;
+  background: var(--accent); color: var(--accent-fg); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+button.secondary { background: transparent; color: var(--accent); }
+button.danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+button:disabled { opacity: .55; cursor: not-allowed; }
+
+input[type='text'], input[type='url'], textarea, select, input[type='file'] {
+  display: block; width: 100%; max-width: 100%; padding: .5rem .6rem; margin: .25rem 0 .75rem; font: inherit;
+  color: var(--fg); background: var(--card); border: 1px solid var(--line); border-radius: .4rem;
+}
+textarea { resize: vertical; }
+label { font-weight: 600; }
+fieldset { border: 1px solid var(--line); border-radius: .5rem; margin: .5rem 0 1rem; }
+fieldset div { margin: .4rem 0; }
+.row { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; }
+.row input[type='text'] { flex: 1 1 18rem; margin: 0; }
+.row select { width: auto; margin: 0; }
+
+.status { min-height: 1.4rem; margin: .5rem 0; color: var(--muted); }
+.status.error { color: var(--danger); font-weight: 600; border-left: 4px solid var(--danger); padding-left: .6rem; }
+.live { color: var(--ok); font-size: .95rem; }
+.live.error { color: var(--danger); font-weight: 600; }
+
+dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1rem; margin: .6rem 0; }
+dt { font-weight: 600; }
+dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 36rem) { dl { grid-template-columns: 1fr; } dd { margin-bottom: .4rem; } }
+
+.inbox, .result, .tip, .me { background: var(--card); border: 1px solid var(--line); border-radius: .6rem; padding: .8rem 1rem; margin: 1rem 0; }
+.tips { list-style: none; padding: 0; }
+.tip .meta { color: var(--muted); font-size: .92rem; }
+.tip-text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1.05rem; margin: .5rem 0; }
+.undecryptable { color: var(--danger); }
+.badge { display: inline-block; padding: 0 .5rem; border: 1px solid var(--line); border-radius: 1rem; font-size: .8rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .5rem; }
+
+.queries-panel, .settings, .world-panel { margin: 1rem 0; border-top: 1px solid var(--line); padding-top: .5rem; }
+summary { cursor: pointer; font-weight: 600; }
+.queries { padding-left: 1.1rem; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; overflow-wrap: anywhere; word-break: break-all; }
+.world { padding-left: 1.1rem; overflow-wrap: anywhere; }

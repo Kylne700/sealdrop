@@ -241,15 +241,15 @@ export function sendTip(reader: Reader, signer: Signer, inbox: InboxView, sealed
     const entityKey = result.createdEntities[0] as Hex
     // Two sends with the same nonce can replace each other and both callers get the survivor's receipt.
     // Reading the tip back and comparing the bytes catches a write that was silently dropped.
-    let stored: { payload?: Uint8Array } | null = null
+    let stored: { payload?: Uint8Array; expiresAt?: bigint } | null = null
     for (let i = 0; i < 4 && !stored; i++) {
       if (i) await sleep(400)
-      stored = (await reader.http.getEntity(entityKey).catch(() => null)) as { payload?: Uint8Array } | null
+      stored = (await reader.http.getEntity(entityKey).catch(() => null)) as { payload?: Uint8Array; expiresAt?: bigint } | null
     }
     if (!stored?.payload || stored.payload.length !== sealed.length || !stored.payload.every((b, i) => b === sealed[i])) {
       throw new Error('This tip was replaced by a concurrent transaction from the same sender key')
     }
-    return { entityKey, txHash: result.txHash }
+    return { entityKey, txHash: result.txHash, expiresAt: stored.expiresAt }
   })
 }
 
@@ -265,10 +265,19 @@ async function allPages(first: () => Promise<{ entities: readonly unknown[]; cur
 
 const tipFilter = (inboxKey: Hex) => and(eq('type', 'tip'), eq('app', APP), eq('inbox', keyAttr(inboxKey)))
 
-/** Full sweep: every tip that references this inbox, cursor-paginated 200 at a time. */
-export function sweepTips(reader: Reader, inboxKey: Hex, opts: { maxPages?: number; pageSize?: number } = {}): Promise<{ tips: TipView[]; query: string; truncated: boolean; pages: number }> {
-  const { maxPages = 10, pageSize = PAGE_SIZE } = opts
-  const builder = reader.http.select(TIP_SELECT).where(tipFilter(inboxKey)).limit(pageSize)
+/** The tip query for one inbox. With `owner` it only matches tips already handed to that address ($owner). */
+const tipQuery = (reader: Reader, inboxKey: Hex, owner?: Address) => {
+  const builder = reader.http.select(TIP_SELECT).where(tipFilter(inboxKey))
+  return owner ? builder.ownedBy(owner) : builder
+}
+
+/**
+ * Full sweep: every tip that references this inbox, cursor-paginated 200 at a time. The newsroom console
+ * passes `owner`, so entities that merely point at the inbox without being handed over never show up.
+ */
+export function sweepTips(reader: Reader, inboxKey: Hex, opts: { maxPages?: number; pageSize?: number; owner?: Address } = {}): Promise<{ tips: TipView[]; query: string; truncated: boolean; pages: number }> {
+  const { maxPages = 10, pageSize = PAGE_SIZE, owner } = opts
+  const builder = tipQuery(reader, inboxKey, owner).limit(pageSize)
   const query = builder.toString()
   return restartOnCursorError(async () => {
     const rows: Row[] = []
@@ -292,13 +301,13 @@ export function sweepTips(reader: Reader, inboxKey: Hex, opts: { maxPages?: numb
  * the SDK builder refuses it (friction F1), so the clause is appended to the builder's query string
  * and sent through client.query().
  */
-export function tipsSince(reader: Reader, inboxKey: Hex, sinceBlock: bigint, maxPages = 10): Promise<{ tips: TipView[]; query: string }> {
-  const query = `${tipFilter(inboxKey).toString()} AND $createdAt >= u64(${sinceBlock})`
+export function tipsSince(reader: Reader, inboxKey: Hex, sinceBlock: bigint, opts: { maxPages?: number; owner?: Address } = {}): Promise<{ tips: TipView[]; query: string }> {
+  const query = `${tipQuery(reader, inboxKey, opts.owner).toString()} AND $createdAt >= u64(${sinceBlock})`
   return restartOnCursorError(async () => {
     const { rows } = await allPages(
       () => reader.http.query(query, { select: TIP_SELECT, limit: PAGE_SIZE }),
       (cursor) => reader.http.query(query, { select: TIP_SELECT, limit: PAGE_SIZE, cursor }),
-      maxPages,
+      opts.maxPages ?? 10,
     )
     return { tips: rows.map(toTip).filter((t): t is TipView => t !== null), query }
   })

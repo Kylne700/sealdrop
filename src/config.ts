@@ -36,6 +36,12 @@ export const DEMO_DESK = {
   inboxId: 'demo-desk',
 } as const
 
+/** Public address of the shared demo sender (its key ships in the build on purpose, see README). */
+export const DEMO_SENDER_ADDRESS = '0xa05d5Bd99440d95526120062364518ddfe11797F'
+
+/** Where the source lives; change when the repository is published under another name. */
+export const REPO_URL = 'https://github.com/Kylne700/sealdrop'
+
 export const txUrl = (hash: string) => `${EXPLORER}/tx/${hash}`
 export const addressUrl = (address: string) => `${EXPLORER}/address/${address}`
 export const entityUrl = (key: string) => `${DATA_EXPLORER}/entity/${key}`
