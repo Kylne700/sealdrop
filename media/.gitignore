@@ -1,0 +1,4 @@
+# Video files and raw takes are not committed: the lead decides where the video is hosted.
+*.mp4
+*.webm
+raw/
