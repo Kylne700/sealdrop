@@ -16,6 +16,8 @@ Commands (<clone> = a clone, <h> = the harness copy, <dist> = <out>/dist that sc
 Final unfiltered run on d2f092c (screens-summary.txt): 76 states, 304 screenshots.
   axe: 0 violations in 0 of 300 combinations (1280 and 390 px, light and dark); horizontal overflow 0; clipped text 0; text in scrolling containers 0;
   contrast below AA 0; console or page errors 0; UNREACHED states 0; FAILED steps 2.
+  76 states x 4 = 304 combinations; the 300 are all but state 80 (the no-JS page): no script runs there, so it has no axe, overflow or contrast measure and was only
+  viewed as images: the four shots after the change (1280 and 390 px, light and dark) show the notice with about 24 px of room above the footer rule.
   The 2 FAILED steps are 43f and 44f: 'The "path" argument must be of type string ... Received undefined'. Cause: those two probe steps write to the env var
   FOCUS_OUT, which screens-r2.sh does not set. A harness problem, not the app. Re-run of states 43 and 44 with FOCUS_OUT set, on both builds: no failure,
   and after the click the focus is on the enabled "Renew now" button both before and after:
@@ -28,7 +30,8 @@ Final unfiltered run on d2f092c (screens-summary.txt): 76 states, 304 screenshot
 Before and after on the 21 states that were shot on both builds (15 in the first run, 6 in a second one), from the text dumps (text/) and the PNG sizes:
   text identical (10): 03 20 70 80 30 31 32 33 55 56
   text changed (11), each on purpose: 29 39 75 76 (I4 faucet), 36 38 41 45 (L1 one next step), 71 (L3), 34 35 (S3 row text)
-  page height equal in all four combinations for the success screens 30 31 32 33 55 56 and for 80 (no-JS) and 75.
+  page height equal in all four combinations for the success screens 30 31 32 33 55 56 and for 75. State 80 (no-JS) is exactly the viewport high (1280 x 800,
+  390 x 844) before and after, so the L4 padding above the footer rule shows only in the composites, not in the height.
   page height changed only where an item touched the page, light theme, as measured:
     03 onboarding 1280 px: 815 -> 929 px (L2: the third card is on a second row, the button has 1 line instead of 3); 390 px unchanged
     70 storage blocked 1280 px: 909 -> 1022 px (the same onboarding block)

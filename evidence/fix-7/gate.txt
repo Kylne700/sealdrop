@@ -1,6 +1,7 @@
-# Gate on d2f092c plus the evidence of this stage (run 2026-10-18 00:20 local): node scripts/secret-scan.mjs && npm ci && npm test && npm run typecheck && npm run build && npm run check:bundle -> exit 0
+# Gate run on the committed tree 66a014e (src/ is unchanged since d2f092c; evidence/fix-7 is tracked now, so the secret scan covers it), 2026-10-18 local: node scripts/secret-scan.mjs && npm ci && npm test && npm run typecheck && npm run build && npm run check:bundle -> exit 0
+# An earlier run (before the evidence was committed) gave the same test result; its secret scan could not see the untracked evidence files, this one can.
 secret scan: clean (4 secrets checked against tracked and staged files)
-added 83 packages, and audited 84 packages in 3s
+added 83 packages, and audited 84 packages in 2s
 30 packages are looking for funding
   run `npm fund` for details
 found 0 vulnerabilities
@@ -24,7 +25,7 @@ dist/assets/index-BaJkchLz.css   17.72 kB │ gzip:   4.66 kB
 dist/assets/native-BKj27wfc.js    0.30 kB │ gzip:   0.17 kB
 dist/assets/ccip-MvAwbCwf.js      2.83 kB │ gzip:   1.30 kB
 dist/assets/index-DtFqjDDS.js   428.61 kB │ gzip: 134.91 kB
-✓ built in 155ms
+✓ built in 148ms
 > sealdrop@0.1.0 check:bundle
 > node scripts/check-bundle.mjs
 PASS  dist/ has 6 files
