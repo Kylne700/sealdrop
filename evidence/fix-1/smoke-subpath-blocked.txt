@@ -1,0 +1,12 @@
+Subpath smoke (BASE_PATH=/sealdrop/), 2 runs at ~07:06 and ~07:20 UTC: FAIL at create-inbox because the public RPC budget was spent (429; the same happens on 3e4fd45, checked on the mock with inbox=limited).
+serving http://127.0.0.1:33975/sealdrop/
+Sealdrop smoke run 2026-10-17T07:10:15.345Z  Chromium Chrome/154.0.8037.92  served from http://127.0.0.1:33975/sealdrop/
+PASS  faked 429 on every query: the send page says the free budget is used up and offers Settings, after 0.6 s  (The free query budget of the public Arkiv RPC is used up. Wait a little, or ente)
+PASS  first load of #/newsroom: the page does not grab focus and the title names the page  (focus on body, hash #/newsroom, title "Newsroom console: Sealdrop")
+PASS  the skip link is Tab stop 1 and is on screen once it has focus  (Skip to content, top 8 px)
+PASS  Enter on the skip link puts focus on <main> and leaves the location alone  (focus on main, hash #/newsroom, title "Newsroom console: Sealdrop")
+PASS  route change to the start page: focus is on its h1 and the title names the page  (focus on h1, hash #/, title "Sealdrop: an anonymous tip line with no server")
+PASS  Back: focus is on the newsroom h1 and the title names the page  (focus on h1, hash #/newsroom, title "Newsroom console: Sealdrop")
+FAIL  step "open the newsroom page and create a throwaway newsroom": Waiting for selector `[data-testid=create-inbox]` failed
+smoke: 1 failure(s)
+sub-exit=1
