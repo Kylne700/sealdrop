@@ -34,7 +34,7 @@ const failFast: typeof fetch = async (input, init) => {
   if (res.status === 429) throw new RateLimitedError(Number(res.headers.get('retry-after')) || 0)
   return res
 }
-const httpTransport = (url: string) => http(url, { fetchFn: failFast, timeout: 20_000, retryCount: 1 })
+const httpTransport = (url: string) => http(url, { fetchFn: failFast, timeout: 20_000, retryCount: 1 }) // reads only: viem sends each broadcast with retryCount 0, so a lost answer is not re-sent (test/fix5.test.ts)
 
 export type Reader = { http: PublicArkivClient; ws: () => PublicArkivClient; dropWs: () => void }
 

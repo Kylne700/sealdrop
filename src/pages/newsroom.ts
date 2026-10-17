@@ -5,7 +5,7 @@ import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, k
 import { SEAL_OVERHEAD, boxKeyPairFromSecret, fromB64, openText, sealedDigest } from '../crypto'
 import {
   balanceOf, burnTip, createInbox, explainError, findInbox, fundAccount, getTip, getTiming, inboxesDueForRenewal, injectedSigner, isOutOfFunds,
-  localSigner, pinTip, rateLimit, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
+  localSigner, mayHaveBeenSent, pinTip, rateLimit, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
 } from '../arkiv'
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
@@ -18,7 +18,9 @@ import { rpcSettings } from '../ui/settings'
 
 /** About 16 writes. Below this a throwaway newsroom is topped up from the shared demo sender. */
 const MIN_BALANCE = parseEther('0.002')
-const wallet = () => (window as unknown as { ethereum?: EIP1193Provider }).ethereum
+/** A renewal sets the expiry to now + 7 days, so a second one does no harm. Not "check the expiry": after this error the Lease line still shows the one read before. */
+const RENEWAL_UNKNOWN = 'Whether the lease was renewed is unknown. "Renew now" under Lease renews it, and a second renewal does no harm.'
+const wallet =() => (window as unknown as { ethereum?: EIP1193Provider }).ethereum
 
 export function renderNewsroom(root: HTMLElement) {
   document.title = 'Newsroom console: Sealdrop'
@@ -291,11 +293,12 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     if (listening) return
     listening = true
     let retry: ReturnType<typeof setTimeout> | undefined
+    let failures = 0 // catch-ups scheduled since the last one that worked: each costs queries, so a long outage is retried less and less often
     onLeave(() => clearTimeout(retry))
-    /** One pending catch-up at a time, however many reads fail: when the query budget renews, or in 20 s after any other failure. */
+    /** One pending catch-up at a time, however many reads fail: when the query budget renews, or after any other failure in 20 s, doubling to 5 min. */
     const catchUpLater = (e: unknown) => {
       const limited = rateLimit(e)
-      retry ??= setTimeout(() => { retry = undefined; void catchUp() }, limited ? (Math.max(60, limited.retryAfterSeconds) + 5) * 1000 : 20_000)
+      retry ??= setTimeout(() => { retry = undefined; void catchUp() }, limited ? (Math.max(60, limited.retryAfterSeconds) + 5) * 1000 : Math.min(300_000, 20_000 * 2 ** failures++))
     }
     // Tips created since the last sweep, read in one query. Used after a long sleep and after a reconnect, because events are not replayed.
     const catchUp = async () => {
@@ -307,6 +310,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         timing = t
         addTips(r.tips, 'sweep')
         setLastSeen(live.key, t.head)
+        failures = 0
         if ([stale, 'No tips yet.'].includes(status.el.textContent ?? '')) status.info(tips.size ? `${tips.size} tip${tips.size === 1 ? '' : 's'} on Arkiv.` : 'No tips yet.')
       } catch (e) {
         catchUpLater(e)
@@ -417,6 +421,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
 
   /** Arkiv could not be read (L-08): the link comes from the keys in this browser, so it can still be handed out. */
   function showLinkOnly() {
+    emptyEl.hidden = true // no tips were read, so "Waiting for tips." would claim there are none; the next read that works sets it again
     body.replaceChildren(h('section', { class: 'inbox' },
       h('h2', null, 'Inbox not read yet'),
       h('p', { class: 'desc' }, 'Arkiv could not be read, so the inbox, its lease and the tips are not shown yet. If the inbox exists, this is its link. Refresh tries again.'),
@@ -436,7 +441,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         if (r.inbox) { inbox = r.inbox; showInbox(r.inbox) }
         status.info('Renewed.')
       } catch (e) {
-        status.error(explainError(e))
+        status.error(mayHaveBeenSent(e) ? RENEWAL_UNKNOWN : explainError(e))
         renew.disabled = false
       } finally {
         restore()
@@ -477,7 +482,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     listen(inbox)
     refreshBtn.onclick = () => fullSweep(inbox!)
     // After the sweep, whose "N tips on Arkiv." would hide it; a failed sweep says what to do itself.
-    if ((await fullSweep(inbox)) && leaseError) status.error(`The inbox lease could not be checked or renewed. ${explainError(leaseError)} "Renew now" under Lease tries again.`)
+    if ((await fullSweep(inbox)) && leaseError) status.error(mayHaveBeenSent(leaseError) ? RENEWAL_UNKNOWN : `The inbox lease could not be checked or renewed. ${explainError(leaseError)} "Renew now" under Lease tries again.`)
   }
 
   /** Every way into the console. When Arkiv cannot be read, the link, the reason and a working Refresh stay (L-08). */
