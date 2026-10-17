@@ -204,6 +204,9 @@ details ul { padding-left: 1.25rem; }
 .queries code, .world { font-size: var(--fs-0); overflow-wrap: anywhere; }
 .queries li, .world li { margin-top: var(--s-2); }
 details.settings { background: transparent; }
+/* The field group gets a card's air; the button carries the bottom inset because the status after it is hidden when empty */
+details.settings > label { margin-top: var(--s-3); }
+details.settings > button { margin: var(--s-2) 0 var(--s-3); }
 
 /* ---- home ------------------------------------------------------------------------------------------------ */
 .hero { padding-block: var(--s-4) 0; }
