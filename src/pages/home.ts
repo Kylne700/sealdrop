@@ -25,7 +25,7 @@ export function renderHome(root: HTMLElement, notice?: string) {
     h('section', { class: 'card', 'aria-labelledby': 'try' },
       h('h2', { id: 'try' }, 'Try it in 60 seconds, no wallet needed'),
       h('ol', { class: 'steps' },
-        h('li', null, h('strong', null, 'Open a newsroom'), ' and create an inbox (about 15 seconds).',
+        h('li', null, h('strong', null, 'Open a newsroom'), ' and create an inbox (about 15 seconds, longer over Tor).',
           h('div', { class: 'cta' }, h('a', { class: 'button big', href: '#/newsroom', 'data-testid': 'open-newsroom' }, 'Start: open a newsroom'))),
         h('li', null, h('strong', null, 'Open the inbox link in a second tab'), ' and send a made-up message. You are the source.'),
         h('li', null, h('strong', null, 'Switch back to the first tab.'), ' The tip arrives within seconds and is decrypted in your browser only.'),

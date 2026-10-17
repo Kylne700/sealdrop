@@ -114,6 +114,10 @@ button.danger { background: transparent; color: var(--danger); border-color: var
 button.danger:hover { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
 button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 .button.big, button.big { min-height: 48px; padding-inline: var(--s-4); font-size: var(--fs-2); }
+/* copyButton: the label changes for a moment. An invisible copy of the first label shares the grid cell, so the button keeps its width and the row beside it does not re-flow. */
+button.copy { display: inline-grid; place-items: center; }
+button.copy > span, button.copy::after { grid-area: 1 / 1; }
+button.copy::after { content: attr(data-label); content: attr(data-label) / ''; height: 0; overflow: hidden; visibility: hidden; }
 .icon-btn { min-width: 32px; min-height: 32px; padding: 0; border: 1px solid transparent; border-radius: var(--r-1); background: transparent; color: var(--muted); }
 .icon-btn:hover { background: var(--surface-2); border-color: var(--line); color: var(--ink); }
 .icon { width: 1.125rem; height: 1.125rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -187,12 +191,13 @@ dd > .row { margin-top: var(--s-2); }
 }
 
 /* ---- disclosure ------------------------------------------------------------------------------------------ */
-details { border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
+/* The inset is the box's padding, so a child with width: 100% (the Settings field) stays inside the box; the summary pulls back out to the full width. */
+details { padding-inline: var(--s-3); border: 1px solid var(--line); border-radius: var(--r-2); background: var(--surface); }
 summary { display: flex; align-items: center; gap: var(--s-2); min-height: 44px; padding: var(--s-2) var(--s-3); font-weight: 600; font-size: var(--fs-1); cursor: pointer; list-style: none; }
 summary::-webkit-details-marker { display: none; }
 summary::before { content: ''; width: 0.5rem; height: 0.5rem; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform 200ms var(--ease); }
 details[open] > summary::before { transform: rotate(45deg); }
-details > :not(summary) { margin-inline: var(--s-3); }
+details > summary { margin-inline: calc(-1 * var(--s-3)); }
 details > :last-child { margin-bottom: var(--s-3); }
 details > summary + * { margin-top: var(--s-1); }
 details ul { padding-left: 1.25rem; }
@@ -271,6 +276,15 @@ details.stores { background: var(--surface-2); border-color: transparent; }
 .empty { border: 1.5px dashed var(--line-strong); border-radius: var(--r-3); padding: var(--s-5) var(--s-4); text-align: center; color: var(--muted); }
 .empty strong { display: block; font: 700 var(--fs-4) / 1.3 var(--font-serif); color: var(--ink); }
 .empty .mark { width: 2.5rem; height: 2.5rem; margin-bottom: var(--s-2); opacity: 0.8; }
+
+/* ---- touch: field size and link tap areas (mouse layouts are not touched) ---------------------------------- */
+@media (pointer: coarse) {
+  /* iOS Safari zooms into a field under 16px: the read-only link field was 13px and the key-file field 15px */
+  input[readonly], input[type='file'] { font-size: 1rem; }
+  /* Links that stand alone get a 44px tall box (WCAG 2.5.8 asks 24px); links inside a sentence keep their line */
+  .quiet-links { align-items: center; }
+  .quiet-links a, .tip .hint > a, .me dd > a, a.hex-v { display: inline-flex; align-items: center; min-height: 44px; }
+}
 
 /* ---- motion ---------------------------------------------------------------------------------------------- */
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } }

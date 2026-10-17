@@ -79,7 +79,7 @@ function renderOnboarding(root: HTMLElement, again: () => void) {
         file,
       ),
     ),
-    h('p', { class: 'hint' }, 'The keys are stored in this browser\'s local storage and nowhere else. Export the key file once the inbox exists: if you clear the browser data, or close Tor Browser, the keys are gone and so is the access to every tip. The key file holds secrets; keep it private.'),
+    h('p', { class: 'hint' }, 'The keys are stored in this browser\'s local storage and nowhere else. Export the key file once the inbox exists: if you clear the browser data, or close Tor Browser, the keys are gone and so is the access to every tip. Safari can also delete the keys after 7 days without a visit. The key file holds secrets; keep it private.'),
   )
   if (hasUnreadableIdentity()) status.error(`The newsroom stored in this browser cannot be read. Creating or importing a newsroom keeps a copy of it in this browser's local storage under "${IDENTITY_BACKUP}".`)
 }
@@ -542,7 +542,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
           },
         }, 'Forget this newsroom'),
       ),
-      h('p', { class: 'hint' }, 'Export the key file: if you clear the browser data, or close Tor Browser, the keys are gone and so is the access to every tip.'),
+      h('p', { class: 'hint' }, 'Export the key file: if you clear the browser data, or close Tor Browser, the keys are gone and so is the access to every tip. Safari can also delete the keys after 7 days without a visit.'),
     ),
     body,
     tipsSection,

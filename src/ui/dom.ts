@@ -35,11 +35,18 @@ export function statusLine(testid = 'status', note?: HTMLElement) {
   }
 }
 
+/**
+ * A button whose label changes for 1.8 s after a click: "Copied ✓", or COPY_BLOCKED when the clipboard refuses. The label sits in a span and
+ * button.copy::after (style.css) holds an invisible copy of the first label in the same grid cell, so the button keeps that width and the row does not re-flow.
+ * "Copied ✓" and COPY_BLOCKED must therefore be no wider than the first label.
+ */
+export const COPY_BLOCKED = 'Copy manually'
 export function copyButton(getText: () => string, label = 'Copy', cls = 'secondary') {
-  const b = h('button', { type: 'button', class: cls }, label)
+  const text = h('span', null, label)
+  const b = h('button', { type: 'button', class: `${cls} copy`, 'data-label': label }, text)
   b.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(getText()); b.textContent = 'Copied ✓' } catch { b.textContent = 'Select and copy manually' }
-    setTimeout(() => (b.textContent = label), 1800)
+    try { await navigator.clipboard.writeText(getText()); text.textContent = 'Copied ✓' } catch { text.textContent = COPY_BLOCKED }
+    setTimeout(() => (text.textContent = label), 1800)
   })
   return b
 }
