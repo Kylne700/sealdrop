@@ -8,6 +8,7 @@
 | muted on surface-2 | hints on inset areas | 6.86 | 7.01 | 4.5 | pass |
 | accent on paper | links, secondary buttons | 7.15 | 9.30 | 4.5 | pass |
 | accent on surface | links and buttons in cards | 7.80 | 8.59 | 4.5 | pass |
+| accent on surface-2 | hex values that link to the explorer | 6.59 | 7.79 | 4.5 | pass |
 | accent-hover on paper | link hover | 9.92 | 11.25 | 4.5 | pass |
 | accent-hover on surface | link hover in cards | 10.82 | 10.39 | 4.5 | pass |
 | accent on accent-soft | Live / verified chips | 6.46 | 7.44 | 4.5 | pass |

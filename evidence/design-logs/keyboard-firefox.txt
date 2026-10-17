@@ -5,11 +5,11 @@ INFO focus right after the page change: body (the old link is gone)
 PASS K2 newsroom page: "Create a throwaway newsroom" reached with Tab: 1 Tab(s): button:Create a throwaway newsroom
 PASS K2 the first Tab after the page change lands inside the page content, not the header: button:Create a throwaway newsroom
 PASS K2 every stop shows a ring
-PASS K3 "Create the inbox" reached with Tab: 8 Tab(s): a:0xFB47Bb60667F98619c88164DA839C30a68 > button:Copy newsroom address > a:faucet > button:Export key file > button:Forget this newsroom > input:Name > textarea:Description > button:Create the inbox
+PASS K3 "Create the inbox" reached with Tab: 8 Tab(s): a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy newsroom address > a:faucet > button:Export key file > button:Forget this newsroom > input:Name > textarea:Description > button:Create the inbox
 PASS K3 every stop shows a ring
-PASS K3 the inbox link is shown: http://127.0.0.1:37823/#/send/0xFB47.../inbox-fzvj9b
+PASS K3 the inbox link is shown: http://127.0.0.1:43603/#/send/0x23C7.../inbox-kws4ff
 PASS K3 "Copy inbox link" reachable by keyboard: 2 Tab(s)
-PASS K4 send page: the message box is reached with Tab: 11 Tab(s): a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:0xFB47Bb60667F98619c88164DA839C30a68 > button:Copy creator address > a:0xFB47Bb60667F98619c88164DA839C30a68 > button:Copy owner address > a:0x113613cf933b2c68cb5d4e3b176e7de07e > button:Copy inbox entity key > textarea:Your message
+PASS K4 send page: the message box is reached with Tab: 11 Tab(s): a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy creator address > a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy owner address > a:0x113613cf933b2c68cb5d4e3b176e7de07e > button:Copy inbox entity key > textarea:Your message
 PASS K4 every stop shows a ring
 PASS K4 typing shows the byte count
 PASS K4 the lifetime group is the next stop (default 14 days): input:14 days
@@ -22,8 +22,12 @@ PASS K5 after sending, focus is on the success heading (not lost): h2:Sealed and
 PASS K7 bar fills set through CSSOM take effect under the production CSP: receipt bar fill / track = 1.00
 PASS K5 the next Tab is "Send another": button:Send another
 PASS K5 it shows a ring
+PASS K8 the receipt links and copy buttons show a ring and "What Arkiv stores" is reachable: a:0x272865842a4bdb32ff6099437158c19764 > button:Copy tip entity key > a:0xa1fefbf611d5e916c382ec238696fdb05a > button:Copy transaction hash > summary:What Arkiv stores
+PASS K8 Enter opens "What Arkiv stores"
+PASS K8 the stops inside it, up to "What can anyone see", show a ring: a:0xa05d5Bd99440d95526120062364518ddfe > button:Copy creator address > a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy owner address > summary:What can anyone see on Arkiv for thi
+PASS K8 Enter opens "What can anyone see"
+PASS K8 the stops inside the open panel, up to "Queries this page runs", show a ring: a:Everything this owner holds, in the  > summary:Queries this page runs
 PASS K5 "Send another" returns to the message box with focus in it: textarea:Your message
 PASS K6 no console errors or page errors (production CSP active)
 
 ALL PASS
-firefox exit 0

@@ -30,6 +30,7 @@ const PAIRS = [
   ['muted', 'surface-2', 4.5, 'hints on inset areas'],
   ['accent', 'paper', 4.5, 'links, secondary buttons'],
   ['accent', 'surface', 4.5, 'links and buttons in cards'],
+  ['accent', 'surface-2', 4.5, 'hex values that link to the explorer'],
   ['accent-hover', 'paper', 4.5, 'link hover'],
   ['accent-hover', 'surface', 4.5, 'link hover in cards'],
   ['accent', 'accent-soft', 4.5, 'Live / verified chips'],
