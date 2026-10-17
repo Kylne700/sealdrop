@@ -1,6 +1,6 @@
 // Recompute every src/arkiv.ts#L anchor in SUBMISSION.md from the symbol named in its link text. --write to apply.
 import { readFileSync, writeFileSync } from 'node:fs'
-const root = '/path/to/sealdrop/'
+const root = import.meta.dirname + '/../../'
 const src = readFileSync(root + 'src/arkiv.ts', 'utf8').split('\n')
 let doc = readFileSync(root + 'SUBMISSION.md', 'utf8')
 const find = (sym) => src.findIndex((l) => new RegExp(`^export (async )?(function|const) ${sym}\\b`).test(l)) + 1

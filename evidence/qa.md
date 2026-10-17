@@ -11,7 +11,7 @@ Checks A to J of the QA brief, run against the built site (`dist/`, production C
   (`diff -r`) to the copy the subpath smoke served.
 * Tools: node v24.18.0 (fresh clones also on 22.23.2 and 20.19.2), Chromium 154.0.8037.92 (`/usr/bin/chromium`), Firefox 153.4.0 (WebDriver BiDi through
   puppeteer-core 25.14.0), Linux x86_64, headless.
-* Scripts: [qa-scripts/](qa-scripts/). They use absolute paths: the repository is `/path/to/sealdrop` in these copies, scratch files are in `/tmp/qa`. `a-costs.mts` creates the throwaway
+* Scripts: [qa-scripts/](qa-scripts/). `lib.mjs` and `anchors.mjs` find the repository from their own location; the other scripts use absolute paths (the repository is `/path/to/sealdrop` in these copies), scratch files are in `/tmp/qa`. `a-costs.mts` creates the throwaway
   newsroom ("fixture") that `d-ws.mts` and `e-tour.mts` reuse; the fixture holds that newsroom's keys, so it is not in the repo.
   Raw outputs: [qa-logs/](qa-logs/). Screenshots: [screens/](screens/).
 * Browser traffic to the public RPC went through a counting proxy that keeps the real CSP valid, or was counted from the

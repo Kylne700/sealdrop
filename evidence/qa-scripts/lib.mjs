@@ -5,7 +5,7 @@ import { extname, join, normalize } from 'node:path'
 import { gzipSync } from 'node:zlib'
 import puppeteer from 'puppeteer-core'
 
-export const PROJECT = '/path/to/sealdrop'
+export const PROJECT = join(import.meta.dirname, '../..')
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json' }
 
 /** Static server for a dist/ directory. prefix='/sealdrop/' mimics GitHub Pages (nothing is served outside it). */
