@@ -16,13 +16,14 @@ describe('fix stage 2', () => {
   it('A-W5: the wallet status switches to "writing" only after the wallet answers eth_sendTransaction', async () => {
     const calls: string[] = []
     const provider = { request: async ({ method }: { method: string }) => (calls.push(method), '0xhash') } as never
-    let sent = 0
-    const wrapped = notifyOnSend(provider, () => sent++)
+    const log: string[] = []
+    const wrapped = notifyOnSend(provider, { before: () => log.push('confirm'), after: () => log.push('writing') })
     await wrapped.request({ method: 'eth_chainId' } as never)
-    expect(sent).toBe(0)
+    expect(log).toEqual([])
     await wrapped.request({ method: 'eth_sendTransaction' } as never)
-    expect(sent).toBe(1)
-    expect(calls).toEqual(['eth_chainId', 'eth_sendTransaction'])
+    await wrapped.request({ method: 'eth_sendTransaction' } as never) // a retry asks the wallet again
+    expect(log).toEqual(['confirm', 'writing', 'confirm', 'writing'])
+    expect(calls).toEqual(['eth_chainId', 'eth_sendTransaction', 'eth_sendTransaction'])
     expect(read('../src/pages/send.ts')).toMatch(/Confirm in your wallet/)
   })
   it('N1: an HTTP 5xx says what to do', () => {

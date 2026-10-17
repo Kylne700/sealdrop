@@ -10,6 +10,7 @@ import { bar, chip, h, hex, keepFocus, kib, link, queriesPanel, setFill, short, 
 import { rpcSettings } from '../ui/settings'
 
 const WRITING = 'Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)...'
+const CONFIRM = 'Confirm in your wallet...'
 const wallet = () => (window as unknown as { ethereum?: EIP1193Provider }).ethereum
 
 export async function renderSend(root: HTMLElement, ref: InboxRef) {
@@ -140,9 +141,9 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
         const provider = wallet()
         if (!provider) throw new Error(`No browser wallet found. Install a wallet extension such as MetaMask${DEMO_SENDER_KEY ? ', or choose the shared demo key' : ''}.`)
         progress.busy('Waiting for your wallet...')
-        signer = await injectedSigner(provider, () => progress.busy(WRITING))
+        signer = await injectedSigner(provider, { before: () => progress.busy(CONFIRM), after: () => progress.busy(WRITING) })
       }
-      progress.busy(signer.kind === 'injected' ? 'Confirm in your wallet...' : WRITING)
+      progress.busy(signer.kind === 'injected' ? CONFIRM : WRITING)
       const sent = await sendTip(reader, signer, live, sealed, days)
       const t = await getTiming(reader)
       const expiry = sent.expiresAt !== undefined ? `${formatUtc(blockToUnix(sent.expiresAt, t))} (${formatDuration(secondsLeft(sent.expiresAt, t))} from now)` : `in about ${days} days`

@@ -63,17 +63,19 @@ export function localSigner(privateKey: Hex, rpcUrl: string = RPC_HTTP): Signer 
 
 const CHAIN_HEX = '0x' + CHAIN_ID.toString(16)
 
-/** Calls `onSent` when the wallet has answered a transaction request, i.e. the user confirmed it (or it threw). */
-export function notifyOnSend(provider: EIP1193Provider, onSent: () => void): EIP1193Provider {
+/** `before` runs when a transaction request goes to the wallet (every attempt, retries too), `after` when the wallet has answered it (not when it throws). */
+export function notifyOnSend(provider: EIP1193Provider, hooks: { before: () => void; after: () => void }): EIP1193Provider {
   return { ...provider, request: (async (args: { method: string }) => {
+    const send = args.method === 'eth_sendTransaction'
+    if (send) hooks.before()
     const res = await provider.request(args as never)
-    if (args.method === 'eth_sendTransaction') onSent()
+    if (send) hooks.after()
     return res
   }) as EIP1193Provider['request'] }
 }
 
 /** Connects an injected EIP-1193 wallet (MetaMask etc.) and makes sure it is on Tiramisu. */
-export async function injectedSigner(provider: EIP1193Provider, onSent?: () => void): Promise<Signer> {
+export async function injectedSigner(provider: EIP1193Provider, hooks?: { before: () => void; after: () => void }): Promise<Signer> {
   const accounts = (await provider.request({ method: 'eth_requestAccounts' })) as Address[]
   const address = accounts[0]
   if (!address) throw new Error('The wallet returned no account. Unlock the wallet and allow this page to connect, then try again.')
@@ -91,7 +93,7 @@ export async function injectedSigner(provider: EIP1193Provider, onSent?: () => v
     // Some wallets add the network without switching to it.
     if ((await chainId()) !== CHAIN_HEX) throw new Error(`Your wallet is on a different network. Switch it to Arkiv Tiramisu (chain id ${CHAIN_ID}) and try again.`)
   }
-  return { address, client: createWalletClient({ chain: tiramisu, transport: custom(onSent ? notifyOnSend(provider, onSent) : provider), account: address }), kind: 'injected' }
+  return { address, client: createWalletClient({ chain: tiramisu, transport: custom(hooks ? notifyOnSend(provider, hooks) : provider), account: address }), kind: 'injected' }
 }
 
 // ---- small utilities --------------------------------------------------------------------------------
