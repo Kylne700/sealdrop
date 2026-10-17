@@ -1,0 +1,5 @@
+FAIL  885f5b2 1280x800 light: button 174x72px, 3 line(s), label="Create a throwaway newsroom", cards 224x344@288,204 | 224x344@528,204 | 224x344@768,204, overflow 0
+FAIL  885f5b2 1280x800 dark: button 174x72px, 3 line(s), label="Create a throwaway newsroom", cards 224x344@288,204 | 224x344@528,204 | 224x344@768,204, overflow 0
+PASS  885f5b2 390x844 light: button 308x44px, 1 line(s), label="Create a throwaway newsroom", cards 358x213@16,306 | 358x213@16,535 | 358x204@16,764, overflow 0
+PASS  885f5b2 390x844 dark: button 308x44px, 1 line(s), label="Create a throwaway newsroom", cards 358x213@16,306 | 358x213@16,535 | 358x204@16,764, overflow 0
+fails=2

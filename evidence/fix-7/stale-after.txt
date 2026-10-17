@@ -1,0 +1,8 @@
+# the same on d2f092c (mock build screens-final/dist): the note is empty once the status is no longer an error
+# node stale.mjs <clone at d2f092c> <dist> <out>
+1. lease error + live tip: status="The inbox lease could not be checked or renewed. Transaction failed: Execution e" [status error] note="A new tip just arrived. 1 tip listed." rows=1
+PASS  start: error in the status and the note set
+2. after Refresh: status="1 tip on Arkiv." [status] note="" rows=1
+PASS  the error is gone from the status after Refresh  :: 1 tip on Arkiv.
+PASS  STALE NOTE after the error went: the hidden note is empty (FAIL = the old sentence is still there)  :: note="" status="1 tip on Arkiv." rows=1
+fails=0

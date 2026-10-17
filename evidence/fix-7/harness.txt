@@ -1,0 +1,46 @@
+Fix stage 7: how the browser checks were run. Headless Chromium, localhost only, mock Arkiv. The only live run is smoke-run.txt.
+
+before = 885f5b2 (clone /tmp/fq-F7/base), after = d2f092c (clone /tmp/fq-F7/after). The harness builds a mock of `git archive HEAD`, so each change was committed in the clone first.
+The harness is evidence/final-qa/R3/scripts/screens/ (read-only here, not changed).
+
+Exec bit: build-mock-r2.sh has no exec bit in that directory, so screens-r2.sh stopped there with "nice: Permission denied".
+Workaround: a copy of the directory in /tmp/fq-F7/harness with chmod +x on the .sh files. An exec-bit problem only; no permission was refused. The original is untouched.
+
+Commands (<clone> = a clone, <h> = the harness copy, <dist> = <out>/dist that screens-r2.sh builds):
+  AXE_JS=/tmp/fq-R3/screens/harness/axe.min.js bash <h>/screens-r2.sh <clone> <out> [comma-separated state-id prefixes]
+  node <h>/stale.mjs <clone> <dist> <out>            R3-L6   (stale-before.txt, stale-after.txt)
+  node row-note.mjs <clone> <dist> <out>             R2-S3   (row-note-before.txt, row-note-after.txt)
+  node measure-button.mjs <clone> <dist> [label]     R3-L2   (measure-before.txt, measure-after.txt)
+  node widths.mjs <clone> <dist>                     R3-L2 at 360 to 1920 px (widths-before.txt, widths-after.txt)
+
+Final unfiltered run on d2f092c (screens-summary.txt): 76 states, 304 screenshots.
+  axe: 0 violations in 0 of 300 combinations (1280 and 390 px, light and dark); horizontal overflow 0; clipped text 0; text in scrolling containers 0;
+  contrast below AA 0; console or page errors 0; UNREACHED states 0; FAILED steps 2.
+  The 2 FAILED steps are 43f and 44f: 'The "path" argument must be of type string ... Received undefined'. Cause: those two probe steps write to the env var
+  FOCUS_OUT, which screens-r2.sh does not set. A harness problem, not the app. Re-run of states 43 and 44 with FOCUS_OUT set, on both builds: no failure,
+  and after the click the focus is on the enabled "Renew now" button both before and after:
+    before: 43f-console-renew-focus button|testid=renew|Renew now|disabled=false
+            44f-console-renew-5xx-focus button|testid=renew|Renew now|disabled=false
+    after:  the same two lines.
+  The metric "status line a whole viewport above the first tip button" still lists 92 console combinations: the status line did not move. R2-S3 adds the
+  row text next to the buttons instead; row-note.mjs measures that (the gap to the buttons is 8 px at 1280 and 390 px; the status line is 1012 px and 1490 px above the Keep button).
+
+Before and after on the 21 states that were shot on both builds (15 in the first run, 6 in a second one), from the text dumps (text/) and the PNG sizes:
+  text identical (10): 03 20 70 80 30 31 32 33 55 56
+  text changed (11), each on purpose: 29 39 75 76 (I4 faucet), 36 38 41 45 (L1 one next step), 71 (L3), 34 35 (S3 row text)
+  page height equal in all four combinations for the success screens 30 31 32 33 55 56 and for 80 (no-JS) and 75.
+  page height changed only where an item touched the page, light theme, as measured:
+    03 onboarding 1280 px: 815 -> 929 px (L2: the third card is on a second row, the button has 1 line instead of 3); 390 px unchanged
+    70 storage blocked 1280 px: 909 -> 1022 px (the same onboarding block)
+    45 console not read 390 px: 1483 -> 1458 px (L1: the paragraph lost its second "tries again")
+    20, 29, 76 at 390 px: +16, +16, +23 px (L5 summary padding where a label wraps, plus the changed faucet wording on 29 and 76)
+  Pixel diffs on the success screens (219 to 5256 pixels differ) are the `main` rise animation and the pulsing "Live" dot: a control between two near-identical
+  builds showed the same size of noise. The text and size comparison above is what was used, not the pixels.
+
+R3-L2 at other widths (widths-before.txt, widths-after.txt): after, the button has 1 line at 360, 480, 560, 561 and 700 to 1920 px and 2 lines at 600 px
+  (also 2 before); before it had 3 lines at 768 to 1920 px and 2 lines at 560 to 600 px. No horizontal overflow at any width, before or after.
+
+Composites of before and after (screens/, viewed as images): 03 and 70 (onboarding, L2), 71 (L3 next step), 80 (no-JS, L4) at 1280 and 390 px, 20 (summary, L5, at 390 px),
+lease 36 38 41 45 (L1), faucet 29 39 75 76 (I4), and the S3 row text for Keep (1280 px) and Burn with a hash (390 px).
+
+Not run here: the real live site, a real wallet, a real renewal failure on the testnet. The error screens come from the mock.

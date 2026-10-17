@@ -1,0 +1,40 @@
+# Gate on d2f092c plus the evidence of this stage (run 2026-10-18 00:20 local): node scripts/secret-scan.mjs && npm ci && npm test && npm run typecheck && npm run build && npm run check:bundle -> exit 0
+secret scan: clean (4 secrets checked against tracked and staged files)
+added 83 packages, and audited 84 packages in 3s
+30 packages are looking for funding
+  run `npm fund` for details
+found 0 vulnerabilities
+> sealdrop@0.1.0 test
+> vitest run
+ RUN  v5.0.5 <repo>
+ Test Files  20 passed (20)
+      Tests  132 passed (132)
+> sealdrop@0.1.0 typecheck
+> tsc --noEmit
+> sealdrop@0.1.0 build
+> tsc --noEmit && vite build
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 480 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   2.37 kB │ gzip:   1.19 kB
+dist/THIRD-PARTY-LICENSES.md      9.10 kB
+dist/assets/index-BaJkchLz.css   17.72 kB │ gzip:   4.66 kB
+dist/assets/native-BKj27wfc.js    0.30 kB │ gzip:   0.17 kB
+dist/assets/ccip-MvAwbCwf.js      2.83 kB │ gzip:   1.30 kB
+dist/assets/index-DtFqjDDS.js   428.61 kB │ gzip: 134.91 kB
+✓ built in 155ms
+> sealdrop@0.1.0 check:bundle
+> node scripts/check-bundle.mjs
+PASS  dist/ has 6 files
+PASS  demo-sender key is in the bundle (public testnet-only demo affordance, by design)
+PASS  FUNDER_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_BOX_SECRET is NOT in the bundle
+PASS  no .env file in dist/
+bundle check: all rules pass
+
+# test/fix7.test.ts alone, after (the same file on 885f5b2: 11 failed, 4 passed; see tests-before.txt):
+ Test Files  1 passed (1)
+      Tests  15 passed (15)

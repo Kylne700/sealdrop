@@ -1,0 +1,20 @@
+# test/fix7.test.ts (15 tests) copied into a clone at 885f5b2 and run there: npx vitest run test/fix7.test.ts  -> fail-before
+# (the 4 that pass are guards that already held: the error keeps the note, no note on other pages, 'try again' once from explainError, a gone tip drops its row)
+     × empties it for info (Refresh, Keep, Burn, a renewal that worked), busy and clear 4ms
+     × the console creates the note first and hands it to its status line 1ms
+     × the page adds no second "tries again" to the lease status or to the link-only paragraph (state 45) 0ms
+     × ends with state 70's next step 27ms
+     × every text that names the faucet URL says "the Arkiv faucet (URL)", and none uses the old forms 4ms
+     × a wallet that is out of GLM gets the same sentence in the console as from explainError 1ms
+     × L2: the label stays; the cards are at least 17rem wide and a lone last card spans the row 1ms
+     × L4: the no-JS notice has room above the footer rule 0ms
+     × L5: a summary label has vertical padding, like buttons since fix 6 0ms
+     × every own tip row carries a hidden plain-text note, not a live region (the status already announces) 0ms
+     × a failed Keep or Burn writes the action and the status text into its row; the next action on that row clears it 0ms
+ Test Files  1 failed (1)
+      Tests  11 failed | 4 passed (15)
+
+# the R3-L6 unit test, first failure:
+ FAIL  test/fix7.test.ts > R3-L6: the hidden tip note goes quiet when the status stops showing an error > empties it for info (Refresh, Keep, Burn, a renewal that worked), busy and clear
+AssertionError: expected 'A new tip just arrived. 1 tip listed.' to be '' // Object.is equality
+AssertionError: expected 'A new tip just arrived. 1 tip listed.' to be '' // Object.is equality

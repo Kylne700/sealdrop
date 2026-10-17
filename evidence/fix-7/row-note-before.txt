@@ -1,0 +1,35 @@
+PASS  1280px before any action: no failure text is visible in the row  :: {"row":true,"exists":false,"visible":false,"text":"","attrs":"","liveAncestor":null,"height":0,"gapBelowButtons":null,"statusAbove":1018,"sideways":null}
+PASS  1280px Keep failed: the status shows the error  :: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+FAIL  1280px Keep failed: the failure shows inside that row  :: {"row":true,"exists":false,"visible":false,"text":"","attrs":"","liveAncestor":null,"height":0,"gapBelowButtons":null,"statusAbove":1012,"sideways":null}
+FAIL  1280px the row text names the action and carries the status text
+FAIL  1280px the row text is plain text (no role, no aria-live, no live ancestor)
+FAIL  1280px the row text is next to the buttons (gap nullpx; the status is 1012px above the Keep button)
+FAIL  1280px no sideways overflow  :: note null, page 0
+PASS  1280px the other row shows nothing  :: {"row":true,"exists":false,"visible":false,"text":"","attrs":"","liveAncestor":null,"height":0,"gapBelowButtons":null,"statusAbove":1279,"sideways":null}
+PASS  1280px Keep on the other row worked  :: Kept: this tip now expires 30 days from now.
+FAIL  1280px ... and the first row still says its Keep failed
+PASS  1280px Keep again: the row text is gone  :: status="Kept: this tip now expires 30 days from now." visibleNotes=0
+FAIL  1280px Burn failed: the row says so and shows the hash
+FAIL  1280px the 66-character hash wraps (no sideways overflow)  :: note null, page 0
+PASS  1280px Keep on that row after a failed Burn: the row text is gone
+PASS  1280px Keep worked: no failure text anywhere  :: Kept: this tip now expires 30 days from now.
+PASS  1280px the hidden notes take no room  :: []
+PASS  1280px Burn worked: no failure text anywhere  :: Burned.
+PASS  390px before any action: no failure text is visible in the row  :: {"row":true,"exists":false,"visible":false,"text":"","attrs":"","liveAncestor":null,"height":0,"gapBelowButtons":null,"statusAbove":1474,"sideways":null}
+PASS  390px Keep failed: the status shows the error  :: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+FAIL  390px Keep failed: the failure shows inside that row  :: {"row":true,"exists":false,"visible":false,"text":"","attrs":"","liveAncestor":null,"height":0,"gapBelowButtons":null,"statusAbove":1490,"sideways":null}
+FAIL  390px the row text names the action and carries the status text
+FAIL  390px the row text is plain text (no role, no aria-live, no live ancestor)
+FAIL  390px the row text is next to the buttons (gap nullpx; the status is 1490px above the Keep button)
+FAIL  390px no sideways overflow  :: note null, page 0
+PASS  390px the other row shows nothing  :: {"row":true,"exists":false,"visible":false,"text":"","attrs":"","liveAncestor":null,"height":0,"gapBelowButtons":null,"statusAbove":1912,"sideways":null}
+PASS  390px Keep on the other row worked  :: Kept: this tip now expires 30 days from now.
+FAIL  390px ... and the first row still says its Keep failed
+PASS  390px Keep again: the row text is gone  :: status="Kept: this tip now expires 30 days from now." visibleNotes=0
+FAIL  390px Burn failed: the row says so and shows the hash
+FAIL  390px the 66-character hash wraps (no sideways overflow)  :: note null, page 0
+PASS  390px Keep on that row after a failed Burn: the row text is gone
+PASS  390px Keep worked: no failure text anywhere  :: Kept: this tip now expires 30 days from now.
+PASS  390px the hidden notes take no room  :: []
+PASS  390px Burn worked: no failure text anywhere  :: Burned.
+fails=16

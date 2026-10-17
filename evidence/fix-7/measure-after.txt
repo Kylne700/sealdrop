@@ -1,0 +1,5 @@
+PASS  d2f092c 1280x800 light: button 294x44px, 1 line(s), label="Create a throwaway newsroom", cards 344x238@288,204 | 344x238@648,204 | 704x204@288,457, overflow 0
+PASS  d2f092c 1280x800 dark: button 294x44px, 1 line(s), label="Create a throwaway newsroom", cards 344x238@288,204 | 344x238@648,204 | 704x204@288,457, overflow 0
+PASS  d2f092c 390x844 light: button 308x44px, 1 line(s), label="Create a throwaway newsroom", cards 358x213@16,306 | 358x213@16,535 | 358x204@16,764, overflow 0
+PASS  d2f092c 390x844 dark: button 308x44px, 1 line(s), label="Create a throwaway newsroom", cards 358x213@16,306 | 358x213@16,535 | 358x204@16,764, overflow 0
+fails=0
