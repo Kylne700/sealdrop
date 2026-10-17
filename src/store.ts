@@ -5,6 +5,7 @@ import { getAddress, isAddress, type Address, type Hex } from 'viem'
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 import { boxKeyPairFromSecret, fromB64, newBoxKeyPair, toB64 } from './crypto'
 import { isValidInboxId, newInboxId } from './codec'
+import { PlainError } from './arkiv'
 
 const storage = {
   get(key: string): string | null {
@@ -75,9 +76,9 @@ export const hasUnreadableIdentity = () => Boolean(storage.get(IDENTITY)) && loa
 /** Throws, with a message for the page, when the browser will not keep the keys. Call it before any write on chain. */
 export function saveIdentity(identity: Identity) {
   const old = storage.get(IDENTITY)
-  if (old && loadIdentity() === null && !storage.set(IDENTITY_BACKUP, old)) throw new Error('The newsroom stored in this browser cannot be read, and it could not be backed up, so it was not replaced.')
+  if (old && loadIdentity() === null && !storage.set(IDENTITY_BACKUP, old)) throw new PlainError('The newsroom stored in this browser cannot be read, and it could not be backed up, so it was not replaced.')
   if (!storage.set(IDENTITY, JSON.stringify(identity))) {
-    throw new Error('This browser would not store the newsroom keys (its storage is full, or site data is blocked, as in some private windows), so nothing was created. Allow site data for this page or use another browser, then try again.')
+    throw new PlainError('This browser would not store the newsroom keys (its storage is full, or site data is blocked, as in some private windows), so nothing was created. Allow site data for this page or use another browser, then try again.')
   }
 }
 export const forgetIdentity = () => storage.del(IDENTITY)

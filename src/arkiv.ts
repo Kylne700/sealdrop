@@ -112,7 +112,7 @@ export async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<
       return await fn()
     } catch (e) {
       const text = `${(e as Error)?.message ?? e} ${(e as { cause?: Error })?.cause?.message ?? ''}`
-      if (i >= attempts || !RETRYABLE.test(text)) throw e
+      if (i >= attempts || !RETRYABLE.test(text) || mayHaveBeenSent(e)) throw e
       retryHook.onRetry?.(i, text.split('\n')[0]?.slice(0, 200) ?? '')
       await sleep(400 * i + Math.random() * 600)
     }
@@ -132,8 +132,34 @@ export function rateLimit(e: unknown): RateLimitedError | undefined {
   for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) if (cur instanceof RateLimitedError) return cur
 }
 
+/** A message already written for the reader (no RPC advice): explainError shows it as it is. */
+export class PlainError extends Error {}
+
+/**
+ * The transaction may be on chain although the call failed: a hash came back and then the receipt did not
+ * (viem gives up after 180 s, or the connection dropped), or the connection dropped while the signed
+ * transaction was on its way. A retry would send it a second time.
+ */
+export function mayHaveBeenSent(e: unknown): boolean {
+  // A revert, or a 429 that failFast turned into an error (viem wraps it as a lost connection), is an answer.
+  if (rateLimit(e) || /reverted/i.test((e as Error)?.message ?? '')) return false
+  for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) {
+    const c = cur as { txHash?: unknown; name?: string; body?: { method?: string } }
+    if (c.txHash || c.name === 'WaitForTransactionReceiptTimeoutError') return true
+    // Only a lost connection: an RPC error answer ("nonce too low", "already known") means the node rejected it.
+    if ((c.name === 'HttpRequestError' || c.name === 'TimeoutError') && /^(eth|wallet)_send(Raw)?Transaction$/.test(c.body?.method ?? '')) return true
+  }
+  return false
+}
+
 /** One line a person can act on. */
 export function explainError(e: unknown): string {
+  if (e instanceof PlainError) return e.message
+  if (mayHaveBeenSent(e)) {
+    const hash = (e as { txHash?: string }).txHash
+    // Not "the answer was lost": the SDK also lands here when a receipt came back but did not match the batch.
+    return `The result of this transaction${hash ? ` (${hash})` : ''} is unknown. It may have been sent. Check the newsroom console, or the Data Explorer link, before you send it again.`
+  }
   const limited = rateLimit(e)
   if (limited) {
     const mins = Math.max(1, Math.ceil(limited.retryAfterSeconds / 60))
