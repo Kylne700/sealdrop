@@ -9,7 +9,7 @@ const CSP = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 's
 // Routing is hash based, so no server rewrite rules are needed anywhere.
 export default defineConfig({
   base: process.env.BASE_PATH ?? './',
-  build: { target: 'es2022', sourcemap: false },
+  build: { target: 'es2022', sourcemap: false, license: { fileName: 'THIRD-PARTY-LICENSES.md' } },
   plugins: [{ name: 'sealdrop-csp', apply: 'build', transformIndexHtml: (html) => html.replace('<meta charset="utf-8" />', (m) => `${m}\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`) }],
   test: { include: ['test/**/*.test.ts'] },
 })

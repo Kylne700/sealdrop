@@ -9,3 +9,7 @@ evidence/*.failed.txt
 HANDOFF.md
 SUBMISSION.md
 SUBMISSION.filled.md
+.env
+.env.*
+!.env.example
+SUBMISSION*.md
