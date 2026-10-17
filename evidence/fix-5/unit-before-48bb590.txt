@@ -1,0 +1,9 @@
+# npx vitest run test/fix5.test.ts on 48bb590 (src unchanged), filtered to the result lines; full output kept outside the repo
+     × item 1: an unknown renewal outcome gets its own text, on open and on "Renew now"; real failures keep theirs 3ms
+     × item 2: the link-only view does not show "Waiting for tips." 1ms
+     × item 3: the catch-up backs off 20 s doubling to 5 min, resets on success, and keeps the 429 wait 0ms
+AssertionError: expected '' to match /unknown/
+AssertionError: expected '// #/newsroom: create a throwaway new…' to match /function showLinkOnly\(\) \{\n\s*empt…/
+AssertionError: expected '// #/newsroom: create a throwaway new…' to match /retry \?\?= setTimeout\(\(\) => \{ re…/
+ Test Files  1 failed (1)
+      Tests  3 failed | 5 passed (8)

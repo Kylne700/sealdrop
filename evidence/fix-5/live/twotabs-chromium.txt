@@ -1,0 +1,20 @@
+setup (mkdue 3 days): inbox inbox-vejg3w creator 0x193B1BaBE4CE785dDd2b6E1A6Fa0Ee50D36fC711 entity 0x156f9bf551fe17e5bfa1b6e62253b811c53b6dad7a63e7e38237735ca8ee6f41
+inbox on chain before: {"found":true,"expiresAt":"830710","currentBlock":"701128","daysLeft":3}
+tab1 sequence: 0.0s status="(none)" | 0.0s live-status="(none)" | 82.3s status="Reading your inbox from Arkiv..." | 82.3s live-status="Live updates start once the inbox exists." | 90.0s status="The inbox lease is running low, extending it for another 7 days..." | 97.2s live-status="Connecting to the live feed..." | 98.3s status="No tips yet." | 99.1s live-status="Live: listening for new tips on a WebSocket. This page does not poll."
+tab2 sequence: 0.0s status="(none)" | 0.0s live-status="(none)" | 82.3s status="Reading your inbox from Arkiv..." | 82.3s live-status="Live updates start once the inbox exists." | 90.0s status="The inbox lease is running low, extending it for another 7 days..." | 92.3s live-status="Connecting to the live feed..." | 92.7s status="Whether the lease was renewed is unknown. "Renew now" under Lease renews it, and a second renewal does no harm." | 93.5s live-status="Live: listening for new tips on a WebSocket. This page does not poll."
+signed transactions the two tabs sent while opening: 2
+status tab1: class="status" role=status text="No tips yet."
+status tab2: class="status error" role=alert text="Whether the lease was renewed is unknown. "Renew now" under Lease renews it, and a second renewal does no harm."
+tab1: unknown-renewal text shown=false; Lease line "alive for 7 d 0 h (until 2026-10-24 15:48 UTC). It expires after 7 days; opening this console renews it.Renew now"
+PASS fix 5 item 1, tab1: the status does not say a renewal "could do it twice": No tips yet.
+tab2: unknown-renewal text shown=true; Lease line "alive for 2 d 23 h (until 2026-10-20 15:46 UTC). It expires after 7 days; opening this console renews it.Renew now"
+PASS fix 5 item 1, tab2: the status does not say a renewal "could do it twice": Whether the lease was renewed is unknown. "Renew now" under Lease renews it, and a second renewal does no harm.
+inbox on chain after: {"found":true,"expiresAt":"1003575","currentBlock":"701249","daysLeft":7} (days left 3 -> 7)
+tip sent for both tabs: tip 0x058b9f87a19e67fb82a992f52765b4311412b17da8146fb9e8f2d0db173df57d tx 0xd03324a13a3795669a940a97
+tip shows in tab1=true (data-source=live, 0.006 s) and tab2=true (data-source=live, 0.006 s)
+PASS two tabs: both tabs show the live tip
+PASS two tabs: the lease was extended at most once (days left after <= 3 + 7 + 0.5): days left 3 -> 7
+page problems (errors+warnings): 0: 
+proxy: forwarded arkiv_query=9 units=900 real429=0; methods {"arkiv_getBlockTiming":4,"arkiv_query":9,"eth_getBalance":2,"eth_blockNumber":4,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":3,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":2,"eth_getTransactionReceipt":3,"eth_getTransactionByHash":1}
+proxy log tail: 15:48:34 send answer 200 {"jsonrpc":"2.0","id":10,"result":"0x854f0430cfd0d10670586b317898f238472df54540dab603a4bbb466b18cd0ab"} / 15:48:34 send answer 200 {"jsonrpc":"2.0","id":10,"error":{"code":-32000,"message":"already known"}} / 15:48:34 ws client connected / 15:48:40 ws client connected
+no failed checks

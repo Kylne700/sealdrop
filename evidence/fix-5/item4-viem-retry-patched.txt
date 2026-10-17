@@ -1,0 +1,9 @@
+# item 4 fail-before: node_modules/viem/_esm/actions/wallet/sendRawTransaction.js with its per-request { retryCount: 0 } removed (so the broadcast goes through the transport's retryCount: 1), then restored
+# npx vitest run test/fix5.test.ts -t "item 4", filtered to the result lines
+     × first broadcast answered after the timeout, then "nonce too low": one broadcast, outcome unknown 70ms
+     × first broadcast answered with HTTP 502, then "nonce too low": one broadcast, outcome unknown 10ms
+     × first broadcast answered with HTTP 500, then "nonce too low": one broadcast, outcome unknown 9ms
+     × first broadcast connection lost, then "nonce too low": one broadcast, outcome unknown 10ms
+AssertionError: expected 4 to be 1 // Object.is equality
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed | 3 skipped (8)

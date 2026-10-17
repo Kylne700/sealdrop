@@ -1,0 +1,11 @@
+browser chromium Chrome/154.0.8037.92; inbox inbox-trxhd5; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+F2q tip from a second process while every HTTP call answers 500: tip 0x8275b9feced434e4bb3ed2ffe3abc9bbd88b3c7e9a57d522a5726399d130c6ce tx 0xb2b7306b7e2c4c20fc381db12823d53225637fb5abb6
+F2q HTTP calls in the outage (180 s after the tip was sent): 14 {"arkiv_query":8,"arkiv_getBlockTiming":6}; 500s injected 14
+F2q the calls with their time: 15:48:18 arkiv_query | 15:48:18 arkiv_query | 15:48:18 arkiv_query | 15:48:18 arkiv_query | 15:48:19 arkiv_query | 15:48:19 arkiv_query | 15:48:19 arkiv_query | 15:48:20 arkiv_query | 15:48:40 arkiv_getBlockTiming | 15:48:40 arkiv_getBlockTiming | 15:49:20 arkiv_getBlockTiming | 15:49:20 arkiv_getBlockTiming | 15:50:40 arkiv_getBlockTiming | 15:50:40 arkiv_getBlockTiming
+F2q status at the end of the outage: class="status error" role=alert text="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+F2q after the outage ended: tip shows by itself=true after 118.299 s (data-source=sweep); status class="status" role=status text="1 tip on Arkiv."
+PASS F2q the tip from the outage shows by itself once the RPC is back
+page problems (errors+warnings): 14: newsroom console.error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+proxy: forwarded arkiv_query=5 units=500 real429=0; methods {"arkiv_getBlockTiming":10,"arkiv_query":13,"eth_getBalance":4,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":4,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":2,"eth_getTransactionReceipt":6,"eth_blockNumber":5,"eth_getTransactionByHash":2}
+proxy log tail: 15:50:40 call arkiv_getBlockTiming / 15:50:40 injected 500 / 15:50:40 call arkiv_getBlockTiming / 15:50:40 injected 500 / 15:53:20 call arkiv_getBlockTiming / 15:53:22 call arkiv_query
+no failed checks

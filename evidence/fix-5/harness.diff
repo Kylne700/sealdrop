@@ -1,0 +1,159 @@
+diff -ru fq-F4/repo/qa-net/h.mjs fq-F5/repo/qa-net/h.mjs
+--- fq-F4/repo/qa-net/h.mjs	2026-10-17 17:47:26.185688420 +0300
++++ fq-F5/repo/qa-net/h.mjs	2026-10-17 18:44:59.507819973 +0300
+@@ -4,7 +4,7 @@
+ import { appendFileSync, writeFileSync } from 'node:fs'
+ export { sleep }
+ export const PROJECT = new URL('..', import.meta.url).pathname
+-export const OUT = '/tmp/fq-F4/out'
++export const OUT = '/tmp/fq-F5/out'
+ export function reporter(name) {
+   const fails = []
+   const say = (s) => { console.log(s); appendFileSync(`${OUT}/${name}.txt`, s + '\n') }
+@@ -12,7 +12,7 @@
+   return { say, check, fails }
+ }
+ export async function boot(kind = 'chromium', { headless = process.env.HEADLESS === '1' } = {}) {
+-  const proxy = await startProxy(PROJECT + 'dist')
++  const proxy = await startProxy(process.env.DIST ?? PROJECT + 'dist') // fix 5: DIST runs the before build
+   const browser = await launch(kind, kind === 'firefox' ? { headless, dumpio: true } : { headless, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
+   const browser2 = await launch(kind, kind === 'firefox' ? { headless } : { headless, args: ['--no-sandbox', '--disable-dev-shm-usage'] })
+   const problems = []
+@@ -69,7 +69,7 @@
+ /** Hold the shared live lock until release() is called (or this process dies). */
+ let lockSeq = 0
+ export async function lock() {
+-  const flag = `/tmp/fq-F4/out/rel.${process.pid}.${++lockSeq}`
++  const flag = `/tmp/fq-F5/out/rel.${process.pid}.${++lockSeq}`
+   const c = spawn('flock', ['/tmp/sealdrop-live.lock', 'sh', '-c', `echo got; while kill -0 ${process.pid} 2>/dev/null && [ ! -e ${flag} ]; do sleep 1; done`], { stdio: ['ignore', 'pipe', 'ignore'] })
+   await new Promise((res) => c.stdout.once('data', res))
+   return () => { writeFileSync(flag, '') }
+diff -ru fq-F4/repo/qa-net/l.mjs fq-F5/repo/qa-net/l.mjs
+--- fq-F4/repo/qa-net/l.mjs	2026-10-17 17:49:21.935847896 +0300
++++ fq-F5/repo/qa-net/l.mjs	2026-10-17 18:52:24.075337789 +0300
+@@ -17,6 +17,10 @@
+ const n500 = (h) => h.proxy.st.log.filter((l) => /injected 500/.test(l)).length
+ const stInfo = (p, s = ST) => p.$eval(s, (e) => `class="${e.className}" role=${e.getAttribute('role')} text="${(e.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 300)}"`).catch(() => '(no such element)')
+ const body = (p) => p.evaluate(() => document.body.innerText.replace(/\s+/g, ' ').trim()).catch(() => '(no body)')
++// fix 5: is the "Waiting for tips." card on screen; the text of the Lease line; the start of the fix-5 unknown-renewal text
++const noTips = (p) => p.$eval('[data-testid=no-tips]', (e) => !e.hidden && e.offsetParent !== null).catch(() => 'no element')
++const leaseText = (p) => p.evaluate(() => [...document.querySelectorAll('dt')].find((d) => d.textContent === 'Lease')?.nextElementSibling?.textContent ?? '(no Lease line)').catch(() => '(no page)')
++const RENEWAL_UNKNOWN = 'Whether the lease was renewed is unknown.'
+ const freeBtn = (p, t = 90_000) => p.waitForFunction(() => !document.querySelector('[data-testid=refresh]')?.disabled, { timeout: t }).then(() => true, () => false)
+ /** Records every distinct text of the given selectors until stop() is called. */
+ function sampler(p, sels, ms = 400) {
+@@ -312,7 +316,7 @@
+ sections.twotabs = async (h) => {
+   const { proxy } = h
+   say('setup (mkdue 3 days): ' + (await locked(['npx', 'tsx', 'qa-net/mkdue.mts', '3'])).slice(0, 200))
+-  const st = JSON.parse(readFileSync('/tmp/fq-F4/out/due-id.json', 'utf8'))
++  const st = JSON.parse(readFileSync('/tmp/fq-F5/out/due-id.json', 'utf8'))
+   const exp = async () => JSON.parse((await locked(['npx', 'tsx', 'qa-net/inboxexp.mts', st.identity.address, st.identity.inboxId])).split('\n').pop())
+   const e0 = await exp(); say(`inbox on chain before: ${JSON.stringify(e0)}`)
+   const ctx = await h.browser.createBrowserContext()
+@@ -320,12 +324,19 @@
+   const T1 = await mk('tab1'), T2 = await mk('tab2')
+   const sent0 = proxy.st.methods.eth_sendRawTransaction ?? 0
+   const s1 = sampler(T1, [ST, CHIP]), s2 = sampler(T2, [ST, CHIP])
++  if (process.env.SENDMODE) { proxy.ctl.sendMode = process.env.SENDMODE; proxy.ctl.trace = true; say(`proxy sendMode=${process.env.SENDMODE} (fix 5: forces an unknown renewal outcome)`) }
+   await withLock(async () => { await Promise.all([T1.goto(proxy.url + '#/newsroom'), T2.goto(proxy.url + '#/newsroom')]); await sleep(75_000) })
+   say(`tab1 sequence: ${s1.stop().join(' | ')}`); say(`tab2 sequence: ${s2.stop().join(' | ')}`)
+   say(`signed transactions the two tabs sent while opening: ${(proxy.st.methods.eth_sendRawTransaction ?? 0) - sent0}`)
+   say(`status tab1: ${await stInfo(T1)}`); say(`status tab2: ${await stInfo(T2)}`)
++  if (process.env.SENDMODE) say(`proxy log (sends): ${proxy.st.log.filter((l) => /sendRaw|forwarded|dropped/.test(l)).join(' / ')}`)
++  for (const [n, T] of [['tab1', T1], ['tab2', T2]]) {
++    const s = await txt(T, ST)
++    say(`${n}: unknown-renewal text shown=${s.includes(RENEWAL_UNKNOWN)}; Lease line "${(await leaseText(T)).slice(0, 170)}"`)
++    check(`fix 5 item 1, ${n}: the status does not say a renewal "could do it twice"`, !/could do it twice/.test(s), s.slice(0, 160))
++  }
+   const e1 = await exp(); say(`inbox on chain after: ${JSON.stringify(e1)} (days left ${e0.daysLeft} -> ${e1.daysLeft})`)
+-  await shot(T1, 'twotabs-tab1'); await shot(T2, 'twotabs-tab2')
++  await shot(T1, 'twotabs-tab1' + (process.env.TAG ?? '')); await shot(T2, 'twotabs-tab2' + (process.env.TAG ?? ''))
+   const text = 'SYNTHETIC TEST TIP L two tabs'
+   say('tip sent for both tabs: ' + (await shortTip(st.identity.address, st.identity.inboxId, 1440, text)).slice(0, 100))
+   const a = await waitFor(() => has(T1, text), 60_000), b = await waitFor(() => has(T2, text), 60_000)
+@@ -338,7 +349,7 @@
+ sections.duefail = async (h) => {
+   const { proxy } = h
+   say('setup (mkdue 3 days): ' + (await locked(['npx', 'tsx', 'qa-net/mkdue.mts', '3'])).slice(0, 200))
+-  const st = JSON.parse(readFileSync('/tmp/fq-F4/out/due-id.json', 'utf8'))
++  const st = JSON.parse(readFileSync('/tmp/fq-F5/out/due-id.json', 'utf8'))
+   const text = 'SYNTHETIC TEST TIP L waiting while the lease renewal fails'
+   say('tip already waiting in the inbox: ' + (await shortTip(st.identity.address, st.identity.inboxId, 1440, text)).slice(0, 90))
+   const ctx = await h.browser.createBrowserContext()
+@@ -348,7 +359,7 @@
+   const s = sampler(A, [ST, CHIP])
+   await A.goto(proxy.url + '#/newsroom'); await sleep(30_000)
+   say(`console, renewal answered "insufficient funds": ${s.stop().join(' | ')}`)
+-  say(`status ${await stInfo(A)}; tips shown=${(await tipTexts(A)).length}; inbox link shown=${Boolean(await A.$('[data-testid=inbox-link]'))}; body: ${(await body(A)).slice(0, 420)}`)
++  say(`status ${await stInfo(A)}; tips shown=${(await tipTexts(A)).length}; "Waiting for tips." card shown=${await noTips(A)}; inbox link shown=${Boolean(await A.$('[data-testid=inbox-link]'))}; body: ${(await body(A)).slice(0, 420)}`)
+   await shot(A, 'duefail-console')
+   const q0 = proxy.st.methods.arkiv_query ?? 0
+   await A.click(REFRESH).catch((e) => say('Refresh click failed: ' + e.message.slice(0, 80)))
+@@ -472,7 +483,8 @@
+   const s4 = sampler(A, [ST, CHIP])
+   await fresh(A, proxy.url + '#/newsroom'); await sleep(15_000)
+   say(`F429d console reloaded while the first query is answered 429 (Retry-After 120 s): ${s4.stop().join(' | ')}`)
+-  say(`F429d state: status ${await stInfo(A)}; Refresh clickable=${await A.$eval(REFRESH, (e) => !e.disabled).catch(() => 'no button')}; tips shown=${(await tipTexts(A)).length}; inbox link shown=${Boolean(await A.$('[data-testid=inbox-link]'))}`)
++  say(`F429d state: status ${await stInfo(A)}; Refresh clickable=${await A.$eval(REFRESH, (e) => !e.disabled).catch(() => 'no button')}; tips shown=${(await tipTexts(A)).length}; inbox link shown=${Boolean(await A.$('[data-testid=inbox-link]'))}; "Waiting for tips." card shown=${await noTips(A)}`)
++  check('fix 5 item 2, F429d: the link-only view shows no "Waiting for tips." card', (await noTips(A)) === false, (await txt(A, ST)).slice(0, 120))
+   const q0 = proxy.st.methods.arkiv_query ?? 0
+   await A.click(REFRESH).catch(() => {}); await sleep(Number(process.env.REFRESHWAIT ?? 6000))
+   say(`F429d Refresh pressed in that state: arkiv_query calls sent=${(proxy.st.methods.arkiv_query ?? 0) - q0}; tips shown=${(await tipTexts(A)).length}; status ${await stInfo(A)}`)
+@@ -481,6 +493,28 @@
+   say(`F429d after a second reload (no more 429): tips shown=${(await tipTexts(A)).length}; chip "${(await chip(A)).slice(0, 60)}"; status ${await stInfo(A)}`)
+ }
+ 
++// ---- fix 5, item 3: how often the console retries its catch-up while every HTTP call fails ---------------
++sections.f2q = async (h) => {
++  const { proxy } = h
++  const { A, creator, id } = await setup(h)
++  const text = 'SYNTHETIC TEST TIP L F2q tip during a long outage'
++  proxy.ctl.trace = true; proxy.ctl.fail500 = 1e9
++  const mark = proxy.st.log.length
++  say('F2q tip from a second process while every HTTP call answers 500: ' + (await shortTip(creator, id, 1440, text)).slice(0, 120))
++  const outage = Number(process.env.OUTAGE ?? 180)
++  await sleep(outage * 1000)
++  proxy.ctl.fail500 = 0
++  const calls = proxy.st.log.slice(mark).filter((l) => / call /.test(l)).map((l) => l.replace(' call ', ' '))
++  const per = {}; for (const l of calls) { const m = l.split(' ')[1]; per[m] = (per[m] ?? 0) + 1 }
++  say(`F2q HTTP calls in the outage (${outage} s after the tip was sent): ${calls.length} ${JSON.stringify(per)}; 500s injected ${n500(h)}`)
++  say(`F2q the calls with their time: ${calls.join(' | ')}`)
++  say(`F2q status at the end of the outage: ${await stInfo(A)}`)
++  const seen = await waitFor(() => has(A, text), 330_000, 1000)
++  say(`F2q after the outage ended: tip shows by itself=${seen !== null}${seen !== null ? ` after ${seen} s (data-source=${await srcOf(A, text)})` : ' (not within 330 s)'}; status ${await stInfo(A)}`)
++  await shot(A, `f2q-after${process.env.TAG ?? ''}`)
++  check('F2q the tip from the outage shows by itself once the RPC is back', seen !== null)
++}
++
+ const h = await boot(kind)
+ let code = 0
+ try {
+diff -ru fq-F4/repo/qa-net/mkdue.mts fq-F5/repo/qa-net/mkdue.mts
+--- fq-F4/repo/qa-net/mkdue.mts	2026-10-17 17:47:26.185688420 +0300
++++ fq-F5/repo/qa-net/mkdue.mts	2026-10-17 18:40:25.737351547 +0300
+@@ -1,4 +1,4 @@
+-// Makes a throwaway newsroom whose inbox has only <days> days left (so a console open triggers auto-renew). Writes /tmp/fq-F4/out/due-id.json (throwaway keys).
++// Makes a throwaway newsroom whose inbox has only <days> days left (so a console open triggers auto-renew). Writes /tmp/fq-F5/out/due-id.json (throwaway keys).
+ import '../scripts/load-env'
+ import { writeFileSync } from 'node:fs'
+ import { ExpirationTime } from '@arkiv-network/sdk'
+@@ -12,5 +12,5 @@
+ await fundAccount(localSigner(needKey('VITE_DEMO_SENDER_PRIVATE_KEY')), id.address, '0.02')
+ const signer = localSigner(id.evmPrivateKey!)
+ const r = await signer.client.createEntity({ payload: encodeInbox({ name: 'SYNTHETIC TEST newsroom (due)', description: 'QA only', publicKey: fromB64(id.boxPublicKey) }), contentType: INBOX_CONTENT_TYPE, attributes: inboxAttributes(id.inboxId), expires: ExpirationTime.fromDays(days) })
+-writeFileSync('/tmp/fq-F4/out/due-id.json', JSON.stringify({ identity: id, entity: r.entityKey }))
++writeFileSync('/tmp/fq-F5/out/due-id.json', JSON.stringify({ identity: id, entity: r.entityKey }))
+ console.log('inbox', id.inboxId, 'creator', id.address, 'entity', r.entityKey)
+diff -ru fq-F4/repo/qa-net/proxy2.mjs fq-F5/repo/qa-net/proxy2.mjs
+--- fq-F4/repo/qa-net/proxy2.mjs	2026-10-17 17:48:08.007913943 +0300
++++ fq-F5/repo/qa-net/proxy2.mjs	2026-10-17 18:40:25.737351547 +0300
+@@ -31,7 +31,7 @@
+     let calls
+     try { const j = JSON.parse(body); calls = Array.isArray(j) ? j : [j] } catch { calls = [] }
+     for (const c of calls) st.methods[c.method] = (st.methods[c.method] ?? 0) + 1
+-    if (calls.some((c) => c.method === 'arkiv_query') && !st.sampleQuery) { st.sampleQuery = body; try { writeFileSync('/tmp/fq-F4/out/sample-query.json', body) } catch {} }
++    if (calls.some((c) => c.method === 'arkiv_query') && !st.sampleQuery) { st.sampleQuery = body; try { writeFileSync('/tmp/fq-F5/out/sample-query.json', body) } catch {} }
+     const isQuery = calls.some((c) => c.method === 'arkiv_query')
+     if (ctl.trace) for (const c of calls) {
+       let extra = ''
