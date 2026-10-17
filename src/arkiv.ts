@@ -6,6 +6,7 @@ import { key as keyAttr, u64 } from '@arkiv-network/sdk/attr'
 import { and, eq, lt } from '@arkiv-network/sdk/query'
 import { custom, http, parseEther, webSocket, type Address, type EIP1193Provider, type Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
+import { socketClientCache } from 'viem/utils'
 import { APP, CHAIN_ID, FUND_AMOUNT_GLM, INBOX_LIFETIME_DAYS, PAGE_SIZE, RENEW_BELOW_DAYS, RPC_HTTP, RPC_WS, TIP_LIFETIME_CHOICES } from './config'
 import { INBOX_CONTENT_TYPE, TIP_CONTENT_TYPE, daysToBlocks, decodeInbox, encodeInbox, inboxAttributes, inboxPublicKey, keyFingerprint, tipAttributes, type InboxPayload, type InboxRef, type Timing } from './codec'
 
@@ -40,16 +41,18 @@ export type Reader = { http: PublicArkivClient; ws: () => PublicArkivClient; dro
 /** Queries go over HTTP; live events use a separate WebSocket client (created on first use). */
 export function createReader(opts: { rpcUrl?: string; wsUrl?: string } = {}): Reader {
   const httpClient = createPublicClient({ chain: tiramisu, transport: httpTransport(opts.rpcUrl ?? RPC_HTTP) })
+  const wsUrl = opts.wsUrl ?? RPC_WS
   let wsClient: PublicArkivClient | undefined
   return {
     http: httpClient,
     // viem retries a dropped socket five times and then gives up for good, silently (see watchHandovers), so it is switched off here.
-    ws: () => (wsClient ??= createPublicClient({ chain: tiramisu, transport: webSocket(opts.wsUrl ?? RPC_WS, { reconnect: false }) })),
+    // No request retries either: each one opens a new socket, and watchHandovers has its own backoff.
+    ws: () => (wsClient ??= createPublicClient({ chain: tiramisu, transport: webSocket(wsUrl, { reconnect: false, retryCount: 0 }) })),
     // viem keeps a dead socket client in a module cache until it is closed, so the next ws() would reuse it.
+    // Only a cached client is closed: asking the transport for its client would open one more socket just to close it.
     dropWs: () => {
-      const old = wsClient as { transport: { getRpcClient?: () => Promise<{ close(): void }> } } | undefined
       wsClient = undefined
-      old?.transport.getRpcClient?.().then((c) => c.close(), () => {})
+      for (const c of socketClientCache.values()) if (c.url === wsUrl) c.close()
     },
   }
 }
@@ -101,7 +104,8 @@ export async function injectedSigner(provider: EIP1193Provider, hooks?: { before
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 /** Several visitors share the demo key, so nonces (tx nonce and entity nonce) can collide. */
-const RETRYABLE = /nonce|underpriced|replace|already known|not found|EntityNotFound|no entity|concurrent|timed out|timeout|429|rate limit|Missing or invalid parameters/i
+/** Not "already known": the node holds this very transaction then, so a re-signed one would be a second copy (see mayHaveBeenSent). */
+const RETRYABLE = /nonce|underpriced|replace|not found|EntityNotFound|no entity|concurrent|timed out|timeout|\b429\b|rate limit|Missing or invalid parameters/i
 
 /** Scripts set this to record which errors made a write retry (used as evidence in the integration test). */
 export const retryHook: { onRetry?: (attempt: number, message: string) => void } = {}
@@ -111,7 +115,8 @@ export async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<
     try {
       return await fn()
     } catch (e) {
-      const text = `${(e as Error)?.message ?? e} ${(e as { cause?: Error })?.cause?.message ?? ''}`
+      // Hex is cut first: the signed transaction quoted in an error can hold "429" or other digits that read as a reason.
+      const text = `${(e as Error)?.message ?? e} ${(e as { cause?: Error })?.cause?.message ?? ''}`.replace(/0x[0-9a-f]{12,}/gi, '0x')
       if (i >= attempts || !RETRYABLE.test(text) || mayHaveBeenSent(e)) throw e
       retryHook.onRetry?.(i, text.split('\n')[0]?.slice(0, 200) ?? '')
       await sleep(400 * i + Math.random() * 600)
@@ -143,11 +148,15 @@ export class PlainError extends Error {}
 export function mayHaveBeenSent(e: unknown): boolean {
   if (/reverted/i.test((e as Error)?.message ?? '')) return false
   for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) {
-    const c = cur as { txHash?: unknown; name?: string; body?: { method?: string } }
+    const c = cur as { txHash?: unknown; name?: string; message?: string; body?: { method?: string } }
     if (c.txHash || c.name === 'WaitForTransactionReceiptTimeoutError') return true
-    // Only a lost connection: an RPC error answer ("nonce too low", "already known") means the node rejected it,
+    // The node already holds this very transaction: the browser resent a request whose answer was lost.
+    if (/already known/i.test(c.message ?? '')) return true
+    // Only a lost connection or no answer in time: an RPC error answer ("nonce too low") means the node rejected it,
     // and so does a 429 to the send, which failFast throws and viem wraps like a lost connection.
-    if ((c.name === 'HttpRequestError' || c.name === 'TimeoutError') && /^(eth|wallet)_send(Raw)?Transaction$/.test(c.body?.method ?? '')) return !rateLimit(c)
+    // A TimeoutError keeps the request only in its message.
+    const method = c.body?.method ?? /"method":"(\w+)"/.exec(c.message ?? '')?.[1]
+    if ((c.name === 'HttpRequestError' || c.name === 'TimeoutError') && /^(eth|wallet)_send(Raw)?Transaction$/.test(method ?? '')) return !rateLimit(c)
   }
   return false
 }
@@ -158,7 +167,7 @@ export function explainError(e: unknown): string {
   if (mayHaveBeenSent(e)) {
     const hash = (e as { txHash?: string }).txHash
     // Not "the answer was lost": the SDK also lands here when a receipt came back but did not match the batch.
-    return `The result of this transaction${hash ? ` (${hash})` : ''} is unknown. It may have been sent. Check the newsroom console, or the Data Explorer link, before you send it again.`
+    return `The result of this transaction is unknown: it may have gone through, so trying again could do it twice.${hash ? ` Look up its hash ${hash} on the Arkiv Data Explorer to see whether it did.` : ''}`
   }
   const limited = rateLimit(e)
   if (limited) {
@@ -316,10 +325,13 @@ export function sendTip(reader: Reader, signer: Signer, inbox: InboxView, sealed
     // Two sends with the same nonce can replace each other and both callers get the survivor's receipt.
     // Reading the tip back and comparing the bytes catches a write that was silently dropped.
     let stored: { payload?: Uint8Array; expiresAt?: bigint } | null = null
-    for (let i = 0; i < 4 && !stored; i++) {
+    let readError: unknown
+    for (let i = 0; entityKey && i < 4 && !stored; i++) {
       if (i) await sleep(400)
-      stored = (await reader.http.getEntity(entityKey).catch(() => null)) as { payload?: Uint8Array; expiresAt?: bigint } | null
+      stored = (await reader.http.getEntity(entityKey).catch((e) => ((readError = e), null))) as { payload?: Uint8Array; expiresAt?: bigint } | null
     }
+    // No answer (a 5xx, a spent budget, indexer lag) proves nothing: the tip may be on chain, so this must not be retried.
+    if (entityKey && !stored) throw Object.assign(new Error('The tip was written, but it could not be read back.', { cause: readError }), { txHash: result.txHash })
     if (!stored?.payload || stored.payload.length !== sealed.length || !stored.payload.every((b, i) => b === sealed[i])) {
       throw new Error('This tip was replaced by another transaction from the same sender key, so it was not sent. Send it again.')
     }
@@ -391,16 +403,19 @@ export function tipsSince(reader: Reader, inboxKey: Hex, sinceBlock: bigint, opt
  * Reads one entity and returns it only if it is a tip for one of the given inboxes. A pushed event can
  * arrive a moment before the indexer serves the entity, so a miss is retried briefly. A spent query budget
  * is thrown at once (no retry: each one would cost more), so the caller can say so and read the tip later.
+ * Any other failure (a 5xx, a lost connection) is thrown after the tries: it must not read as "no tip".
  */
 export async function getTip(reader: Reader, entityKey: Hex, inboxKeys: Hex[], tries = 4): Promise<TipView | null> {
+  let last: unknown
   for (let i = 0; i < tries; i++) {
-    const entity = (await reader.http.getEntity(entityKey).catch((e) => { if (rateLimit(e)) throw e; return null })) as Row | null
+    const entity = (await reader.http.getEntity(entityKey).catch((e) => { if (rateLimit(e)) throw e; last = e; return null })) as Row | null
     if (entity) {
       const tip = toTip(entity)
       return tip && tip.inbox && inboxKeys.some((k) => k.toLowerCase() === tip.inbox!.toLowerCase()) ? tip : null
     }
     await sleep(400)
   }
+  if (last && (last as Error).name !== 'NoEntityFoundError') throw last
   return null
 }
 
@@ -448,7 +463,8 @@ export function watchHandovers(reader: Reader, newsroom: Address, h: {
       onError: lost, // the SDK only reports socket and subscription failures here
     })
     // Answers once the socket is open (after the subscribe request on it) and fails when it is not.
-    const probe = () => ws.getBlockNumber({ cacheTime: 0 }).then(() => undefined, lost)
+    // viem puts no timeout on the handshake, so a hung upgrade would neither answer nor fail without the deadline.
+    const probe = () => new Promise((ok, no) => { const t = setTimeout(no, 15_000); ws.getBlockNumber({ cacheTime: 0 }).then(ok, no).finally(() => clearTimeout(t)) }).then(() => undefined, lost)
     void probe().then(() => {
       if (down || stopped) return
       failures = 0

@@ -34,7 +34,7 @@ function fakeNode(fault: (method: string) => Response | Error | undefined) {
 const send = () => sendTip(createReader({ rpcUrl: URL_ }), localSigner(generatePrivateKey(), URL_),
   { key: HASH, owner: '0x000000000000000000000000000000000000dEaD' } as never, new Uint8Array(64), 7)
 
-const UNKNOWN = 'It may have been sent. Check the newsroom console, or the Data Explorer link, before you send it again.'
+const UNKNOWN = 'it may have gone through, so trying again could do it twice'
 
 describe('fix stage 3', () => {
   afterEach(() => { vi.unstubAllGlobals() })

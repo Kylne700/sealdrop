@@ -1,5 +1,5 @@
 // #/newsroom: create a throwaway newsroom (or use a wallet), open an inbox, receive and decrypt tips.
-import { formatEther, parseEther, type EIP1193Provider } from 'viem'
+import { formatEther, parseEther, type Address, type EIP1193Provider } from 'viem'
 import { DEMO_SENDER_ADDRESS, FAUCET_URL, INBOX_LIFETIME_DAYS, PIN_DAYS, RENEW_BELOW_DAYS, addressUrl, entityUrl, ownerUrl } from '../config'
 import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, keyFingerprint, secondsLeft, type Timing } from '../codec'
 import { SEAL_OVERHEAD, boxKeyPairFromSecret, fromB64, openText, sealedDigest } from '../crypto'
@@ -94,6 +94,9 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   let timing: Timing | undefined
   let inbox: InboxView | undefined
   let listening = false
+  /** The last read error shown: a later successful read replaces it (L-02), a message about anything else stays. */
+  let stale = ''
+  const readFailed = (text: string) => { status.error(text); stale = text }
 
   const balanceEl = h('span', { 'data-testid': 'balance' }, 'checking...')
   const body = h('div')
@@ -220,32 +223,49 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     restore()
   }
 
+  /** A tip past its expiry block is gone from Arkiv: Keep would fail with "Try again" and Burn would "burn" nothing (L-06). */
+  async function expired(tip: TipView) {
+    timing = await getTiming(reader)
+    if (tip.expiresAt > timing.head) return false
+    dropTip(tip.key)
+    status.info('This tip has expired, so it is no longer on Arkiv.')
+    return true
+  }
+  function actionFailed(tip: TipView, e: unknown) {
+    if (!/expired at block|no entity/i.test(String((e as Error)?.message))) return status.error(explainError(e))
+    dropTip(tip.key)
+    status.info('This tip is no longer on Arkiv: it expired, or it was burned already.')
+  }
+
   async function burn(tip: TipView) {
     if (!confirm('Burn this tip? Arkiv deletes the entity. The ciphertext stays in chain history, which is why it is sealed.')) return
     try {
+      if (await expired(tip)) return
       status.info('Burning the tip...')
       await burnTip(await getSigner(), tip.key)
       dropTip(tip.key)
       status.info('Burned.')
     } catch (e) {
-      status.error(explainError(e))
+      actionFailed(tip, e)
     }
   }
 
   async function pin(tip: TipView) {
     try {
+      if (await expired(tip)) return
       status.info(`Extending the tip's lifetime to ${PIN_DAYS} days from now...`)
       await pinTip(await getSigner(), tip.key, PIN_DAYS)
-      const fresh = inbox ? await getTip(reader, tip.key, [inbox.key]) : null
+      // The extension is done: a failed read here only leaves the old expiry on the row.
+      const fresh = inbox ? await getTip(reader, tip.key, [inbox.key]).catch(() => null) : null
       if (fresh) addTips([fresh], 'sweep')
       status.info(`Kept: this tip now expires ${PIN_DAYS} days from now.`)
     } catch (e) {
-      status.error(explainError(e))
+      actionFailed(tip, e)
     }
   }
 
   // ---- reading the inbox --------------------------------------------------------------------------------
-  async function fullSweep(live: InboxView) {
+  async function fullSweep(live: InboxView): Promise<boolean> {
     const restore = keepFocus(tipsSection) // a disabled button drops focus
     refreshBtn.disabled = true
     try {
@@ -254,10 +274,13 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       queries.add('Tips handed to me', swept.query)
       timing = t
       addTips(swept.tips, 'sweep')
+      for (const [key, { tip }] of tips) if (tip.expiresAt <= t.head) dropTip(key) // expired: Arkiv no longer has them (L-06)
       setLastSeen(live.key, t.head)
       status.info(swept.tips.length ? `${swept.tips.length} tip${swept.tips.length === 1 ? '' : 's'} on Arkiv${swept.truncated ? ' (showing the first pages only)' : ''}.` : 'No tips yet.')
+      return true
     } catch (e) {
-      status.error(explainError(e))
+      readFailed(explainError(e))
+      return false
     } finally {
       refreshBtn.disabled = false
       restore()
@@ -269,8 +292,11 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     listening = true
     let retry: ReturnType<typeof setTimeout> | undefined
     onLeave(() => clearTimeout(retry))
-    /** One pending catch-up at a time, however many events hit the spent budget. */
-    const retryWhenBudgetRenews = (seconds: number) => { retry ??= setTimeout(() => { retry = undefined; void catchUp() }, (Math.max(60, seconds) + 5) * 1000) }
+    /** One pending catch-up at a time, however many reads fail: when the query budget renews, or in 20 s after any other failure. */
+    const catchUpLater = (e: unknown) => {
+      const limited = rateLimit(e)
+      retry ??= setTimeout(() => { retry = undefined; void catchUp() }, limited ? (Math.max(60, limited.retryAfterSeconds) + 5) * 1000 : 20_000)
+    }
     // Tips created since the last sweep, read in one query. Used after a long sleep and after a reconnect, because events are not replayed.
     const catchUp = async () => {
       try {
@@ -281,10 +307,10 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         timing = t
         addTips(r.tips, 'sweep')
         setLastSeen(live.key, t.head)
+        if ([stale, 'No tips yet.'].includes(status.el.textContent ?? '')) status.info(tips.size ? `${tips.size} tip${tips.size === 1 ? '' : 's'} on Arkiv.` : 'No tips yet.')
       } catch (e) {
-        const limited = rateLimit(e)
-        if (limited) retryWhenBudgetRenews(limited.retryAfterSeconds)
-        status.error(explainError(e))
+        catchUpLater(e)
+        readFailed(explainError(e))
       }
     }
     const stop = watchHandovers(reader, identity.address, {
@@ -295,10 +321,12 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
           addTips([tip], 'live')
           status.info('A new tip just arrived.')
         } catch (e) {
+          // Never dropped silently (L-01): the catch-up reads it once the RPC answers again.
+          catchUpLater(e)
           const limited = rateLimit(e)
-          if (!limited) return status.error(explainError(e))
-          retryWhenBudgetRenews(limited.retryAfterSeconds)
-          status.error(`A new tip may have arrived, but the free query budget of the public Arkiv RPC is used up, so it cannot be read yet. It loads by itself when the budget renews (in about ${Math.max(1, Math.ceil(limited.retryAfterSeconds / 60))} min).`)
+          readFailed(limited
+            ? `A new tip may have arrived, but the free query budget of the public Arkiv RPC is used up, so it cannot be read yet. It loads by itself when the budget renews (in about ${Math.max(1, Math.ceil(limited.retryAfterSeconds / 60))} min).`
+            : `A new tip may have arrived, but it cannot be read yet. ${explainError(e)} It loads by itself once the RPC answers again.`)
         }
       },
       onState: (state) => {
@@ -365,7 +393,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         await ensureFunds()
         status.info('Creating the inbox entity on Arkiv (about 5 s)...')
         await createInbox(await getSigner(), { inboxId: identity.inboxId, name: name.value, description: desc.value, publicKey: fromB64(identity.boxPublicKey) })
-        await load()
+        await open() // not load(): a failed read here would offer "Create the inbox" again, for an inbox that exists
         const heading = body.querySelector('h2')
         if (lost() && heading) focusFromScript(heading)
       } catch (e) {
@@ -378,10 +406,25 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     status.clear()
   }
 
-  function showInbox(live: InboxView) {
+  function linkBlock(creator: Address) {
     // The key fingerprint in the link lets the send page refuse any other key, even from a dishonest RPC.
-    const url = location.origin + location.pathname + formatSendHash({ creator: live.creator, inboxId: identity.inboxId, fp: keyFingerprint(fromB64(identity.boxPublicKey)) })
-    const field = h('input', { id: 'inbox-link', type: 'text', readonly: true, value: url, 'data-testid': 'inbox-link' })
+    const url = location.origin + location.pathname + formatSendHash({ creator, inboxId: identity.inboxId, fp: keyFingerprint(fromB64(identity.boxPublicKey)) })
+    return h('div', null,
+      h('label', { for: 'inbox-link' }, 'Your inbox link: give it to sources'),
+      h('div', { class: 'row linkrow' }, h('input', { id: 'inbox-link', type: 'text', readonly: true, value: url, 'data-testid': 'inbox-link' }), copyButton(() => url, 'Copy inbox link', 'big')),
+    )
+  }
+
+  /** Arkiv could not be read (L-08): the link comes from the keys in this browser, so it can still be handed out. */
+  function showLinkOnly() {
+    body.replaceChildren(h('section', { class: 'inbox' },
+      h('h2', null, 'Inbox not read yet'),
+      h('p', { class: 'desc' }, 'Arkiv could not be read, so the inbox, its lease and the tips are not shown yet. If the inbox exists, this is its link. Refresh tries again.'),
+      linkBlock(identity.address),
+    ))
+  }
+
+  function showInbox(live: InboxView) {
     const renew = h('button', { type: 'button', class: 'secondary', 'data-testid': 'renew' }, 'Renew now')
     renew.addEventListener('click', async () => {
       const restore = keepFocus(body) // a disabled button drops focus, and showInbox() builds a new "Renew now"
@@ -404,10 +447,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       h('section', { class: 'inbox', 'data-testid': 'inbox' },
         h('h2', null, h('bdi', { dir: 'auto' }, live.payload.name)),
         h('p', { class: 'desc' }, live.payload.description || 'No description.'),
-        h('div', null,
-          h('label', { for: 'inbox-link' }, 'Your inbox link: give it to sources'),
-          h('div', { class: 'row linkrow' }, field, copyButton(() => url, 'Copy inbox link', 'big')),
-        ),
+        linkBlock(live.creator),
         h('dl', { class: 'facts' },
           h('dt', null, '$creator'), h('dd', null, hex(live.creator, { href: addressUrl(live.creator), label: 'creator address' })),
           h('dt', null, '$owner'), h('dd', null, hex(live.owner, { href: ownerUrl(live.owner), label: 'owner address' })),
@@ -429,11 +469,31 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       status.clear()
       return
     }
-    inbox = await leaseCheck(found.inbox)
+    // A failed renewal must not take the console with it (L-07): the inbox is shown as it was read.
+    const read = found.inbox
+    let leaseError: unknown
+    inbox = await leaseCheck(read).catch((e) => ((leaseError = e), read))
     showInbox(inbox)
     listen(inbox)
     refreshBtn.onclick = () => fullSweep(inbox!)
-    await fullSweep(inbox)
+    // After the sweep, whose "N tips on Arkiv." would hide it; a failed sweep says what to do itself.
+    if ((await fullSweep(inbox)) && leaseError) status.error(`The inbox lease could not be checked or renewed. ${explainError(leaseError)} "Renew now" under Lease tries again.`)
+  }
+
+  /** Every way into the console. When Arkiv cannot be read, the link, the reason and a working Refresh stay (L-08). */
+  async function open() {
+    const restore = keepFocus(tipsSection) // a disabled button drops focus
+    refreshBtn.disabled = true
+    try {
+      await load()
+    } catch (e) {
+      showLinkOnly()
+      refreshBtn.onclick = () => open()
+      readFailed(explainError(e))
+    } finally {
+      refreshBtn.disabled = false
+      restore()
+    }
   }
 
   // ---- page ---------------------------------------------------------------------------------------------------
@@ -467,9 +527,5 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     settings,
   )
 
-  try {
-    await load()
-  } catch (e) {
-    status.error(explainError(e))
-  }
+  await open()
 }
