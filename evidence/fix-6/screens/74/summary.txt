@@ -1,0 +1,10 @@
+states: 1, screenshots: 4 (4 files, 0.2 MB) in /tmp/fq-F6/shots-6-74/shots
+axe: 0 violations in 0 of 4 state/viewport/theme combinations; rules: {}
+horizontal overflow (scrollWidth > clientWidth): 0 combinations
+status line a whole viewport above the first tip button (Keep/Burn), console only: 0 combinations
+clipped text (overflow hidden/clip, not inputs): 0
+text in scrolling containers (overflow auto/scroll, not inputs): 0
+contrast scan below AA: 0
+console/page errors: 0
+UNREACHED states (the marker text did not appear): 0
+FAILED steps: 0

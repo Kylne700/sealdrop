@@ -1,0 +1,32 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+NAV newsroom http://127.0.0.1:34417/#/newsroom
+browser chromium Chrome/154.0.8037.92; inbox inbox-fpmc5g; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+NAV source about:blank
+NAV source http://127.0.0.1:34417/#/send/0xDfc4f54c14e8fed087B7FE846f230FF01531Fc7f/inbox-f
+start: 500s injected so far 0 (must be 0); status A: class="status" role=status text="No tips yet."
+F2a console Refresh under 500: button free again=true after 1.7 s; sequence: 0.0s status="No tips yet." | 0.0s live-status="Live: listening for new tips on a WebSocket. This page does not poll." | 0.4s status="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+F2a status element: class="status error" role=alert text="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+F2b second process sends a tip straight to the chain: tip 0xca0444e534b5a364eddbb5ee3918a4e415eb46644a0a440fcdf97d2955cffbea tx 0x78fac4b8d8adf9ecadc7a5abca2df6423a9a25497fc756af232879f605c02638
+F2b live tip while HTTP answers 500: visible in the console=false (not within 30 s); status now: class="status error" role=alert text="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."; sequence: 0.0s status="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings." | 0.0s live-status="Live: listening for new tips on a WebSocket. This page does not poll." | 28.8s status="A new tip may have arrived, but the RPC did not answer properly, so it cannot be read yet. It loads by itself once the RPC answers again." | 49.0s status="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+F2c send under 500: 0.0s status="" | 0.0s progress="" | 0.0s send="Seal and send" | 0.4s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 2.5s progress="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+F2c progress element: class="status error" role=alert text="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."; send enabled=true; result shown=false; textarea still holds 39 characters
+NAV source about:blank
+NAV source http://127.0.0.1:34417/#/send/0xDfc4f54c14e8fed087B7FE846f230FF01531Fc7f/inbox-f
+F2d send page load under 500: 0.0s status="(none)" | 0.4s status="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+F2d body: Skip to content Sealdrop Open a newsroom Demo Desk Source Send a tip The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings. Settings Arkiv Tiramisu testnet demo. Send made-up messages only. Built for the Arkiv Global Tour Stop; MIT licensed. Custom RPC: 127.0.0.1:34417. Change it under Settings.; settings offered=true
+500s injected in total: 24
+F2e 35 s after the outage ended, no user action: live tip visible=true; status: class="status" role=status text="1 tip on Arkiv."; 0.0s status="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings." | 0.0s live-status="Live: listening for new tips on a WebSocket. This page does not poll." | 10.2s status="1 tip on Arkiv."
+F2e after Refresh: live tip visible=true (data-source=sweep); status: class="status" role=status text="1 tip on Arkiv."
+NAV source about:blank
+NAV source http://127.0.0.1:34417/#/send/0xDfc4f54c14e8fed087B7FE846f230FF01531Fc7f/inbox-f
+F2e after the outage, Send again on a reloaded page: copies in the console=1
+PASS F2 no copy of the tip that failed under 500 sneaks in; pressing Send again gives exactly one: copies=1
+PASS F2 a live tip that arrived during the outage is visible without any user action once the RPC is back: during outage=false, 35 s after=true
+page problems (errors+warnings): 27: source pageerror: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document. | newsroom console.error: Failed to load resource: the server responded with a status of 500 (Internal Server Error) | source console.error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+proxy: forwarded arkiv_query=10 units=1000 real429=0; methods {"arkiv_getBlockTiming":16,"arkiv_query":20,"eth_getBalance":4,"eth_fillTransaction":3,"eth_getTransactionCount":3,"eth_getBlockByNumber":4,"eth_maxPriorityFeePerGas":3,"eth_estimateGas":3,"eth_sendRawTransaction":3,"eth_getTransactionReceipt":7,"eth_blockNumber":6,"eth_getTransactionByHash":3,"eth_call":7}
+proxy log tail: 18:47:20 injected 500 / 18:47:34 injected 500 / 18:47:34 injected 500 / 18:47:40 injected 500 / 18:47:40 injected 500 / 18:48:41 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0x2e4f350af5c468f4eb3ace89946ea9e14506fba09e6a29f6f6dc7819d116b451"}
+PAGE CLOSE newsroom
+DETACHED newsroom
+PAGE CLOSE source
+DETACHED source
+no failed checks

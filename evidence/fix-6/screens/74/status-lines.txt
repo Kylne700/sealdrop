@@ -1,0 +1,3 @@
+## 74-send-replaced  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | This tip was replaced by another transaction from the same sender key, so it was not sent. Send it again.

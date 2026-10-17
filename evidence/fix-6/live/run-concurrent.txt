@@ -1,0 +1,23 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+NAV newsroom http://127.0.0.1:34605/#/newsroom
+browser chromium Chrome/154.0.8037.92; inbox inbox-b9hdjq; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+NAV source about:blank
+NAV source http://127.0.0.1:34605/#/send/0x58b66cfD97F975Fa928D9c1E13f14ad031c77aFD/inbox-b
+NAV source about:blank
+NAV source http://127.0.0.1:34605/#/send/0x58b66cfD97F975Fa928D9c1E13f14ad031c77aFD/inbox-b
+source 1 status: class="status" role=status text=""
+source 2 status: class="status" role=status text=""
+concurrent: send-result shown on source 1 = true, source 2 = true
+concurrent: proxy trace: 18:37:31 call eth_sendRawTransaction nonce=774 hash=0xbf7ef9a3c6 / 18:37:31 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0xbf7ef9a3c6be3c45ce06588928398629887e8d149e156d596728cb5efbeb4daa"} / 18:37:32 call eth_sendRawTransaction nonce=774 hash=0x8a47c5961a / 18:37:32 send answer 200 {"jsonrpc":"2.0","id":9,"error":{"code":-32000,"message":"replacement transaction underpriced"}} / 18:37:38 call eth_sendRawTransaction nonce=775 hash=0xbc099599f7 / 18:37:38 send answer 200 {"jsonrpc":"2.0","id":21,"result":"0xbc099599f770b5ff288120c21331a825fe5ea175fafcf382f61605a16cd38649"}
+console shows both tips after 0.013 s; copies one=1 two=1
+PASS concurrent: both tips arrive, exactly one copy each: one=1 two=1
+page problems (errors+warnings): 2: source pageerror: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.
+proxy: forwarded arkiv_query=10 units=1000 real429=0; methods {"arkiv_getBlockTiming":7,"arkiv_query":10,"eth_getBalance":4,"eth_fillTransaction":4,"eth_getTransactionCount":6,"eth_getBlockByNumber":10,"eth_maxPriorityFeePerGas":6,"eth_estimateGas":6,"eth_sendRawTransaction":5,"eth_getTransactionReceipt":12,"eth_blockNumber":12,"eth_getTransactionByHash":4,"eth_call":4}
+proxy log tail: 18:37:39 call eth_getBlockByNumber / 18:37:40 call arkiv_query / 18:37:43 call eth_blockNumber / 18:37:43 call eth_getTransactionReceipt / 18:37:43 call arkiv_query / 18:37:43 call arkiv_getBlockTiming
+PAGE CLOSE newsroom
+DETACHED newsroom
+PAGE CLOSE source
+DETACHED source
+PAGE CLOSE source
+DETACHED source
+no failed checks

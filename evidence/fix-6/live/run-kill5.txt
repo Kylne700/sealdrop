@@ -1,0 +1,57 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+NAV newsroom http://127.0.0.1:41349/#/newsroom
+browser chromium Chrome/154.0.8037.92; inbox inbox-euwbm8; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+=== network killed during send, mode before: connection cut before the signed transaction leaves the proxy
+NAV source about:blank
+NAV source http://127.0.0.1:41349/#/send/0xCC9010106790f9B10D149C120781A7407a393bd6/inbox-e
+before: outcome=alert after 5.1 s; proxy dropped 3 send(s), forwarded-then-dead 0; result shown=false; send button enabled=true; progress element: class="status error" role=alert text="The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "What can anyone see on Arkiv for this inbox?" to see whether it did."
+before: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 3.8s progress="The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "
+before: network back, console Refresh: copies of this tip=0 (data-source=undefined)
+before: user presses Send again: class="status" role=status text=""; result shown=true
+before: after the second Send: copies=1
+PASS kill before: tip never lost silently (told it failed, or delivered): result shown=false, copies after network back=0
+PASS kill before: no duplicate after the user's retry: copies=1
+=== network killed during send, mode after: transaction forwarded to the node, the answer is lost
+NAV source about:blank
+NAV source http://127.0.0.1:41349/#/send/0xCC9010106790f9B10D149C120781A7407a393bd6/inbox-e
+after: outcome=alert after 5.8 s; proxy dropped 3 send(s), forwarded-then-dead 0; result shown=false; send button enabled=true; progress element: class="status error" role=alert text="The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "What can anyone see on Arkiv for this inbox?" to see whether it did."
+after: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 4.3s progress="The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "
+after: network back, console Refresh: copies of this tip=1 (data-source=live)
+after: user presses Send again: class="status" role=status text=""; result shown=true
+after: after the second Send: copies=2
+PASS kill after: tip never lost silently (told it failed, or delivered): result shown=false, copies after network back=1
+FAIL kill after: no duplicate after the user's retry: copies=2
+=== network killed during send, mode then-dead: transaction answered normally, then every HTTP call fails for 25 s (receipt polling)
+NAV source about:blank
+NAV source http://127.0.0.1:41349/#/send/0xCC9010106790f9B10D149C120781A7407a393bd6/inbox-e
+then-dead: outcome=result after 33.2 s; proxy dropped 0 send(s), forwarded-then-dead 1; result shown=true; send button enabled=false; progress element: class="status" role=status text=""
+then-dead: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 31.8s progress=""
+then-dead: network back, console Refresh: copies of this tip=1 (data-source=sweep)
+PASS kill then-dead: tip never lost silently (told it failed, or delivered): result shown=true, copies after network back=1
+PASS kill then-dead: no duplicate after the user's retry: copies=1
+=== network killed during send, mode after-hang: transaction forwarded to the node, the answer never comes (the request times out)
+NAV source about:blank
+NAV source http://127.0.0.1:41349/#/send/0xCC9010106790f9B10D149C120781A7407a393bd6/inbox-e
+after-hang: outcome=alert after 24.4 s; proxy dropped 1 send(s), forwarded-then-dead 0; result shown=false; send button enabled=true; progress element: class="status error" role=alert text="The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "What can anyone see on Arkiv for this inbox?" to see whether it did."
+after-hang: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 22.9s progress="The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "
+after-hang: network back, console Refresh: copies of this tip=1 (data-source=live)
+after-hang: user presses Send again: class="status" role=status text=""; result shown=true
+after-hang: after the second Send: copies=2
+PASS kill after-hang: tip never lost silently (told it failed, or delivered): result shown=false, copies after network back=1
+FAIL kill after-hang: no duplicate after the user's retry: copies=2
+=== network killed during send, mode after-once: transaction forwarded, only the first answer is lost (a resend gets the real answer)
+NAV source about:blank
+NAV source http://127.0.0.1:41349/#/send/0xCC9010106790f9B10D149C120781A7407a393bd6/inbox-e
+after-once: outcome=result after 7.3 s; proxy dropped 1 send(s), forwarded-then-dead 0; result shown=true; send button enabled=false; progress element: class="status" role=status text=""
+after-once: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 6.0s progress=""
+after-once: network back, console Refresh: copies of this tip=1 (data-source=live)
+PASS kill after-once: tip never lost silently (told it failed, or delivered): result shown=true, copies after network back=1
+PASS kill after-once: no duplicate after the user's retry: copies=1
+page problems (errors+warnings): 31: source pageerror: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document. | source console.error: Failed to load resource: net::ERR_EMPTY_RESPONSE | newsroom console.error: Failed to load resource: net::ERR_EMPTY_RESPONSE
+proxy: forwarded arkiv_query=29 units=2900 real429=0; methods {"arkiv_getBlockTiming":24,"arkiv_query":37,"eth_getBalance":4,"eth_fillTransaction":10,"eth_getTransactionCount":10,"eth_getBlockByNumber":11,"eth_maxPriorityFeePerGas":10,"eth_estimateGas":10,"eth_sendRawTransaction":15,"eth_getTransactionReceipt":17,"eth_blockNumber":28,"eth_getTransactionByHash":7,"eth_call":8}
+proxy log tail: 18:52:20 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0xade8681f953d92d7f79d60d39b5c33cda06f0f2eacbfe655e87bba9d9e67986b"} / 18:52:20 tx forwarded, answer withheld until the client gives up / 18:53:12 send answer 200 {"jsonrpc":"2.0","id":17,"result":"0xfa26c30b620d4fa5991ed64c6fc70bf907302b45f33127b6cc25e20b7d49a708"} / 18:53:30 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0x0deb8d418700563978d99025426e13ec81e8ac6525b351b5a94799583fe8360a"} / 18:53:30 tx forwarded, only this first answer dropped / 18:53:31 send answer 200 {"jsonrpc":"2.0","id":9,"error":{"code":-32000,"message":"already known"}}
+PAGE CLOSE newsroom
+DETACHED newsroom
+PAGE CLOSE source
+DETACHED source
+FAILS: kill after: no duplicate after the user's retry; kill after-hang: no duplicate after the user's retry

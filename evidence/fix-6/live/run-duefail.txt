@@ -1,0 +1,18 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+setup (mkdue 3 days): inbox inbox-x5wbxq creator 0x4a8238Dcf447370D40F61751E39786AFEa920Bc4 entity 0xa8410c284128198677915f5e03863bd9262b13d869191ec40d9264658da692e7
+tip already waiting in the inbox: tip 0x4d74cebb0debe57f220200770aa615c2609b1c430ceaeb680f22ca044afdc268 tx 0xa3b30e98910afe
+NAV console http://127.0.0.1:36991/#/newsroom
+console, renewal answered "insufficient funds": 0.0s status="(none)" | 0.1s live-status="Live updates start once the inbox exists." | 0.7s status="Reading your inbox from Arkiv..." | 8.9s status="The inbox lease is running low, extending it for another 7 days..." | 11.0s live-status="Connecting to the live feed..." | 12.3s status="The inbox lease could not be checked or renewed. This wallet has no testnet GLM left. Get some at the Arkiv faucet (https://hub.arkiv.network/faucet)." | 14.3s live-status="Live: listening for new tips on a WebSocket. This page does not poll."
+status class="status error" role=alert text="The inbox lease could not be checked or renewed. This wallet has no testnet GLM left. Get some at the Arkiv faucet (https://hub.arkiv.network/faucet). "Renew now" under Lease tries again."; tips shown=1; inbox link shown=true; body: Skip to content Sealdrop Open a newsroom Demo Desk Source Newsroom console The inbox lease could not be checked or renewed. This wallet has no testnet GLM left. Get some at the Arkiv faucet (https://hub.arkiv.network/faucet). "Renew now" under Lease tries again. Address 0x4a82 38Dcf447370D40F61751E39786AFEa92 0Bc4 (throwaway, generated in this browser) Balance 0.0199 GLM faucet Export key file Forget this newsroom Ex
+Refresh pressed: arkiv_query calls sent=1; tips shown=1; status class="status" role=status text="1 tip on Arkiv."; button disabled=false
+PASS failed renewal: the tip already in the inbox is still readable (Refresh works)
+NAV console about:blank
+NAV console http://127.0.0.1:36991/#/newsroom
+after the key has funds again and the page is reloaded: tips shown=1; chip "Live: listening for new tips on a WebSocket. This page does not poll."; status class="status" role=status text="1 tip on Arkiv."
+PASS failed renewal: a reload recovers the console
+page problems (errors+warnings): 2: console pageerror: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.
+proxy: forwarded arkiv_query=8 units=800 real429=0; methods {"arkiv_getBlockTiming":5,"arkiv_query":8,"eth_getBalance":2,"eth_blockNumber":4,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":3,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":1,"eth_getTransactionReceipt":3,"eth_getTransactionByHash":1}
+proxy log tail: 18:58:32 ws client connected / 18:59:11 send answer 200 {"jsonrpc":"2.0","id":10,"result":"0xf90cd19dbf152e7939a6c539fe53f8b7a055024d181c9573c805af300a55cac4"} / 18:59:18 ws client connected
+PAGE CLOSE console
+DETACHED console
+no failed checks

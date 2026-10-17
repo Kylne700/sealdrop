@@ -1,0 +1,8 @@
+eth_blockNumber: HTTP 200 arkiv-cost=null body={"jsonrpc":"2.0","id":1,"result":"0xac34a"}
+eth_getTransactionByHash: HTTP 200 arkiv-cost=null body={"jsonrpc":"2.0","id":1,"result":null}
+arkiv_getBlockTiming: HTTP 200 arkiv-cost=null body={"jsonrpc":"2.0","id":1,"result":{"current_block":705355,"current_block_time":1792260476,"
+eth_chainId: HTTP 200 arkiv-cost=null body={"jsonrpc":"2.0","id":1,"result":"0x7614d1"}
+eth_getBalance: HTTP 200 arkiv-cost=null body={"jsonrpc":"2.0","id":1,"result":"0x18b487d88af8d00c"}
+after arkiv_getBlockTiming: spent=0 queries=0
+after eth_blockNumber: spent=0 queries=0
+after one arkiv_query (findInbox): spent=100 queries=1

@@ -1,0 +1,22 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+NAV newsroom http://127.0.0.1:40181/#/newsroom
+browser chromium Chrome/154.0.8037.92; inbox inbox-yqp6qy; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+=== network killed during send, mode after-late: transaction forwarded and mined, the connection is cut 6 s later without an answer (the browser resends the same bytes: the node says nonce too low)
+NAV source about:blank
+NAV source http://127.0.0.1:40181/#/send/0x814E2CF17a21E44f7A3856b09fE8DF02340Dfdc5/inbox-y
+after-late: outcome=result after 15.6 s; proxy dropped 1 send(s), forwarded-then-dead 0; result shown=true; send button enabled=false; progress element: class="status" role=status text=""
+after-late: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 14.2s progress=""
+after-late: proxy trace: 18:34:16 call eth_call / 18:34:17 call eth_fillTransaction / 18:34:18 call eth_getTransactionCount / 18:34:19 call eth_maxPriorityFeePerGas / 18:34:19 call eth_estimateGas / 18:34:20 call eth_sendRawTransaction nonce=770 hash=0x1bdf69dd5f / 18:34:20 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0x1bdf69dd5f867748be0f24260fdeac41948815f76558d48c6b94a95c86344418"} / 18:34:20 tx forwarded; the answer is held 6000 ms (the tx is mined meanwhile), then the connection is cut / 18:34:22 call arkiv_query / 18:34:26 call eth_sendRawTransaction nonce=770 hash=0x1bdf69dd5f / 18:34:28 send answer 200 {"jsonrpc":"2.0","id":9,"error":{"code":-32000,"message":"nonce too low: next nonce 771, tx nonce 770"}} / 18:34:28 call eth_getTransactionByHash / 18:34:29 call eth_getTransactionReceipt / 18:34:29 call arkiv_query
+shot failed kill-after-late-source ENOENT: no such file or directory, open '/tmp/fq-F6/out/shots/kill-after-late-source.png'
+after-late: network back, console Refresh: copies of this tip=1 (data-source=live)
+shot failed kill-after-late-console ENOENT: no such file or directory, open '/tmp/fq-F6/out/shots/kill-after-late-console.png'
+PASS kill after-late: tip never lost silently (told it failed, or delivered): result shown=true, copies after network back=1
+PASS kill after-late: no duplicate after the user's retry: copies=1
+page problems (errors+warnings): 1: source pageerror: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.
+proxy: forwarded arkiv_query=8 units=800 real429=0; methods {"arkiv_getBlockTiming":6,"arkiv_query":8,"eth_getBalance":4,"eth_fillTransaction":3,"eth_getTransactionCount":3,"eth_getBlockByNumber":5,"eth_maxPriorityFeePerGas":3,"eth_estimateGas":3,"eth_sendRawTransaction":4,"eth_getTransactionReceipt":7,"eth_blockNumber":6,"eth_getTransactionByHash":3,"eth_call":1}
+proxy log tail: 18:34:28 call eth_getTransactionByHash / 18:34:29 call eth_getTransactionReceipt / 18:34:29 call arkiv_query / 18:34:30 call arkiv_getBlockTiming / 18:34:57 call arkiv_getBlockTiming / 18:34:59 call arkiv_query
+PAGE CLOSE newsroom
+DETACHED newsroom
+PAGE CLOSE source
+DETACHED source
+no failed checks

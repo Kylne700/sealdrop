@@ -1,0 +1,96 @@
+## 03-newsroom-onboarding  (h1: Open a newsroom)
+
+
+## 20-send-unknown-hash  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether it did.
+
+## 21-send-unknown-nohash  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "What can anyone see on Arkiv for this inbox?" to see whether it did.
+
+## 22-send-unknown-readback  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether it did.
+
+## 23-send-unknown-5xx-on-send  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload this page and open "What can anyone see on Arkiv for this inbox?" to see whether it did.
+
+## 72-send-wallet-no-account  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | The wallet returned no account. Unlock the wallet and allow this page to connect, then try again.
+
+## 73-send-wallet-wrong-network  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | Your wallet is on a different network. Switch it to Arkiv Tiramisu (chain id 7738577) and try again.
+
+## 74-send-replaced  (h1: Send a tip)
+  alert#no-key-check | This link has no key check. Ask the newsroom for its current link.
+  alert#progress | This tip was replaced by another transaction from the same sender key, so it was not sent. Send it again. Try again; if it keeps failing, reload the page or set your own RPC under Settings.
+
+## 75-newsroom-create-demo-out-of-funds  (h1: Newsroom console)
+  alert#status | The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to 0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A from the faucet at https://hub.arkiv.network/faucet, then try again.
+  status#live-status | Live updates start once the inbox exists.
+
+## 76-newsroom-create-wallet-low-funds  (h1: Newsroom console)
+  alert#status | This wallet has too little testnet GLM. Get some at https://hub.arkiv.network/faucet and try again.
+  status#live-status | Live updates start once the inbox exists.
+
+## 77-console-wallet-no-provider  (h1: Newsroom console)
+  alert#status | No browser wallet found. Open this page in a browser with your wallet.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 78-console-wallet-wrong-account  (h1: Newsroom console)
+  alert#status | Switch your wallet to 0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A: this newsroom was created with that account.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 34-console-burn-unknown-hash  (h1: Newsroom console)
+  alert#status | The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether it did.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 35-console-keep-unknown-nohash  (h1: Newsroom console)
+  alert#status | The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 36-console-lease-plain  (h1: Newsroom console)
+  alert#status | The inbox lease could not be checked or renewed. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the page or set your own RPC under Settings. "Renew now" under Lease tries again.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 37-console-lease-unknown  (h1: Newsroom console)
+  alert#status | Whether the lease was renewed is unknown. Reload to see the expiry under Lease. If needed, "Renew now" renews it again, and a second renewal does no harm.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 38-console-lease-check-5xx  (h1: Newsroom console)
+  alert#status | The inbox lease could not be checked or renewed. The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings. "Renew now" under Lease tries again.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 39-console-lease-nofunds  (h1: Newsroom console)
+  alert#status | The inbox lease could not be checked or renewed. This wallet has no testnet GLM left. Get some at the Arkiv faucet (https://hub.arkiv.network/faucet). "Renew now" under Lease tries again.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 40-console-lease-check-budget  (h1: Newsroom console)
+  alert#status | The inbox lease could not be checked or renewed. The free query budget of the public Arkiv RPC is used up (it renews in about 30 min). Wait a little, or enter your own RPC URL under Settings. "Renew now" under Lease tries again.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 41-console-lease-then-live  (h1: Newsroom console)
+  alert#status | The inbox lease could not be checked or renewed. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the page or set your own RPC under Settings. "Renew now" under Lease tries again.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 43-console-renew-unknown-nohash  (h1: Newsroom console)
+  alert#status | Whether the lease was renewed is unknown. Reload to see the expiry under Lease. If needed, "Renew now" renews it again, and a second renewal does no harm.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 51-console-live-fail-5xx  (h1: Newsroom console)
+  alert#status | A new tip may have arrived, but the RPC did not answer properly, so it cannot be read yet. It loads by itself once the RPC answers again.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 53-console-live-fail-plain  (h1: Newsroom console)
+  alert#status | A new tip may have arrived, but the RPC did not answer properly, so it cannot be read yet. It loads by itself once the RPC answers again.
+  status#live-status | Live : listening for new tips on a WebSocket. This page does not poll.
+
+## 70-storage-blocked  (h1: Open a newsroom)
+  alert#status | This browser would not store the newsroom keys (its storage is full, or site data is blocked, as in some private windows), so nothing was created. Allow site data for this page or use another browser, then try again.
+
+## 71-storage-unreadable-no-backup  (h1: Open a newsroom)
+  alert#status | The newsroom stored in this browser cannot be read, and it could not be backed up, so it was not replaced.

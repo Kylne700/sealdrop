@@ -1,0 +1,35 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+WebDriver BiDi listening on ws://127.0.0.1:41745
+1792262117515	RemoteAgent	INFO	Perform WebSocket upgrade for incoming connection from 127.0.0.1:37520
+console.warn: RSLoader: Recipe new-tab-157020260831183837-to-release-155-addondeployment not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-158120260920214645-to-release-156 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-159020260925223456-to-release-157 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-159120261002163917-to-release-157 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-160020261011195215-to-release-158 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+NAV newsroom http://127.0.0.1:36917/#/newsroom
+console.warn: RSLoader: Recipe new-tab-157020260831183837-to-release-155-addondeployment not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-158120260920214645-to-release-156 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-159020260925223456-to-release-157 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-159120261002163917-to-release-157 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+console.warn: RSLoader: Recipe new-tab-160020261011195215-to-release-158 not returned from collection nimbus-secure-experiments because it does not contain at least one required feature ID.
+browser firefox firefox/153.4.0; inbox inbox-93jsdw; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+=== network killed during send, mode after-late: transaction forwarded and mined, the connection is cut 6 s later without an answer (the browser resends the same bytes: the node says nonce too low)
+NAV source about:blank
+NAV source http://127.0.0.1:36917/#/send/0xa3E8E37A9c61CD8eb3bf2B99ef189193eCC231A2/inbox-9
+after-late: outcome=result after 17.2 s; proxy dropped 1 send(s), forwarded-then-dead 0; result shown=true; send button enabled=false; progress element: class="status" role=status text=""
+after-late: what the source saw: 0.1s progress="" | 0.2s status="" | 0.3s send="Seal and send" | 1.1s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 15.9s progress=""
+after-late: proxy trace: 18:35:57 call eth_call / 18:35:58 call eth_fillTransaction / 18:35:58 call eth_getTransactionCount / 18:36:00 call eth_maxPriorityFeePerGas / 18:36:00 call eth_estimateGas / 18:36:01 call eth_sendRawTransaction nonce=772 hash=0xb243baf235 / 18:36:02 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0xb243baf235d8d9bbde5e24811730f75238567c1b0cdb723bacc8ca4ea74cd782"} / 18:36:02 tx forwarded; the answer is held 6000 ms (the tx is mined meanwhile), then the connection is cut / 18:36:04 call arkiv_query / 18:36:08 call eth_sendRawTransaction nonce=772 hash=0xb243baf235 / 18:36:08 send answer 200 {"jsonrpc":"2.0","id":9,"error":{"code":-32000,"message":"nonce too low: next nonce 773, tx nonce 772"}} / 18:36:09 call eth_getTransactionByHash / 18:36:09 call eth_getTransactionReceipt / 18:36:10 call arkiv_query
+shot failed kill-after-late-source ENOENT: no such file or directory, open '/tmp/fq-F6/out/shots/kill-after-late-source.png'
+after-late: network back, console Refresh: copies of this tip=1 (data-source=live)
+shot failed kill-after-late-console ENOENT: no such file or directory, open '/tmp/fq-F6/out/shots/kill-after-late-console.png'
+PASS kill after-late: tip never lost silently (told it failed, or delivered): result shown=true, copies after network back=1
+PASS kill after-late: no duplicate after the user's retry: copies=1
+page problems (errors+warnings): 2: source pageerror: SecurityError: The operation is insecure.
+proxy: forwarded arkiv_query=8 units=800 real429=0; methods {"arkiv_getBlockTiming":6,"arkiv_query":8,"eth_getBalance":4,"eth_fillTransaction":3,"eth_getTransactionCount":3,"eth_getBlockByNumber":4,"eth_maxPriorityFeePerGas":3,"eth_estimateGas":3,"eth_sendRawTransaction":4,"eth_getTransactionReceipt":6,"eth_blockNumber":5,"eth_getTransactionByHash":3,"eth_call":1}
+proxy log tail: 18:36:09 call eth_getTransactionByHash / 18:36:09 call eth_getTransactionReceipt / 18:36:10 call arkiv_query / 18:36:11 call arkiv_getBlockTiming / 18:36:38 call arkiv_getBlockTiming / 18:36:41 call arkiv_query
+DETACHED newsroom
+PAGE CLOSE newsroom
+JavaScript error: resource://gre/modules/PrivateBrowsingUtils.sys.mjs, line 50: TypeError: can't access property "QueryInterface", aWindow.docShell is null
+DETACHED source
+PAGE CLOSE source
+no failed checks

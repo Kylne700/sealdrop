@@ -1,0 +1,8 @@
+Focus after a failed "Renew now" pressed from the keyboard (mock states 43f and 44f, harness.txt): the focused element 0.5 s after the error shows.
+== c097179 (before fix stage 6)
+43f-console-renew-focus button|testid=renew|Renew now|disabled=false
+44f-console-renew-5xx-focus button|testid=renew|Renew now|disabled=false
+== 69a9518 (fix stage 6)
+43f-console-renew-focus button|testid=renew|Renew now|disabled=false
+44f-console-renew-5xx-focus button|testid=renew|Renew now|disabled=false
+Both runs: axe 0, unreached 0.

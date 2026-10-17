@@ -1,0 +1,16 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+NAV newsroom http://127.0.0.1:34651/#/newsroom
+browser chromium Chrome/154.0.8037.92; inbox inbox-ws9f8c; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+tip sent straight to the chain: tip 0xe71029e60d0e93d10e5d045f3b756ceea82e4ba92e7a90356b0da2ee82f4fe10 tx 0x437a4232fe4ee273932d578a7eb2efd6e15e7067c47b
+tip live in the console after 0.008 s (null = not within 60 s)
+row before Keep: 2026-10-17 18:39 UTC1.1 KiB sealed (1 KiB bucket)Expires in 1 d 0 h owned by you
+Keep pressed, status sequence: 0.0s status="A new tip just arrived." | 1.3s status="Extending the tip's lifetime to 30 days from now..." | 11.3s status="Kept: this tip now expires 30 days from now."
+Keep: status element now: class="status" role=status text="Kept: this tip now expires 30 days from now."; row now: 2026-10-17 18:39 UTC1.1 KiB sealed (1 KiB bucket)Expires in 30 d 0 h owned by you; proxy dropped 1 send(s)
+Keep: proxy trace: 18:39:49 call eth_getTransactionCount / 18:39:50 call eth_maxPriorityFeePerGas / 18:39:50 call eth_estimateGas / 18:39:50 call eth_sendRawTransaction nonce=1 hash=0x2b4aafde12 / 18:39:51 send answer 200 {"jsonrpc":"2.0","id":47,"result":"0x2b4aafde1285ac1d99dba4717a8886405d80e8371941696adb33e71dbb1c3e05"} / 18:39:51 tx forwarded; the answer is held 6000 ms (the tx is mined meanwhile), then the connection is cut / 18:39:57 call eth_sendRawTransaction nonce=1 hash=0x2b4aafde12 / 18:39:58 send answer 200 {"jsonrpc":"2.0","id":47,"error":{"code":-32000,"message":"nonce too low: next nonce 2, tx nonce 1"}} / 18:39:58 call eth_getTransactionByHash / 18:39:58 call eth_getTransactionReceipt / 18:39:58 call arkiv_query
+PASS keep after-late: the console says "Kept:" (the extension went through): class="status" role=status text="Kept: this tip now expires 30 days from now."
+page problems (errors+warnings): 0: 
+proxy: forwarded arkiv_query=6 units=600 real429=0; methods {"arkiv_getBlockTiming":4,"arkiv_query":6,"eth_getBalance":4,"eth_fillTransaction":2,"eth_getTransactionCount":3,"eth_getBlockByNumber":5,"eth_maxPriorityFeePerGas":3,"eth_estimateGas":3,"eth_sendRawTransaction":4,"eth_getTransactionReceipt":7,"eth_blockNumber":6,"eth_getTransactionByHash":3}
+proxy log tail: 18:39:51 tx forwarded; the answer is held 6000 ms (the tx is mined meanwhile), then the connection is cut / 18:39:57 call eth_sendRawTransaction nonce=1 hash=0x2b4aafde12 / 18:39:58 send answer 200 {"jsonrpc":"2.0","id":47,"error":{"code":-32000,"message":"nonce too low: next nonce 2, tx nonce 1"}} / 18:39:58 call eth_getTransactionByHash / 18:39:58 call eth_getTransactionReceipt / 18:39:58 call arkiv_query
+PAGE CLOSE newsroom
+DETACHED newsroom
+no failed checks

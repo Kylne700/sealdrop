@@ -1,0 +1,50 @@
+states: 25, screenshots: 100 (100 files, 5.1 MB) in /tmp/fq-F6/shots-6/shots
+axe: 0 violations in 0 of 100 state/viewport/theme combinations; rules: {}
+horizontal overflow (scrollWidth > clientWidth): 0 combinations
+status line a whole viewport above the first tip button (Keep/Burn), console only: 40 combinations
+  77-console-wallet-no-provider desktop light: 1020px apart, viewport 800px
+  77-console-wallet-no-provider mobile light: 1478px apart, viewport 844px
+  77-console-wallet-no-provider desktop dark: 1020px apart, viewport 800px
+  77-console-wallet-no-provider mobile dark: 1478px apart, viewport 844px
+  78-console-wallet-wrong-account desktop light: 1043px apart, viewport 800px
+  78-console-wallet-wrong-account mobile light: 1525px apart, viewport 844px
+  78-console-wallet-wrong-account desktop dark: 1043px apart, viewport 800px
+  78-console-wallet-wrong-account mobile dark: 1525px apart, viewport 844px
+  34-console-burn-unknown-hash desktop light: 1090px apart, viewport 800px
+  34-console-burn-unknown-hash mobile light: 1571px apart, viewport 844px
+  34-console-burn-unknown-hash desktop dark: 1090px apart, viewport 800px
+  34-console-burn-unknown-hash mobile dark: 1571px apart, viewport 844px
+  35-console-keep-unknown-nohash desktop light: 1043px apart, viewport 800px
+  35-console-keep-unknown-nohash mobile light: 1525px apart, viewport 844px
+  35-console-keep-unknown-nohash desktop dark: 1043px apart, viewport 800px
+  35-console-keep-unknown-nohash mobile dark: 1525px apart, viewport 844px
+  36-console-lease-plain desktop light: 1067px apart, viewport 800px
+  36-console-lease-plain mobile light: 1547px apart, viewport 844px
+  36-console-lease-plain desktop dark: 1067px apart, viewport 800px
+  36-console-lease-plain mobile dark: 1547px apart, viewport 844px
+  37-console-lease-unknown desktop light: 1043px apart, viewport 800px
+  37-console-lease-unknown mobile light: 1500px apart, viewport 844px
+  37-console-lease-unknown desktop dark: 1043px apart, viewport 800px
+  37-console-lease-unknown mobile dark: 1500px apart, viewport 844px
+  38-console-lease-check-5xx desktop light: 1067px apart, viewport 800px
+  38-console-lease-check-5xx mobile light: 1523px apart, viewport 844px
+  38-console-lease-check-5xx desktop dark: 1067px apart, viewport 800px
+  38-console-lease-check-5xx mobile dark: 1523px apart, viewport 844px
+  39-console-lease-nofunds desktop light: 1067px apart, viewport 800px
+  39-console-lease-nofunds mobile light: 1523px apart, viewport 844px
+  39-console-lease-nofunds desktop dark: 1067px apart, viewport 800px
+  39-console-lease-nofunds mobile dark: 1523px apart, viewport 844px
+  40-console-lease-check-budget desktop light: 1067px apart, viewport 800px
+  40-console-lease-check-budget mobile light: 1547px apart, viewport 844px
+  40-console-lease-check-budget desktop dark: 1067px apart, viewport 800px
+  40-console-lease-check-budget mobile dark: 1547px apart, viewport 844px
+  41-console-lease-then-live desktop light: 1067px apart, viewport 800px
+  41-console-lease-then-live mobile light: 1547px apart, viewport 844px
+  41-console-lease-then-live desktop dark: 1067px apart, viewport 800px
+  41-console-lease-then-live mobile dark: 1547px apart, viewport 844px
+clipped text (overflow hidden/clip, not inputs): 0
+text in scrolling containers (overflow auto/scroll, not inputs): 0
+contrast scan below AA: 0
+console/page errors: 0
+UNREACHED states (the marker text did not appear): 0
+FAILED steps: 0

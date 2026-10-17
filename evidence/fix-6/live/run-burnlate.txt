@@ -1,0 +1,18 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+NAV newsroom http://127.0.0.1:44617/#/newsroom
+browser chromium Chrome/154.0.8037.92; inbox inbox-gu9yqz; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+tip sent straight to the chain: tip 0x2b8df57721d76b3c4a648cab640e7b451710a197c9a1870f909b512db98ed410 tx 0x2bbd77b3b2d29b7acfa2c75f4af12d793e21ba723f44
+tip live in the console after 0.011 s (null = not within 60 s)
+DIALOG confirm Burn this tip? Arkiv deletes t
+Burn pressed, status sequence: 0.0s status="A new tip just arrived." | 0.3s status="Burning the tip..." | 8.6s status="Burned."
+Burn: status element now: class="status" role=status text="Burned."; tip row still listed=false; proxy dropped 1 send(s)
+Burn: proxy trace: 18:38:36 call eth_getTransactionCount / 18:38:36 call eth_maxPriorityFeePerGas / 18:38:36 call eth_estimateGas / 18:38:37 call eth_sendRawTransaction nonce=1 hash=0xdb343eed95 / 18:38:37 send answer 200 {"jsonrpc":"2.0","id":46,"result":"0xdb343eed95450547e804040bfd32d5eb0e88e9a66ceb12d279c9ce0deb046302"} / 18:38:37 tx forwarded; the answer is held 6000 ms (the tx is mined meanwhile), then the connection is cut / 18:38:43 call eth_sendRawTransaction nonce=1 hash=0xdb343eed95 / 18:38:44 send answer 200 {"jsonrpc":"2.0","id":46,"error":{"code":-32000,"message":"nonce too low: next nonce 2, tx nonce 1"}} / 18:38:44 call eth_getTransactionByHash / 18:38:44 call eth_getTransactionReceipt
+after Refresh: tip listed=false; status class="status" role=status text="No tips yet."
+PASS burn after-late: the console says "Burned." (the burn went through): class="status" role=status text="Burned."
+PASS burn after-late: the burned tip is gone after Refresh
+page problems (errors+warnings): 0: 
+proxy: forwarded arkiv_query=6 units=600 real429=0; methods {"arkiv_getBlockTiming":5,"arkiv_query":6,"eth_getBalance":4,"eth_fillTransaction":2,"eth_getTransactionCount":3,"eth_getBlockByNumber":5,"eth_maxPriorityFeePerGas":3,"eth_estimateGas":3,"eth_sendRawTransaction":4,"eth_getTransactionReceipt":7,"eth_blockNumber":5,"eth_getTransactionByHash":3}
+proxy log tail: 18:38:43 call eth_sendRawTransaction nonce=1 hash=0xdb343eed95 / 18:38:44 send answer 200 {"jsonrpc":"2.0","id":46,"error":{"code":-32000,"message":"nonce too low: next nonce 2, tx nonce 1"}} / 18:38:44 call eth_getTransactionByHash / 18:38:44 call eth_getTransactionReceipt / 18:38:47 call arkiv_getBlockTiming / 18:38:47 call arkiv_query
+PAGE CLOSE newsroom
+DETACHED newsroom
+no failed checks

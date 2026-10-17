@@ -1,0 +1,42 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+
+> sealdrop@0.1.0 smoke
+> tsx scripts/smoke.ts
+
+Sealdrop smoke run 2026-10-17T19:00:01.199Z  Chromium Chrome/154.0.8037.92  served from dist/
+PASS  faked 429 on every query: the send page says the free budget is used up and offers Settings, after 1.7 s  (The free query budget of the public Arkiv RPC is used up. Wait a little, or ente)
+PASS  first load of #/newsroom: the page does not grab focus and the title names the page  (focus on body, hash #/newsroom, title "Newsroom console: Sealdrop")
+PASS  the skip link is Tab stop 1 and is on screen once it has focus  (Skip to content, top 8 px)
+PASS  Enter on the skip link puts focus on <main> and leaves the location alone  (focus on main, hash #/newsroom, title "Newsroom console: Sealdrop")
+PASS  route change to the start page: focus is on its h1 and the title names the page  (focus on h1, hash #/, title "Sealdrop: an anonymous tip line with no server")
+PASS  Back: focus is on the newsroom h1 and the title names the page  (focus on h1, hash #/newsroom, title "Newsroom console: Sealdrop")
+  throwaway newsroom created in the browser after 2.1 s (no network yet)
+  inbox created in 21.2 s: <site>/#/send/0x6655E5CF87735f39fe888D04bdf2C823beFCD091/inbox-b5wb8s/4UykHd2ui3bq-3XptYS21Q
+PASS  the inbox link points at #/send/<creator>/<inbox id>/<key check>
+PASS  the key file can be exported
+PASS  the send page shows the newsroom as $creator (found by creator, not by a writable field)
+PASS  the inbox key matches the key check in the link
+PASS  first load of the send page: the page does not grab focus and the title says "Send a tip"  (focus on body, hash #/send/0x6655E5CF87735f39fe888D04bdf2C823beFCD091/inbox-b5wb8s/4UykHd2ui3bq-3XptYS21Q, title "Send a tip: Sealdrop")
+PASS  a live tip arrives while the newsroom types in Settings: focus and text stay in the field  (focus on rpc)
+PASS  after sending, focus is on the success heading (not lost, not moved to the page h1)  (focus on h2, hash #/send/0x6655E5CF87735f39fe888D04bdf2C823beFCD091/inbox-b5wb8s/4UykHd2ui3bq-3XptYS21Q, title "Send a tip: Sealdrop")
+PASS  the tip decrypts in the newsroom tab to the exact text that was sent
+PASS  it arrived through the WebSocket subscription (data-source=live), not through a sweep
+  tip visible in the newsroom 4.2 s after Send was clicked; the sender's own page confirmed after 4.8 s
+  JUDGE PATH TOTAL: 30.7 s from opening the newsroom page to the decrypted live tip
+  tip entity https://data.arkiv.network/entity/0x0c3b22927d15ba36c38c6b6d53dea9dfca813ca5f5f1d52e50da29268a2847f8
+  tx https://tiramisu.explorer.arkiv.network/tx/0x2ac3c892cad7365dfa73599c5eed4181245c7476d438614e6c26e2f7f8200acd
+PASS  wallet mode is offered when an EIP-1193 wallet is injected
+PASS  wallet mode: the result shows the wallet address as $creator
+PASS  wallet mode: the second tip also arrived live
+PASS  the second live tip leaves focus and text in the Settings field as well  (focus on rpc)
+PASS  a look-alike link (same inbox id, different creator) shows "no live inbox"
+PASS  the Demo Desk inbox is found on Arkiv by its creator and inbox id
+PASS  first load of #/demo: the redirect does not grab focus, the title says "Send a tip"  (focus on body, hash #/send/0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6/demo-desk/4JL_elI5QI6aemyST_9gJA, title "Send a tip: Sealdrop")
+  Demo Desk tip entity https://data.arkiv.network/entity/0x83b6475d29ebfc8b81a79c116952a6d7b3c755e0f803b12e16dd2b47abafd37b
+PASS  the desk operator (key not in the build) decrypts the Demo Desk tip with `ops desk-read`
+  newsroom tab: Public RPC: this tab has made 6 queries (600 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+  source tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+  desk tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
+PASS  no uncaught errors or console errors in any tab
+
+smoke: all checks passed

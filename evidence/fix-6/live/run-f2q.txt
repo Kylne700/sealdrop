@@ -1,0 +1,15 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+NAV newsroom http://127.0.0.1:39285/#/newsroom
+browser chromium Chrome/154.0.8037.92; inbox inbox-b2jp83; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+F2q tip from a second process while every HTTP call answers 500: tip 0x2e7e720cac927859938fe3df907a32e5b285c9ce651af752897b7edd717e9427 tx 0xa394722f4bc9193df22c814c20786346287bf13bb482
+F2q HTTP calls in the outage (180 s after the tip was sent): 26 {"arkiv_query":8,"arkiv_getBlockTiming":18}; 500s injected 26
+F2q the calls with their time: 18:41:42 arkiv_query | 18:41:42 arkiv_query | 18:41:42 arkiv_query | 18:41:43 arkiv_query | 18:41:43 arkiv_query | 18:41:43 arkiv_query | 18:41:43 arkiv_query | 18:41:44 arkiv_query | 18:42:04 arkiv_getBlockTiming | 18:42:04 arkiv_getBlockTiming | 18:42:24 arkiv_getBlockTiming | 18:42:24 arkiv_getBlockTiming | 18:42:44 arkiv_getBlockTiming | 18:42:45 arkiv_getBlockTiming | 18:43:05 arkiv_getBlockTiming | 18:43:05 arkiv_getBlockTiming | 18:43:25 arkiv_getBlockTiming | 18:43:25 arkiv_getBlockTiming | 18:43:45 arkiv_getBlockTiming | 18:43:45 arkiv_getBlockTiming | 18:44:05 arkiv_getBlockTiming | 18:44:05 arkiv_getBlockTiming | 18:44:25 arkiv_getBlockTiming | 18:44:25 arkiv_getBlockTiming | 18:44:45 arkiv_getBlockTiming | 18:44:45 arkiv_getBlockTiming
+F2q status at the end of the outage: class="status error" role=alert text="The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+F2q after the outage ended: tip shows by itself=true after 19.242 s (data-source=sweep); status class="status" role=status text="1 tip on Arkiv."
+PASS F2q the tip from the outage shows by itself once the RPC is back
+page problems (errors+warnings): 26: newsroom console.error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+proxy: forwarded arkiv_query=5 units=500 real429=0; methods {"arkiv_getBlockTiming":22,"arkiv_query":13,"eth_getBalance":4,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":4,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":2,"eth_getTransactionReceipt":6,"eth_blockNumber":5,"eth_getTransactionByHash":2}
+proxy log tail: 18:44:45 call arkiv_getBlockTiming / 18:44:45 injected 500 / 18:44:45 call arkiv_getBlockTiming / 18:44:45 injected 500 / 18:45:05 call arkiv_getBlockTiming / 18:45:07 call arkiv_query
+PAGE CLOSE newsroom
+DETACHED newsroom
+no failed checks

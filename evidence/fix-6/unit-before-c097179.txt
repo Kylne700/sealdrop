@@ -1,0 +1,37 @@
+
+ RUN  v5.0.5 <scratch clone at c097179 with the fix-6 tests>
+
+ ❯ test/fix6.test.ts (19 tests | 18 failed) 59ms
+   ❯ fix stage 6, R2-D1: a browser re-send of our own broadcast (8)
+     × "nonce too low: next nonce 701, tx nonce 700" for a transaction the node holds is the success of the first copy 39ms
+     × "already known" for a transaction the node holds is the success of the first copy 2ms
+     × the lookup counts in the query budget like every other call 1ms
+     × lookup answered "none": the original "nonce too low" stands 4ms
+     × lookup answered "other-hash": the original "nonce too low" stands 2ms
+     × lookup answered "429": the original "nonce too low" stands 1ms
+     × lookup answered "throw": the original "nonce too low" stands 1ms
+   ❯ fix stage 6, R2-S1 and R2-S8: messages (3)
+     × R2-S1: a wallet with no account or on another network gets one next step, not the RPC tail 1ms
+     × R2-S1: the page messages that say what to do are PlainErrors 1ms
+     × R2-S8: an unknown outcome without a hash says how to check (states 21, 23, 35) 0ms
+   ❯ fix stage 6: page code (source checks; the browser runs and screens are in evidence/fix-6/) (8)
+     × R2-S4: a live tip does not overwrite an error, only the read failure it resolves 0ms
+     × R2-S8 and state 53: a failed live read gives one next step and no write wording 0ms
+     × R2-S9a: one cost unit is singular 0ms
+     × R2-S9b: the no-JS notice comes before the footer 0ms
+     × R2-S9c: the faucet is written one way 0ms
+     × R2-S9d: the Lease card does not promise a renewal next to a failed one 0ms
+     × R2-S9e: the stock design mock exports what the pages import from arkiv 0ms
+     × R2-S7 and R2-S2: wrapped button labels get vertical padding; a long hash in a status line wraps 0ms
+ ❯ test/fix5.test.ts (8 tests | 2 failed) 78ms
+   ❯ fix stage 5: the console (source checks; the browser runs are in evidence/fix-5/) (3)
+     × item 1: an unknown renewal outcome gets its own text, on open and on "Renew now"; real failures keep theirs 3ms
+     × item 3 (as of fix 6): the catch-up retries every 20 s, its first call is the free block timing, and the 429 wait stays 0ms
+
+   (... the failure details of each test, 4491 lines, are left out ...)
+
+ Test Files  2 failed (2)
+      Tests  20 failed | 7 passed (27)
+   Start at  21:30:00
+   Duration  373ms (import 54%, tests 27%, transform 17%, worker 1%)
+

@@ -1,0 +1,23 @@
+WARN: you enabled following architectures: amd64 i386 but you have installed libtorsocks only for those archs: amd64. The best what you can do is to install libtorsocks for all enabled architectures. If you run torsocks with an executable from a missing architecture, the connections went directly into the internet and are NOT redirected via Tor.
+setup (mkdue 3 days): inbox inbox-k3h9gs creator 0xCA044DA3570b2b8dd248F128f70B28C9ba719F54 entity 0xd8d14e0b16d05228c6e01774a0689cfd24b477ba31dd170cca1293a0794cb040
+inbox on chain before: {"found":true,"expiresAt":"836360","currentBlock":"706765","daysLeft":3}
+NAV tab1 http://127.0.0.1:44919/#/newsroom
+NAV tab2 http://127.0.0.1:44919/#/newsroom
+tab1 sequence: 0.0s status="(none)" | 0.1s live-status="Live updates start once the inbox exists." | 0.7s status="Reading your inbox from Arkiv..." | 7.4s status="The inbox lease is running low, extending it for another 7 days..." | 15.3s live-status="Connecting to the live feed..." | 16.3s status="No tips yet." | 17.1s live-status="Live: listening for new tips on a WebSocket. This page does not poll."
+tab2 sequence: 0.0s status="(none)" | 0.1s live-status="Live updates start once the inbox exists." | 0.7s status="Reading your inbox from Arkiv..." | 7.4s status="The inbox lease is running low, extending it for another 7 days..." | 14.7s live-status="Connecting to the live feed..." | 15.3s status="No tips yet." | 16.7s live-status="Live: listening for new tips on a WebSocket. This page does not poll."
+signed transactions the two tabs sent while opening: 2
+status tab1: class="status" role=status text="No tips yet."
+status tab2: class="status" role=status text="No tips yet."
+inbox on chain after: {"found":true,"expiresAt":"1009171","currentBlock":"706804","daysLeft":7} (days left 3 -> 7)
+tip sent for both tabs: tip 0xa86a3ca17d59c62974d7ccdb6caa3c9a8f33e83a09e4ab098caec22ab8f6232d tx 0xe7b939a2ec292adc761369a3
+tip shows in tab1=true (data-source=live, 0.005 s) and tab2=true (data-source=live, 0.004 s)
+PASS two tabs: both tabs show the live tip
+PASS two tabs: the lease was extended at most once (days left after <= 3 + 7 + 0.5): days left 3 -> 7
+page problems (errors+warnings): 0: 
+proxy: forwarded arkiv_query=10 units=1000 real429=0; methods {"arkiv_getBlockTiming":4,"arkiv_query":10,"eth_getBalance":2,"eth_blockNumber":6,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":4,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":2,"eth_getTransactionReceipt":6,"eth_getTransactionByHash":3}
+proxy log tail: 18:55:06 send answer 200 {"jsonrpc":"2.0","id":10,"result":"0xdf4860a00ae65d1e13a19a718bc14e67ad2676bc4394b4227b7c2886edd5be64"} / 18:55:06 send answer 200 {"jsonrpc":"2.0","id":10,"error":{"code":-32000,"message":"already known"}} / 18:55:11 ws client connected / 18:55:12 ws client connected
+PAGE CLOSE tab2
+DETACHED tab2
+PAGE CLOSE tab1
+DETACHED tab1
+no failed checks

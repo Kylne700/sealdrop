@@ -1,0 +1,2 @@
+built HEAD -> /tmp/fq-F6/stockmock
+exit 0

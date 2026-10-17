@@ -1,0 +1,37 @@
+Fix stage 6: how the checks in this folder were run (paths: <sealdrop> = this repository).
+
+Scratch clone (browser re-runs never ran in <sealdrop>):
+  git clone <sealdrop> /tmp/fq-F6/repo; per-repo identity; npm ci; .env.local is a symlink to <sealdrop>/.env.local (never opened or printed).
+  qa-net/ = QA R2's live harness (its patched clone's qa-net/, the same scripts as evidence/final-qa/R2/scripts/ and scripts/fix5/),
+  with paths and ports moved to this stage: out dir /tmp/fq-F6/out, Tor = QA L's Tor (SOCKS 47711, control 47712, cookie never printed).
+  evidence/qa-scripts/lib.mjs = R2's copy (browsers start with LD_PRELOAD='' so torsocks stays in the Node process).
+  The only differences to R2's scripts are those path and port lines: harness.diff (second half).
+
+Live runs, one after another, at 69a9518 (live/status.txt, live/run-<name>.txt, home paths replaced):
+  env DISPLAY=:94 TORSOCKS_CONF_FILE=<L's torsocks.conf> R2_TORDIR=<L's Tor dir> R2_TORCTL=47712 CHROMIUM=<wrapper: chromium --proxy-server=socks5://127.0.0.1:47711, LD_PRELOAD unset>
+  before each run: Tor NEWNYM, 12 s pause (a fresh exit, so a fresh public-RPC budget).
+  l.mjs takes /tmp/sealdrop-live.lock itself (h.mjs lock()/locked(), checked with rg flock), so it is not wrapped; smoke is wrapped:
+  late-cr     MODES=after-late TRACE=1 torsocks nice -n 10 node qa-net/l.mjs kill chromium
+  late-ff     MODES=after-late TRACE=1 torsocks nice -n 10 node qa-net/l.mjs kill firefox
+  kill5       MODES=before,after,then-dead,after-hang,after-once torsocks nice -n 10 node qa-net/l.mjs kill chromium
+  concurrent, burnlate, keeplate, createlate, f2, twotabs, duefail:  torsocks nice -n 10 node qa-net/l.mjs <name> chromium
+  f2q         TAG=-6 torsocks nice -n 10 node qa-net/l.mjs f2q chromium
+  smoke       flock /tmp/sealdrop-live.lock torsocks nice -n 10 timeout -k 5 880 npm run smoke
+  Reading kill5: "no duplicate after the user's retry" prints FAIL in after and after-hang by construction: the harness presses Send again
+  after an unknown outcome, the accepted limit (R2's report, "Reading the kill FAIL lines"). after-once passes now (R2's runs before the fix: copies=2).
+
+Cost probe (probe-cost.txt), run against the public RPC before the fix (the budget counting is the same at 69a9518),
+  each as: TORSOCKS_CONF_FILE=<L's torsocks.conf> timeout 150 flock -w 100 /tmp/sealdrop-live.lock torsocks <node probe-cost.mjs | npx tsx probe-cost2.mts>:
+  probe-cost.mjs: plain fetch, prints each method's HTTP status and Arkiv-Cost header;
+  probe-cost2.mts (tsx): the app's own transport and budget counter after arkiv_getBlockTiming, eth_blockNumber and one findInbox
+  (its import paths are shortened here to ../../src/; it ran with the absolute path of src/).
+
+Mock screens (screens/): R2's screens harness (evidence/final-qa/R2/scripts/screens/), copied, run as
+  screens-r2.sh /tmp/fq-F6/repo <out> 03,20,21,22,23,34,35,36,37,38,39,40,41,43,51,53,70,71,72,73,74,75,76,77,78   (headless Chromium, localhost only)
+  Three edits to the copy (harness.diff, first half):
+  - state 41: R2's marker was "A new tip just arrived", the very text R2-S4 removes there; it now waits for the tip row, then for the lease error.
+  - mock-arkiv-r2.ts builds the "tip replaced" error (state 74) as a PlainError, as src/arkiv.ts now throws it; state 74 was shot again alone (screens/74/).
+  - focus probe, new states 43f and 44f (renewal outcome unknown, renewal HTTP 500): press "Renew now" from the keyboard, then write the focused element to $FOCUS_OUT.
+    Run at c097179 (a git worktree of the clone) and at 69a9518, only these two states (screens/focus.txt):
+    FOCUS_OUT=<out>/focus-<before|after>.txt nice -n 10 bash screens-r2.sh <worktree at c097179 | clone at 69a9518> /tmp/fq-F6/focus-<before|after> 43f,44f
+  stock-mock-build.txt: evidence/design-scripts/build-mock.sh HEAD <out> in the clone at 69a9518 (R2-S9e).
