@@ -114,7 +114,7 @@ for `sealdrop`, `vitest` 5.0.5, `puppeteer-core` 25.14.0 and `@puppeteer/browser
   the WebSocket (`data-source=live`), wallet mode with a second live tip, a look-alike link, the Demo Desk found and read with
   `ops desk-read`, and 0 console or page errors in the three tabs. Judge path total 20.4 s. The same checks served under
   `/sealdrop/` (a `BASE_PATH=/sealdrop/` build, how GitHub Pages serves a project page): 13 of 13, 19.2 s
-  ([smoke-subpath.txt](smoke-subpath.txt)). Both runs: `src/`, `scripts/` and `test/` as in `c797c65`.
+  ([smoke-subpath.txt](smoke-subpath.txt)). Both runs: `src/`, `scripts/` and `test/` as in `c797c65`. The design stage re-ran both on its final code and overwrote smoke.txt and smoke-subpath.txt with those runs (2026-10-16, 23:53 and 23:54 UTC: 13 of 13 each, judge path 20.1 s and 19.5 s); the figures above are the QA runs.
 * Firefox 153.4.0, the judge path against `dist/` with the production CSP and the public RPC ([qa-logs/ff-judge.out](qa-logs/ff-judge.out)):
   home has one primary button; throwaway newsroom funded and inbox created in 15.9 s; tip sealed and sent in 5.6 s; the
   newsroom tab showed it decrypted, with no refresh, through the WebSocket (`data-source=live`); Demo Desk found and a tip
@@ -276,8 +276,8 @@ The last code change (`src/`, `scripts/`, `test/`) is `387a52a`; everything afte
 | `npm test` | 3 files, 23 tests pass |
 | `npm run build` | exit 0; `index-BHoWWcl2.js` 410.41 kB, 128.65 kB gzip, the same content-hashed files the browser runs used |
 | `npm run check:bundle` | all rules pass (the demo key is in the bundle by design; the funder key, desk key and desk box secret are not; no `.env` file in `dist/`) |
-| `npm run smoke` (Chromium, live testnet) | 13 of 13, judge path 20.4 s, run at 21:13 UTC after the last code change ([smoke.txt](smoke.txt)) |
-| the same smoke served under `/sealdrop/` | 13 of 13, 19.2 s ([smoke-subpath.txt](smoke-subpath.txt)); a rebuilt `BASE_PATH=/sealdrop/` build is byte-identical to the copy it served |
+| `npm run smoke` (Chromium, live testnet) | 13 of 13, judge path 20.4 s, run at 21:13 UTC after the last code change ([smoke.txt](smoke.txt)) (the QA run; the file now holds the design-stage re-run, see section C) |
+| the same smoke served under `/sealdrop/` | 13 of 13, 19.2 s ([smoke-subpath.txt](smoke-subpath.txt)); a rebuilt `BASE_PATH=/sealdrop/` build is byte-identical to the copy it served (the QA run; the file now holds the design-stage re-run) |
 | `npm run integration` (live testnet) | 30 checks passed, 0 failed, 59.2 s, run at 22:01 UTC at `c362b24`, 19 costed queries (1,900 units) ([integration.txt](integration.txt)). Two concurrent sends from the shared demo key needed 2 retries (a failure before broadcast, then a revert on chain, then the send landed): the known concurrent-batch behaviour of friction F6, which `sendTip` handles. |
 | `src/arkiv.ts` changed in this pass (`61a8be2`, `53387e4`), so the SUBMISSION.md anchors were recomputed | `anchors.mjs`: all 12 `src/arkiv.ts#L` links resolve to the declaration of the symbol they name ([qa-logs/anchors.out](qa-logs/anchors.out)); SUBMISSION.md is git-ignored, so this is not a commit. Re-run it if `src/arkiv.ts` changes before publishing. |
 | fresh clone | section B; Node 24.18.0 at `c362b24`, all steps exit 0, all browser checks pass |

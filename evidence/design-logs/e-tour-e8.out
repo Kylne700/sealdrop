@@ -1,0 +1,8 @@
+PASS E8 demo key without GLM on the send page -> clear message, button usable again  (The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: hub)
+PASS E8b throwaway newsroom with an empty demo key -> says who ran out and where to get GLM  (The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to 0xC9CCa23E8ad7047fCa5A738FE95C7A491bc1E461 from the faucet at https://hub.ar)
+   E8 queries through the second proxy: 2
+   [E8 demo key without GLM (real node answer, unfunded key build)] console/page problems: 0; queries to the public RPC: 0
+
+proxy: 0 arkiv_query reached the public RPC (0 units), 0 served from the test cache, 0 injected 429s; eth_sendRawTransaction 0
+ALL console/page problems: 0
+exit 0

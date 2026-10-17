@@ -1,22 +1,22 @@
-Sealdrop smoke run 2026-10-16T21:13:29.161Z  Chromium Chrome/154.0.8037.92  served from dist/
+Sealdrop smoke run 2026-10-16T23:53:27.438Z  Chromium Chrome/154.0.8037.92  served from dist/
 PASS  faked 429 on every query: the send page says the free budget is used up and offers Settings, after 0.6 s  (The free query budget of the public Arkiv RPC is used up. Wait a little, or ente)
   throwaway newsroom created in the browser after 0.7 s (no network yet)
-  inbox created in 15.0 s: <site>/#/send/0x74926f435419c7d0872dc9601B3334ba8935A0Fb/inbox-6b9ath
+  inbox created in 14.5 s: <site>/#/send/0xD4d392Ca2D8b8298acfC1D18f0E475e34a0292d9/inbox-szbjr6
 PASS  the inbox link points at #/send/<creator>/<inbox id>
 PASS  the key file can be exported
 PASS  the send page shows the newsroom as $creator (found by creator, not by a writable field)
 PASS  the tip decrypts in the newsroom tab to the exact text that was sent
 PASS  it arrived through the WebSocket subscription (data-source=live), not through a sweep
-  tip visible in the newsroom 3.1 s after Send was clicked; the sender's own page confirmed after 5.6 s
-  JUDGE PATH TOTAL: 20.4 s from opening the newsroom page to the decrypted live tip
-  tip entity https://data.arkiv.network/entity/0x48915b49972616e540025c197e3cce97d5d6d4bd9f32dd360acf5084c2bec7ea
-  tx https://tiramisu.explorer.arkiv.network/tx/0x01f5e6a58e93d6b4af9c914fbbab2bcec7200537482c0e47ca103256c23241fb
+  tip visible in the newsroom 3.7 s after Send was clicked; the sender's own page confirmed after 5.5 s
+  JUDGE PATH TOTAL: 20.1 s from opening the newsroom page to the decrypted live tip
+  tip entity https://data.arkiv.network/entity/0x666e7ea64fd32a4fa0561266283bd75ad769553b50718e4af07d099d035f0074
+  tx https://tiramisu.explorer.arkiv.network/tx/0x6a6b17f1f8c044298b41c0065e1aaf199b457e989d16fa3bfaae5dd5009ef252
 PASS  wallet mode is offered when an EIP-1193 wallet is injected
 PASS  wallet mode: the result shows the wallet address as $creator
 PASS  wallet mode: the second tip also arrived live
 PASS  a look-alike link (same inbox id, different creator) shows "no live inbox"
 PASS  the Demo Desk inbox is found on Arkiv by its creator and inbox id
-  Demo Desk tip entity https://data.arkiv.network/entity/0x688aad3b29ee3abd2e7b1adda489b2b8cc2c348bfa6468f4f1568a8cfad17a37
+  Demo Desk tip entity https://data.arkiv.network/entity/0xcd3fcb62659f77b5847fda4dfd32354b5abb2700fb816992689fa23a0477b40f
 PASS  the desk operator (key not in the build) decrypts the Demo Desk tip with `ops desk-read`
   newsroom tab: Public RPC: this tab has made 6 queries (600 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
   source tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).

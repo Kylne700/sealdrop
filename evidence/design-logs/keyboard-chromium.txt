@@ -1,0 +1,29 @@
+PASS K1 home: "Start: open a newsroom" reached with Tab: 5 Tab(s): a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:Start: open a newsroom
+PASS K1 home: every stop on the way shows a focus ring and is on screen
+PASS K2 Enter on Start opens the newsroom page
+INFO focus right after the page change: body (the old link is gone)
+PASS K2 newsroom page: "Create a throwaway newsroom" reached with Tab: 1 Tab(s): button:Create a throwaway newsroom
+PASS K2 the first Tab after the page change lands inside the page content, not the header: button:Create a throwaway newsroom
+PASS K2 every stop shows a ring
+PASS K3 "Create the inbox" reached with Tab: 8 Tab(s): a:0x145Fc3B8cB50f75C4427818C2EE4e18301 > button:Copy newsroom address > a:faucet > button:Export key file > button:Forget this newsroom > input:Name > textarea:Description > button:Create the inbox
+PASS K3 every stop shows a ring
+PASS K3 the inbox link is shown: http://127.0.0.1:46141/#/send/0x145F.../inbox-sbwwhr
+PASS K3 "Copy inbox link" reachable by keyboard: 2 Tab(s)
+PASS K4 send page: the message box is reached with Tab: 11 Tab(s): a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:0x145Fc3B8cB50f75C4427818C2EE4e18301 > button:Copy creator address > a:0x145Fc3B8cB50f75C4427818C2EE4e18301 > button:Copy owner address > a:0x113613cf933b2c68cb5d4e3b176e7de07e > button:Copy inbox entity key > textarea:Your message
+PASS K4 every stop shows a ring
+PASS K4 typing shows the byte count
+PASS K4 the lifetime group is the next stop (default 14 days): input:14 days
+PASS K4 ArrowRight moves the lifetime to 30 days: checked=30
+PASS K4 ArrowLeft x2 moves it to 7 days: checked=7
+PASS K4 "Seal and send" reached with Tab: 2 Tab(s): input:Shared demo key (no wallet needed). > button:Seal and send
+PASS K4 every stop shows a ring
+INFO focus after sending: h2:Sealed and sent ✓
+PASS K5 after sending, focus is on the success heading (not lost): h2:Sealed and sent ✓
+PASS K7 bar fills set through CSSOM take effect under the production CSP: receipt bar fill / track = 1.00
+PASS K5 the next Tab is "Send another": button:Send another
+PASS K5 it shows a ring
+PASS K5 "Send another" returns to the message box with focus in it: textarea:Your message
+PASS K6 no console errors or page errors (production CSP active)
+
+ALL PASS
+chromium exit 0

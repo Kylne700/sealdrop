@@ -83,6 +83,7 @@ const STATES = [
   { id: '15-send-notfound', hash: SEND, mock: { inbox: 'none' } },
   { id: '16-send-limited', hash: SEND, mock: { inbox: 'limited' } },
   { id: '17-send-world', hash: SEND, mock: { tips: TIPS }, act: async (p) => { await p.click('details.world-panel > summary'); await sleep(400) } },
+  { id: '18-send-toolong', hash: SEND, act: (p) => fill(p, 'SYNTHETIC TEST TIP: this made-up message is far too long. '.repeat(1300)) },
 ]
 
 const THEMES = ['light', 'dark']

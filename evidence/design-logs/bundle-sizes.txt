@@ -1,0 +1,10 @@
+Bundle size, gzip -9 per file of dist/ (5 files each). Before: build of 5f83e23 (start of the design stage), after: build of the design-stage tree. Same .env.local, same vite.
+
+file       raw_before  raw_after raw_diff  gz_before   gz_after
+index.js       410412     417077     6665     126769     129071
+index.css        3814      16888    13074       1407       4492
+index.html       1514       2252      738        783       1140
+ccip.js          2835       2835        0       1328       1327
+native.js         306        306        0        192        192
+
+TOTAL gzip -9: before 130479 B, after 136222 B, growth 5743 B (4.4 %); limit 10,000 B

@@ -1,0 +1,25 @@
+| Pair | Used for | Light | Dark | Needs | Result |
+|---|---|---|---|---|---|
+| ink on paper | body text on the page | 16.21 | 15.86 | 4.5 | pass |
+| ink on surface | text in cards, inputs | 17.67 | 14.66 | 4.5 | pass |
+| ink on surface-2 | hex values, code | 14.94 | 13.30 | 4.5 | pass |
+| muted on paper | hints, labels, footer | 7.44 | 8.37 | 4.5 | pass |
+| muted on surface | hints in cards | 8.11 | 7.73 | 4.5 | pass |
+| muted on surface-2 | hints on inset areas | 6.86 | 7.01 | 4.5 | pass |
+| accent on paper | links, secondary buttons | 7.15 | 9.30 | 4.5 | pass |
+| accent on surface | links and buttons in cards | 7.80 | 8.59 | 4.5 | pass |
+| accent-hover on paper | link hover | 9.92 | 11.25 | 4.5 | pass |
+| accent-hover on surface | link hover in cards | 10.82 | 10.39 | 4.5 | pass |
+| accent on accent-soft | Live / verified chips | 6.46 | 7.44 | 4.5 | pass |
+| accent-fg on accent | primary button | 7.93 | 8.88 | 4.5 | pass |
+| accent-fg on accent-hover | primary button hover | 11.00 | 10.75 | 4.5 | pass |
+| danger on paper | warnings, destructive text | 6.75 | 9.62 | 4.5 | pass |
+| danger on surface | warnings in cards | 7.36 | 8.88 | 4.5 | pass |
+| danger on danger-soft | error status line, warn chip | 6.12 | 8.47 | 4.5 | pass |
+| line-strong on paper | control borders against the page | 3.57 | 4.31 | 3 | pass |
+| line-strong on surface | control borders against the field | 3.89 | 3.99 | 3 | pass |
+| focus on paper | focus ring on the page | 7.15 | 9.30 | 3 | pass |
+| focus on surface | focus ring in cards | 7.80 | 8.59 | 3 | pass |
+| accent on track | bar fill against its track | 5.79 | 6.41 | 3 | pass |
+
+design.md token block equals src/style.css: light yes, dark yes

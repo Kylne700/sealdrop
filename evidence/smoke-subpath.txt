@@ -1,22 +1,22 @@
-Sealdrop smoke run 2026-10-16T21:14:16.354Z  Chromium Chrome/154.0.8037.92  served from http://127.0.0.1:33471/sealdrop/
-PASS  faked 429 on every query: the send page says the free budget is used up and offers Settings, after 0.6 s  (The free query budget of the public Arkiv RPC is used up. Wait a little, or ente)
-  throwaway newsroom created in the browser after 0.8 s (no network yet)
-  inbox created in 14.8 s: <site>/#/send/0x41a8580DC23DE7618a54801D2Ae93c35E0Bb1dF5/inbox-4eu7fq
+Sealdrop smoke run 2026-10-16T23:54:24.033Z  Chromium Chrome/154.0.8037.92  served from http://127.0.0.1:45859/sealdrop/
+PASS  faked 429 on every query: the send page says the free budget is used up and offers Settings, after 0.7 s  (The free query budget of the public Arkiv RPC is used up. Wait a little, or ente)
+  throwaway newsroom created in the browser after 0.7 s (no network yet)
+  inbox created in 14.6 s: <site>/#/send/0x915C861165BC1292c6195B056612C0089d757A24/inbox-6reyc3
 PASS  the inbox link points at #/send/<creator>/<inbox id>
 PASS  the key file can be exported
 PASS  the send page shows the newsroom as $creator (found by creator, not by a writable field)
 PASS  the tip decrypts in the newsroom tab to the exact text that was sent
 PASS  it arrived through the WebSocket subscription (data-source=live), not through a sweep
-  tip visible in the newsroom 2.5 s after Send was clicked; the sender's own page confirmed after 5.4 s
-  JUDGE PATH TOTAL: 19.2 s from opening the newsroom page to the decrypted live tip
-  tip entity https://data.arkiv.network/entity/0xdac7879f413f2057b09748a2fd6e003d8b844a3d937281df99a484f0fb168e6a
-  tx https://tiramisu.explorer.arkiv.network/tx/0x6759a2f0408ff4919c24a5f3afa8296d224bf1a28f4b85a6d851cd92a08e7177
+  tip visible in the newsroom 3.1 s after Send was clicked; the sender's own page confirmed after 5.5 s
+  JUDGE PATH TOTAL: 19.5 s from opening the newsroom page to the decrypted live tip
+  tip entity https://data.arkiv.network/entity/0x0a846b5548a419650e19bf53a15c2b52a61dd00c7890c87b7f8e88b68976edcc
+  tx https://tiramisu.explorer.arkiv.network/tx/0xa1b0f80bbec7b5db00b315eef96100c50887d2d35311685460197e2667551669
 PASS  wallet mode is offered when an EIP-1193 wallet is injected
 PASS  wallet mode: the result shows the wallet address as $creator
 PASS  wallet mode: the second tip also arrived live
 PASS  a look-alike link (same inbox id, different creator) shows "no live inbox"
 PASS  the Demo Desk inbox is found on Arkiv by its creator and inbox id
-  Demo Desk tip entity https://data.arkiv.network/entity/0x6fed890338391e08f6e030754889f851b18a0cb7a1f1c9cba206951d38615e07
+  Demo Desk tip entity https://data.arkiv.network/entity/0xe92cb4b7baf04404664ed939a8ea2e2c481137bc99aa9f7dc0da2cd496db68f1
 PASS  the desk operator (key not in the build) decrypts the Demo Desk tip with `ops desk-read`
   newsroom tab: Public RPC: this tab has made 6 queries (600 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
   source tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
