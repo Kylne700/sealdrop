@@ -1,0 +1,71 @@
+lock-requested 12:08:01.059
+lock-acquired 12:08:01.062
+{"label":"before","at":"2026-10-17T12:08:02.232Z","inbox":"0xabd068333e0c3fc9625b0002183301a983ff5142c1f5da201a09833b38001a39","tipsFromCreator":1,"newest":[{"key":"0xc4ea67bba5d0c6b5640840fe5e2dc2ad1db22f985fcbb18e5b382317b1693743","createdAt":"686981","bytes":1097}]}
+12:08:03.485 +1.09s mm-target {"type":"service_worker","url":"/service-worker.js"}
+12:08:03.937 +1.54s extension {"found":true,"url":"/service-worker.js","type":"service_worker","otherExtensions":[]}
+12:08:03.994 +1.59s mm-target-changed {"type":"page","url":"/home.html"}
+12:08:05.930 +3.53s mm-target {"type":"page","url":"/home.html"}
+12:08:06.300 +3.90s mm-target-changed {"type":"background_page","url":"/offscreen.html"}
+12:08:08.120 +5.72s mm-target-changed {"type":"page","url":"/home.html#/unlock"}
+12:08:08.230 +5.83s mm-target-changed {"type":"page","url":"/home.html#/unlock"}
+12:08:08.282 +5.88s mm-target-changed {"type":"other","url":"/snaps/index.html"}
+12:08:08.288 +5.89s mm-target-changed {"type":"other","url":"/snaps/index.html"}
+12:08:08.296 +5.90s mm-target-changed {"type":"other","url":"/snaps/index.html"}
+12:08:08.305 +5.91s mm-target-changed {"type":"other","url":"/snaps/index.html"}
+12:08:08.314 +5.92s mm-target-changed {"type":"other","url":"/snaps/index.html"}
+12:08:10.152 +7.75s mm-target-changed {"type":"page","url":"/home.html#/"}
+12:08:14.926 +12.53s mm-home {"typedPassword":true,"text":"Account 1 0xba699...F9d97 $0.00 +$0.00 (+0.00%) Discover Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates 
+12:08:15.024 +12.63s mm-page-closed {"url":"/home.html#/unlock"}
+12:08:15.376 +12.98s status {"text":null,"cls":null,"src":"page"}
+12:08:15.376 +12.98s result {"visible":null,"src":"page"}
+12:08:15.450 +13.05s hook {"note":"window.ethereum.request wrapped","isMetaMask":true,"src":"page"}
+12:08:16.431 +14.03s status {"text":"","cls":"status","src":"page"}
+12:08:16.431 +14.03s result {"visible":false,"src":"page"}
+12:08:16.459 +14.06s send-page-ready {"served":["http://127.0.0.1:47392/assets/index-jvon4gez.js"],"walletRadioDisabled":false}
+12:08:16.589 +14.19s click-send {}
+12:08:16.612 +14.21s eip1193 {"phase":"call","id":1,"method":"eth_requestAccounts","src":"page"}
+12:08:16.612 +14.21s status {"text":"Waiting for your wallet...","cls":"status busy","src":"page"}
+12:08:16.623 +14.22s eip1193 {"phase":"ok","id":1,"method":"eth_requestAccounts","result":["0xba699ff35a42…ff9d97"],"src":"page"}
+12:08:16.623 +14.22s eip1193 {"phase":"call","id":2,"method":"eth_chainId","src":"page"}
+12:08:16.625 +14.23s eip1193 {"phase":"ok","id":2,"method":"eth_chainId","result":"0x7614d1","src":"page"}
+12:08:16.627 +14.23s status {"text":"Confirm in your wallet...","cls":"status busy","src":"page"}
+12:08:16.736 +14.34s eip1193 {"phase":"call","id":3,"method":"eth_blockNumber","src":"page"}
+12:08:17.061 +14.66s eip1193 {"phase":"ok","id":3,"method":"eth_blockNumber","result":"0xa9925","src":"page"}
+12:08:17.063 +14.66s eip1193 {"phase":"call","id":4,"method":"eth_chainId","src":"page"}
+12:08:17.064 +14.66s eip1193 {"phase":"ok","id":4,"method":"eth_chainId","result":"0x7614d1","src":"page"}
+12:08:17.064 +14.66s eip1193 {"phase":"call","id":5,"method":"eth_sendTransaction","params":[{"data":"<2660 bytes>","from":"0xba699ff35a42…ff9d97","to":"0x440000000000…000044"}],"src":"page"}
+12:08:18.018 +15.62s mm-target-changed {"type":"page","url":"/sidepanel.html"}
+12:08:18.712 +16.31s popup {"url":"/sidepanel.html","listedByPages":false,"buttons":[],"open":["eth_sendTransaction"],"text":""}
+12:08:18.853 +16.45s mm-target-changed {"type":"page","url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7"}
+12:08:19.102 +16.70s popup {"url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7","listedByPages":false,"buttons":[],"open":["eth_sendTransaction"],"text":"Account 1 0xba699...F9d97 Buy Swap Send Receive BTC bounces off $80K Trading over $
+12:08:19.559 +17.16s popup {"url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7","listedByPages":false,"buttons":["confirm-footer-button"],"open":["eth_sendTransaction"],"text":"Sending 0 GLM G From Account 1 To 0x440000000000…0000000044 
+12:08:19.592 +17.19s tx-popup-waiting {"status":"Confirm in your wallet..."}
+12:08:29.761 +27.36s tx-popup-still-waiting {"heldMs":10170,"status":"Confirm in your wallet..."}
+12:08:29.855 +27.46s clicked-confirm {}
+12:08:30.102 +27.70s eip1193 {"phase":"ok","id":5,"method":"eth_sendTransaction","result":"0xe74127dfdf3d…4df189","src":"page"}
+12:08:30.102 +27.70s status {"text":"Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)...","cls":"status busy","src":"page"}
+12:08:30.103 +27.70s eip1193 {"phase":"call","id":6,"method":"eth_getTransactionReceipt","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+12:08:30.154 +27.75s mm-target-changed {"type":"page","url":"/sidepanel.html#/"}
+12:08:30.221 +27.82s eip1193 {"phase":"ok","id":6,"method":"eth_getTransactionReceipt","result":null,"src":"page"}
+12:08:30.221 +27.82s eip1193 {"phase":"call","id":7,"method":"eth_blockNumber","src":"page"}
+12:08:30.367 +27.97s popup {"url":"/sidepanel.html#/","listedByPages":false,"buttons":[],"open":["eth_blockNumber"],"text":"Account 1 0xba699...F9d97 Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls 
+12:08:30.419 +28.02s eip1193 {"phase":"ok","id":7,"method":"eth_blockNumber","result":"0xa992c","src":"page"}
+12:08:30.419 +28.02s eip1193 {"phase":"call","id":8,"method":"eth_getTransactionByHash","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+12:08:30.421 +28.02s eip1193 {"phase":"ok","id":8,"method":"eth_getTransactionByHash","result":{"v":"0x0","r":"0x17d81244e32c…a77f3a","s":"0x2654988fd77c…977d18","to":"0x440000000000…000044","gas":"0x20b9e","from":"0xba699ff35a42…ff9d97","hash":"0xe74127dfdf3d…4df189",
+12:08:30.421 +28.02s eip1193 {"phase":"call","id":9,"method":"eth_getTransactionReceipt","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+12:08:30.517 +28.12s eip1193 {"phase":"ok","id":9,"method":"eth_getTransactionReceipt","result":null,"src":"page"}
+12:08:30.518 +28.12s eip1193 {"phase":"call","id":10,"method":"eth_getBlockByNumber","params":["0xa992c",true],"src":"page"}
+12:08:30.639 +28.24s eip1193 {"phase":"ok","id":10,"method":"eth_getBlockByNumber","result":{"hash":"0x2ce63d33b5a1…388990","parentHash":"0xbcd9f226c315…46eefb","sha3Uncles":"0x1dcc4de8dec7…d49347","miner":"0x000000000000…00dead","stateRoot":"0x4f93b2db4484…a00eb4","tr
+12:08:31.720 +29.32s popup {"url":"/sidepanel.html#/","listedByPages":false,"buttons":[],"open":[],"text":"Account 1 0xba699...F9d97 $0.00 +$0.00 (+0.00%) Discover Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Shar
+12:08:34.419 +32.02s eip1193 {"phase":"call","id":11,"method":"eth_blockNumber","src":"page"}
+12:08:34.512 +32.11s eip1193 {"phase":"ok","id":11,"method":"eth_blockNumber","result":"0xa992e","src":"page"}
+12:08:34.513 +32.11s eip1193 {"phase":"call","id":12,"method":"eth_getTransactionReceipt","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+12:08:34.612 +32.21s eip1193 {"phase":"ok","id":12,"method":"eth_getTransactionReceipt","result":{"type":"0x2","status":"0x1","cumulativeGasUsed":"0x20748","logs":[{"address":"0x440000000000…000044","topics":["0xb282d7c494b8…4356a5","0x6431a8beb54c…7188eb","0x000000000
+12:08:35.060 +32.66s status {"text":"","cls":"status","src":"page"}
+12:08:35.060 +32.66s result {"visible":true,"src":"page"}
+12:08:36.579 +34.18s final {"status":"","resultLinks":["https://data.arkiv.network/entity/0x6431a8beb54ce9d5cd4f9b9f00c291444ce1125e16644a0260fe6024ae7188eb","https://tiramisu.explorer.arkiv.network/tx/0xe74127dfdf3d0b8c701bf5f35984ca852b5122955f641c76576154fd764df18
+w5-exit=0
+{"label":"after","at":"2026-10-17T12:08:37.589Z","inbox":"0xabd068333e0c3fc9625b0002183301a983ff5142c1f5da201a09833b38001a39","tipsFromCreator":2,"newest":[{"key":"0x6431a8beb54ce9d5cd4f9b9f00c291444ce1125e16644a0260fe6024ae7188eb","createdAt":"694573","bytes":1097},{"key":"0xc4ea67bba5d0c6b5640840fe5e2dc2ad1db22f985fcbb18e5b382317b1693743","createdAt":"686981","bytes":1097}]}
+{"at":"2026-10-17T12:08:38.415Z","address":"0xba699ff35a4241f4d9d9b878a667969caaff9d97","block":"694576","nonceLatest":9,"noncePending":9,"balanceGlm":"0.01937700999875402"}
+lock-released 12:08:38.428
+flock-exit=0

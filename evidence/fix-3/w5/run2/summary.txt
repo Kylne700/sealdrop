@@ -1,0 +1,44 @@
+W5 run run2, started 2026-10-17T12:08:02.399Z; times are seconds after the click on Send
+   -1.21  STATUS   (no status line)
+   -1.21  RESULT   {"visible":null}
+   -0.16  STATUS   
+   -0.16  RESULT   {"visible":false}
+    0.00  CLICK-SEND {}
+    0.02  WALLET   #1 eth_requestAccounts call
+    0.02  STATUS   Waiting for your wallet...
+    0.03  WALLET   #1 eth_requestAccounts ok ["0xba699ff35a42…ff9d97"]
+    0.03  WALLET   #2 eth_chainId call
+    0.04  WALLET   #2 eth_chainId ok "0x7614d1"
+    0.04  STATUS   Confirm in your wallet...
+    0.15  WALLET   #3 eth_blockNumber call
+    0.47  WALLET   #3 eth_blockNumber ok "0xa9925"
+    0.47  WALLET   #4 eth_chainId call
+    0.47  WALLET   #4 eth_chainId ok "0x7614d1"
+    0.47  WALLET   #5 eth_sendTransaction call [{"data":"<2660 bytes>","from":"0xba699ff35a42…ff9d97","to":"0x440000000000…000044"}]
+    2.12  POPUP    {"url":"/sidepanel.html","listedByPages":false,"buttons":[],"open":["eth_sendTransaction"],"text":""}
+    2.51  POPUP    {"url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7","listedByPages":false,"buttons":[],"open":["eth_sendTransaction"],"text":"Account 1 0xba699...F9d97 Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls 
+    2.97  POPUP    {"url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7","listedByPages":false,"buttons":["confirm-footer-button"],"open":["eth_sendTransaction"],"text":"Sending 0 GLM G From Account 1 To 0x440000000000…0000000044 Network A Arkiv Tiramisu Request from HTTP 127.0.0.1:47392 N
+    3.00  TX-POPUP-WAITING {"status":"Confirm in your wallet..."}
+   13.17  TX-POPUP-STILL-WAITING {"heldMs":10170,"status":"Confirm in your wallet..."}
+   13.27  CLICKED-CONFIRM {}
+   13.51  WALLET   #5 eth_sendTransaction ok "0xe74127dfdf3d…4df189"
+   13.51  STATUS   Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)...
+   13.51  WALLET   #6 eth_getTransactionReceipt call
+   13.63  WALLET   #6 eth_getTransactionReceipt ok null
+   13.63  WALLET   #7 eth_blockNumber call
+   13.78  POPUP    {"url":"/sidepanel.html#/","listedByPages":false,"buttons":[],"open":["eth_blockNumber"],"text":"Account 1 0xba699...F9d97 Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates Tokens DeFi NFTs Network
+   13.83  WALLET   #7 eth_blockNumber ok "0xa992c"
+   13.83  WALLET   #8 eth_getTransactionByHash call
+   13.83  WALLET   #8 eth_getTransactionByHash ok {"v":"0x0","r":"0x17d81244e32c…a77f3a","s":"0x2654988fd77c…977d18","to":"0x440000000000…000044","gas":"0x20b9e","from":"0xba699ff35a42…ff9d97","hash":"0xe74127dfdf3d…4df189","nonce":"0x8","input":"0x496500440000…76cb22","value":"0x0","accessList":null,"blockHash":null,"blockNumber":null,"transactionIndex":null,"type":"0x2","gasPrice":"0x3b9aca02","maxFeePerGas":"0x3b9aca02","maxPriorityFeePerGas":"0x3b9aca02"}
+   13.83  WALLET   #9 eth_getTransactionReceipt call
+   13.93  WALLET   #9 eth_getTransactionReceipt ok null
+   13.93  WALLET   #10 eth_getBlockByNumber call
+   14.05  WALLET   #10 eth_getBlockByNumber ok {"hash":"0x2ce63d33b5a1…388990","parentHash":"0xbcd9f226c315…46eefb","sha3Uncles":"0x1dcc4de8dec7…d49347","miner":"0x000000000000…00dead","stateRoot":"0x4f93b2db4484…a00eb4","transactionsRoot":"0x62e71c1dbdcf…19f6d2","receiptsRoot":"0x84eda20b55c3…3324e7","logsBloom":"0x000000000200…000000","difficulty":"0x0","number":"0xa992c","gasLimit":"0x2255100","gasUsed":"0x30130","timestamp":"0x6ad3653e","extraData":"0x726574682f76…6e7578","mixHash":"0x4a068ebf707d…2b1a59","nonce":"0x0000000000000000","baseFeePerGas":"0x3b9aca00","withdrawalsRoot":"0x56e81f171bcc…63b421","blobGasUsed":"0x0","excessBlobGas":"0x0","parentBeaconBlockRoot":"0x0f3d9d8d4da0…b123e5","requestsHash":"0xe3b0c44298fc…52b855","size":"0xf77","uncles":[],"transactions":[{"type":"0x2","chainId":"0x7614d1","nonce":"0x9bcd9","gas":"0x30d40","maxFeePerGas":"0x2540be400","maxPriorityFeePerGas":"0x2","to":"0x440000000000…000044","value":"0x0","accessList":[],"input":"0x496500440000…363833","r":"0xb1c3b353b0a6…6cf705","s":"0x1f917beeb89f…902487","yParity":"0x1","v":"0x1","hash":"0xf8ffe4f88ca1…08a452","blockHash":"0x2ce63d33b5a1…388990","blockNumber":"0xa992c","transactionIndex":"0x0","from":"0x6cb41094b6ae…8a5e22","gasPrice":"0x3b9aca02","blockTimestamp":"0x6ad3653e"},{"type":"0x2","chainId":"0x7614d1","nonce":"0x9babc","gas":"0x30d40","maxFeePerGas":"0x2540be400","maxPriorityFeePerGas":"0x2","to":"0x440000000000…000044","value":"0x0","accessList":[],"input":"0x496500440000…656231","r":"0xb81be0e7b8ae…12bf78","s":"0x5330f2ba4f6f…3dde0e","yParity":"0x1","v":"0x1","hash":"0xb92af303d34e…67a4b1","blockHash":"0x2ce63d33b5a1…388990","blockNumber":"0xa992c","transactionIndex":"0x1","from":"0x679b5ab1cd4b…d97b59","gasPrice":"0x3b9aca02","blockTimestamp":"0x6ad3653e"}],"withdrawals":[]}
+   15.13  POPUP    {"url":"/sidepanel.html#/","listedByPages":false,"buttons":[],"open":[],"text":"Account 1 0xba699...F9d97 $0.00 +$0.00 (+0.00%) Discover Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates Tokens DeF
+   17.83  WALLET   #11 eth_blockNumber call
+   17.92  WALLET   #11 eth_blockNumber ok "0xa992e"
+   17.92  WALLET   #12 eth_getTransactionReceipt call
+   18.02  WALLET   #12 eth_getTransactionReceipt ok {"type":"0x2","status":"0x1","cumulativeGasUsed":"0x20748","logs":[{"address":"0x440000000000…000044","topics":["0xb282d7c494b8…4356a5","0x6431a8beb54c…7188eb","0x000000000000…ff9d97"],"data":"<64 bytes>","blockHash":"0xa0f8c2f437de…7f710c","blockNumber":"0xa992d","blockTimestamp":"0x6ad36540","transactionHash":"0xe74127dfdf3d…4df189","transactionIndex":"0x0","logIndex":"0x0","removed":false},{"address":"0x440000000000…000044","topics":["0x0b659dccc8eb…1fbf83","0x6431a8beb54c…7188eb","0x000000000000…ff9d97","0x000000000000…76cb22"],"data":"<0 bytes>","blockHash":"0xa0f8c2f437de…7f710c","blockNumber":"0xa992d","blockTimestamp":"0x6ad36540","transactionHash":"0xe74127dfdf3d…4df189","transactionIndex":"0x0","logIndex":"0x1","removed":false}],"logsBloom":"0x000000000300…040000","transactionHash":"0xe74127dfdf3d…4df189","transactionIndex":"0x0","blockHash":"0xa0f8c2f437de…7f710c","blockNumber":"0xa992d","gasUsed":"0x20748","effectiveGasPrice":"0x3b9aca02","from":"0xba699ff35a42…ff9d97","to":"0x440000000000…000044","contractAddress":null}
+   18.47  STATUS   
+   18.47  RESULT   {"visible":true}
+   19.99  FINAL    {"status":"","resultLinks":["https://data.arkiv.network/entity/0x6431a8beb54ce9d5cd4f9b9f00c291444ce1125e16644a0260fe6024ae7188eb","https://tiramisu.explorer.arkiv.network/tx/0xe74127dfdf3d0b8c701bf5f35984ca852b5122955f641c76576154fd764df189","https://tiramisu.explorer.arkiv.network/address/0xba699f

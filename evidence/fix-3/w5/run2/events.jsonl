@@ -1,0 +1,63 @@
+{"t":"12:08:03.485","ms":1086,"kind":"mm-target","type":"service_worker","url":"/service-worker.js"}
+{"t":"12:08:03.937","ms":1538,"kind":"extension","found":true,"url":"/service-worker.js","type":"service_worker","otherExtensions":[]}
+{"t":"12:08:03.994","ms":1595,"kind":"mm-target-changed","type":"page","url":"/home.html"}
+{"t":"12:08:05.930","ms":3531,"kind":"mm-target","type":"page","url":"/home.html"}
+{"t":"12:08:06.300","ms":3901,"kind":"mm-target-changed","type":"background_page","url":"/offscreen.html"}
+{"t":"12:08:08.120","ms":5721,"kind":"mm-target-changed","type":"page","url":"/home.html#/unlock"}
+{"t":"12:08:08.230","ms":5831,"kind":"mm-target-changed","type":"page","url":"/home.html#/unlock"}
+{"t":"12:08:08.282","ms":5883,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"12:08:08.288","ms":5889,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"12:08:08.296","ms":5897,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"12:08:08.305","ms":5906,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"12:08:08.314","ms":5915,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"12:08:10.152","ms":7753,"kind":"mm-target-changed","type":"page","url":"/home.html#/"}
+{"t":"12:08:14.926","ms":12527,"kind":"mm-home","typedPassword":true,"text":"Account 1 0xba699...F9d97 $0.00 +$0.00 (+0.00%) Discover Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates Tokens DeFi NFTs Network: Arkiv Tiramisu G A GLM — - 0.0195 GLM Home Perps Activity Back u"}
+{"t":"12:08:15.024","ms":12625,"kind":"mm-page-closed","url":"/home.html#/unlock"}
+{"t":"12:08:15.376","ms":12977,"kind":"status","text":null,"cls":null,"src":"page"}
+{"t":"12:08:15.376","ms":12977,"kind":"result","visible":null,"src":"page"}
+{"t":"12:08:15.450","ms":13051,"kind":"hook","note":"window.ethereum.request wrapped","isMetaMask":true,"src":"page"}
+{"t":"12:08:16.431","ms":14032,"kind":"status","text":"","cls":"status","src":"page"}
+{"t":"12:08:16.431","ms":14032,"kind":"result","visible":false,"src":"page"}
+{"t":"12:08:16.459","ms":14060,"kind":"send-page-ready","served":["http://127.0.0.1:47392/assets/index-jvon4gez.js"],"walletRadioDisabled":false}
+{"t":"12:08:16.589","ms":14190,"kind":"click-send"}
+{"t":"12:08:16.612","ms":14213,"kind":"eip1193","phase":"call","id":1,"method":"eth_requestAccounts","src":"page"}
+{"t":"12:08:16.612","ms":14213,"kind":"status","text":"Waiting for your wallet...","cls":"status busy","src":"page"}
+{"t":"12:08:16.623","ms":14224,"kind":"eip1193","phase":"ok","id":1,"method":"eth_requestAccounts","result":["0xba699ff35a42…ff9d97"],"src":"page"}
+{"t":"12:08:16.623","ms":14224,"kind":"eip1193","phase":"call","id":2,"method":"eth_chainId","src":"page"}
+{"t":"12:08:16.625","ms":14226,"kind":"eip1193","phase":"ok","id":2,"method":"eth_chainId","result":"0x7614d1","src":"page"}
+{"t":"12:08:16.627","ms":14228,"kind":"status","text":"Confirm in your wallet...","cls":"status busy","src":"page"}
+{"t":"12:08:16.736","ms":14337,"kind":"eip1193","phase":"call","id":3,"method":"eth_blockNumber","src":"page"}
+{"t":"12:08:17.061","ms":14662,"kind":"eip1193","phase":"ok","id":3,"method":"eth_blockNumber","result":"0xa9925","src":"page"}
+{"t":"12:08:17.063","ms":14664,"kind":"eip1193","phase":"call","id":4,"method":"eth_chainId","src":"page"}
+{"t":"12:08:17.064","ms":14665,"kind":"eip1193","phase":"ok","id":4,"method":"eth_chainId","result":"0x7614d1","src":"page"}
+{"t":"12:08:17.064","ms":14665,"kind":"eip1193","phase":"call","id":5,"method":"eth_sendTransaction","params":[{"data":"<2660 bytes>","from":"0xba699ff35a42…ff9d97","to":"0x440000000000…000044"}],"src":"page"}
+{"t":"12:08:18.018","ms":15619,"kind":"mm-target-changed","type":"page","url":"/sidepanel.html"}
+{"t":"12:08:18.712","ms":16313,"kind":"popup","url":"/sidepanel.html","listedByPages":false,"buttons":[],"open":["eth_sendTransaction"],"text":""}
+{"t":"12:08:18.853","ms":16454,"kind":"mm-target-changed","type":"page","url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7"}
+{"t":"12:08:19.102","ms":16703,"kind":"popup","url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7","listedByPages":false,"buttons":[],"open":["eth_sendTransaction"],"text":"Account 1 0xba699...F9d97 Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates Tokens DeFi NFTs Network: Arkiv Tiramisu GLM - 0.0195 GLM 127.0.0.1:47392 Account 1 A Home Perps Activity"}
+{"t":"12:08:19.559","ms":17160,"kind":"popup","url":"/sidepanel.html#/confirm-transaction/6fb205c0-ca23-11f1-a855-8b93b58b12a7","listedByPages":false,"buttons":["confirm-footer-button"],"open":["eth_sendTransaction"],"text":"Sending 0 GLM G From Account 1 To 0x440000000000…0000000044 Network A Arkiv Tiramisu Request from HTTP 127.0.0.1:47392 Network fee 0.0001 G GLM Speed Cancel Confirm"}
+{"t":"12:08:19.592","ms":17193,"kind":"tx-popup-waiting","status":"Confirm in your wallet..."}
+{"t":"12:08:29.761","ms":27362,"kind":"tx-popup-still-waiting","heldMs":10170,"status":"Confirm in your wallet..."}
+{"t":"12:08:29.855","ms":27456,"kind":"clicked-confirm"}
+{"t":"12:08:30.102","ms":27703,"kind":"eip1193","phase":"ok","id":5,"method":"eth_sendTransaction","result":"0xe74127dfdf3d…4df189","src":"page"}
+{"t":"12:08:30.102","ms":27703,"kind":"status","text":"Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)...","cls":"status busy","src":"page"}
+{"t":"12:08:30.103","ms":27704,"kind":"eip1193","phase":"call","id":6,"method":"eth_getTransactionReceipt","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+{"t":"12:08:30.154","ms":27755,"kind":"mm-target-changed","type":"page","url":"/sidepanel.html#/"}
+{"t":"12:08:30.221","ms":27822,"kind":"eip1193","phase":"ok","id":6,"method":"eth_getTransactionReceipt","result":null,"src":"page"}
+{"t":"12:08:30.221","ms":27822,"kind":"eip1193","phase":"call","id":7,"method":"eth_blockNumber","src":"page"}
+{"t":"12:08:30.367","ms":27968,"kind":"popup","url":"/sidepanel.html#/","listedByPages":false,"buttons":[],"open":["eth_blockNumber"],"text":"Account 1 0xba699...F9d97 Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates Tokens DeFi NFTs Network: Arkiv Tiramisu G A GLM — - 0.0195 GLM 127.0.0.1:47392 Account 1 A Home Perps Activity Back up y"}
+{"t":"12:08:30.419","ms":28020,"kind":"eip1193","phase":"ok","id":7,"method":"eth_blockNumber","result":"0xa992c","src":"page"}
+{"t":"12:08:30.419","ms":28020,"kind":"eip1193","phase":"call","id":8,"method":"eth_getTransactionByHash","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+{"t":"12:08:30.421","ms":28022,"kind":"eip1193","phase":"ok","id":8,"method":"eth_getTransactionByHash","result":{"v":"0x0","r":"0x17d81244e32c…a77f3a","s":"0x2654988fd77c…977d18","to":"0x440000000000…000044","gas":"0x20b9e","from":"0xba699ff35a42…ff9d97","hash":"0xe74127dfdf3d…4df189","nonce":"0x8","input":"0x496500440000…76cb22","value":"0x0","accessList":null,"blockHash":null,"blockNumber":null,"transactionIndex":null,"type":"0x2","gasPrice":"0x3b9aca02","maxFeePerGas":"0x3b9aca02","maxPriorityFeePerGas":"0x3b9aca02"},"src":"page"}
+{"t":"12:08:30.421","ms":28022,"kind":"eip1193","phase":"call","id":9,"method":"eth_getTransactionReceipt","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+{"t":"12:08:30.517","ms":28118,"kind":"eip1193","phase":"ok","id":9,"method":"eth_getTransactionReceipt","result":null,"src":"page"}
+{"t":"12:08:30.518","ms":28119,"kind":"eip1193","phase":"call","id":10,"method":"eth_getBlockByNumber","params":["0xa992c",true],"src":"page"}
+{"t":"12:08:30.639","ms":28240,"kind":"eip1193","phase":"ok","id":10,"method":"eth_getBlockByNumber","result":{"hash":"0x2ce63d33b5a1…388990","parentHash":"0xbcd9f226c315…46eefb","sha3Uncles":"0x1dcc4de8dec7…d49347","miner":"0x000000000000…00dead","stateRoot":"0x4f93b2db4484…a00eb4","transactionsRoot":"0x62e71c1dbdcf…19f6d2","receiptsRoot":"0x84eda20b55c3…3324e7","logsBloom":"0x000000000200…000000","difficulty":"0x0","number":"0xa992c","gasLimit":"0x2255100","gasUsed":"0x30130","timestamp":"0x6ad3653e","extraData":"0x726574682f76…6e7578","mixHash":"0x4a068ebf707d…2b1a59","nonce":"0x0000000000000000","baseFeePerGas":"0x3b9aca00","withdrawalsRoot":"0x56e81f171bcc…63b421","blobGasUsed":"0x0","excessBlobGas":"0x0","parentBeaconBlockRoot":"0x0f3d9d8d4da0…b123e5","requestsHash":"0xe3b0c44298fc…52b855","size":"0xf77","uncles":[],"transactions":[{"type":"0x2","chainId":"0x7614d1","nonce":"0x9bcd9","gas":"0x30d40","maxFeePerGas":"0x2540be400","maxPriorityFeePerGas":"0x2","to":"0x440000000000…000044","value":"0x0","accessList":[],"input":"0x496500440000…363833","r":"0xb1c3b353b0a6…6cf705","s":"0x1f917beeb89f…902487","yParity":"0x1","v":"0x1","hash":"0xf8ffe4f88ca1…08a452","blockHash":"0x2ce63d33b5a1…388990","blockNumber":"0xa992c","transactionIndex":"0x0","from":"0x6cb41094b6ae…8a5e22","gasPrice":"0x3b9aca02","blockTimestamp":"0x6ad3653e"},{"type":"0x2","chainId":"0x7614d1","nonce":"0x9babc","gas":"0x30d40","maxFeePerGas":"0x2540be400","maxPriorityFeePerGas":"0x2","to":"0x440000000000…000044","value":"0x0","accessList":[],"input":"0x496500440000…656231","r":"0xb81be0e7b8ae…12bf78","s":"0x5330f2ba4f6f…3dde0e","yParity":"0x1","v":"0x1","hash":"0xb92af303d34e…67a4b1","blockHash":"0x2ce63d33b5a1…388990","blockNumber":"0xa992c","transactionIndex":"0x1","from":"0x679b5ab1cd4b…d97b59","gasPrice":"0x3b9aca02","blockTimestamp":"0x6ad3653e"}],"withdrawals":[]},"src":"page"}
+{"t":"12:08:31.720","ms":29321,"kind":"popup","url":"/sidepanel.html#/","listedByPages":false,"buttons":[],"open":[],"text":"Account 1 0xba699...F9d97 $0.00 +$0.00 (+0.00%) Discover Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates Tokens DeFi NFTs Network: Arkiv Tiramisu G A GLM — - 0.0195 GLM 127.0.0.1:47392 Account 1 "}
+{"t":"12:08:34.419","ms":32020,"kind":"eip1193","phase":"call","id":11,"method":"eth_blockNumber","src":"page"}
+{"t":"12:08:34.512","ms":32113,"kind":"eip1193","phase":"ok","id":11,"method":"eth_blockNumber","result":"0xa992e","src":"page"}
+{"t":"12:08:34.513","ms":32114,"kind":"eip1193","phase":"call","id":12,"method":"eth_getTransactionReceipt","params":["0xe74127dfdf3d…4df189"],"src":"page"}
+{"t":"12:08:34.612","ms":32213,"kind":"eip1193","phase":"ok","id":12,"method":"eth_getTransactionReceipt","result":{"type":"0x2","status":"0x1","cumulativeGasUsed":"0x20748","logs":[{"address":"0x440000000000…000044","topics":["0xb282d7c494b8…4356a5","0x6431a8beb54c…7188eb","0x000000000000…ff9d97"],"data":"<64 bytes>","blockHash":"0xa0f8c2f437de…7f710c","blockNumber":"0xa992d","blockTimestamp":"0x6ad36540","transactionHash":"0xe74127dfdf3d…4df189","transactionIndex":"0x0","logIndex":"0x0","removed":false},{"address":"0x440000000000…000044","topics":["0x0b659dccc8eb…1fbf83","0x6431a8beb54c…7188eb","0x000000000000…ff9d97","0x000000000000…76cb22"],"data":"<0 bytes>","blockHash":"0xa0f8c2f437de…7f710c","blockNumber":"0xa992d","blockTimestamp":"0x6ad36540","transactionHash":"0xe74127dfdf3d…4df189","transactionIndex":"0x0","logIndex":"0x1","removed":false}],"logsBloom":"0x000000000300…040000","transactionHash":"0xe74127dfdf3d…4df189","transactionIndex":"0x0","blockHash":"0xa0f8c2f437de…7f710c","blockNumber":"0xa992d","gasUsed":"0x20748","effectiveGasPrice":"0x3b9aca02","from":"0xba699ff35a42…ff9d97","to":"0x440000000000…000044","contractAddress":null},"src":"page"}
+{"t":"12:08:35.060","ms":32661,"kind":"status","text":"","cls":"status","src":"page"}
+{"t":"12:08:35.060","ms":32661,"kind":"result","visible":true,"src":"page"}
+{"t":"12:08:36.579","ms":34180,"kind":"final","status":"","resultLinks":["https://data.arkiv.network/entity/0x6431a8beb54ce9d5cd4f9b9f00c291444ce1125e16644a0260fe6024ae7188eb","https://tiramisu.explorer.arkiv.network/tx/0xe74127dfdf3d0b8c701bf5f35984ca852b5122955f641c76576154fd764df189","https://tiramisu.explorer.arkiv.network/address/0xba699ff35a4241f4d9d9b878a667969caaff9d97","https://data.arkiv.network/owner/0x5116fB80527C12b04e3281594971Abf51276cb22"],"open":[]}

@@ -1,0 +1,20 @@
+W5 run run1, started 2026-10-17T11:59:50.739Z; times are seconds after the click on Send
+   -0.87  STATUS   (no status line)
+   -0.87  RESULT   {"visible":null}
+   -0.17  STATUS   
+   -0.17  RESULT   {"visible":false}
+    0.00  CLICK-SEND {}
+    0.03  WALLET   #1 eth_requestAccounts call
+    0.03  STATUS   Waiting for your wallet...
+    0.04  POPUP    {"url":"/home.html#/unlock","buttons":[],"open":["eth_requestAccounts"],"text":"Unlock Forgot password?"}
+    0.04  WALLET   #1 eth_requestAccounts ok ["0xba699ff35a42…ff9d97"]
+    0.04  WALLET   #2 eth_chainId call
+    0.04  WALLET   #2 eth_chainId ok "0x7614d1"
+    0.04  STATUS   Confirm in your wallet...
+    0.15  WALLET   #3 eth_blockNumber call
+    0.43  WALLET   #3 eth_blockNumber ok "0xa982e"
+    0.44  WALLET   #4 eth_chainId call
+    0.44  WALLET   #4 eth_chainId ok "0x7614d1"
+    0.44  WALLET   #5 eth_sendTransaction call [{"data":"<2660 bytes>","from":"0xba699ff35a42…ff9d97","to":"0x440000000000…000044"}]
+  330.26  GAVE-UP  {"afterMs":330224,"status":"Confirm in your wallet...","open":["eth_sendTransaction"]}
+  331.76  FINAL    {"status":"Confirm in your wallet...","resultLinks":[],"open":["eth_sendTransaction"]}

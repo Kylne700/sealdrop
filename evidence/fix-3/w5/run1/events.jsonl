@@ -1,0 +1,38 @@
+{"t":"11:59:51.384","ms":645,"kind":"mm-target","type":"service_worker","url":"/service-worker.js"}
+{"t":"11:59:51.828","ms":1089,"kind":"extension","found":true,"url":"/service-worker.js","type":"service_worker","otherExtensions":[]}
+{"t":"11:59:51.874","ms":1135,"kind":"mm-target-changed","type":"page","url":"/home.html"}
+{"t":"11:59:52.899","ms":2160,"kind":"mm-target","type":"page","url":"/home.html"}
+{"t":"11:59:53.195","ms":2456,"kind":"mm-target-changed","type":"background_page","url":"/offscreen.html"}
+{"t":"11:59:54.332","ms":3593,"kind":"mm-target-changed","type":"page","url":"/home.html#/unlock"}
+{"t":"11:59:54.419","ms":3680,"kind":"mm-target-changed","type":"page","url":"/home.html#/unlock"}
+{"t":"11:59:54.424","ms":3685,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"11:59:54.427","ms":3688,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"11:59:54.451","ms":3712,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"11:59:54.468","ms":3729,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"11:59:54.473","ms":3734,"kind":"mm-target-changed","type":"other","url":"/snaps/index.html"}
+{"t":"11:59:57.082","ms":6343,"kind":"mm-target-changed","type":"page","url":"/home.html#/"}
+{"t":"12:00:01.935","ms":11196,"kind":"mm-home","typedPassword":true,"text":"Account 1 0xba699...F9d97 $0.00 +$0.00 (+0.00%) Discover Buy Swap Send Receive BTC bounces off $80K Trading over $83K, +8% month over month TSM on the move Share price falls despite Q3 earnings above estimates Tokens DeFi NFTs Network: Arkiv Tiramisu G A GLM — - 0.0195 GLM Home Perps Activity Back u"}
+{"t":"12:00:02.043","ms":11304,"kind":"mm-page-left-open","url":"/home.html#/unlock"}
+{"t":"12:00:02.307","ms":11568,"kind":"status","text":null,"cls":null,"src":"page"}
+{"t":"12:00:02.307","ms":11568,"kind":"result","visible":null,"src":"page"}
+{"t":"12:00:02.348","ms":11609,"kind":"hook","note":"window.ethereum.request wrapped","isMetaMask":true,"src":"page"}
+{"t":"12:00:03.001","ms":12262,"kind":"status","text":"","cls":"status","src":"page"}
+{"t":"12:00:03.001","ms":12262,"kind":"result","visible":false,"src":"page"}
+{"t":"12:00:03.045","ms":12306,"kind":"send-page-ready","served":["http://127.0.0.1:47392/assets/index-jvon4gez.js"],"walletRadioDisabled":false}
+{"t":"12:00:03.174","ms":12435,"kind":"click-send"}
+{"t":"12:00:03.199","ms":12460,"kind":"eip1193","phase":"call","id":1,"method":"eth_requestAccounts","src":"page"}
+{"t":"12:00:03.199","ms":12460,"kind":"status","text":"Waiting for your wallet...","cls":"status busy","src":"page"}
+{"t":"12:00:03.209","ms":12470,"kind":"popup","url":"/home.html#/unlock","buttons":[],"open":["eth_requestAccounts"],"text":"Unlock Forgot password?"}
+{"t":"12:00:03.210","ms":12471,"kind":"eip1193","phase":"ok","id":1,"method":"eth_requestAccounts","result":["0xba699ff35a42…ff9d97"],"src":"page"}
+{"t":"12:00:03.210","ms":12471,"kind":"eip1193","phase":"call","id":2,"method":"eth_chainId","src":"page"}
+{"t":"12:00:03.212","ms":12473,"kind":"eip1193","phase":"ok","id":2,"method":"eth_chainId","result":"0x7614d1","src":"page"}
+{"t":"12:00:03.215","ms":12476,"kind":"status","text":"Confirm in your wallet...","cls":"status busy","src":"page"}
+{"t":"12:00:03.327","ms":12588,"kind":"eip1193","phase":"call","id":3,"method":"eth_blockNumber","src":"page"}
+{"t":"12:00:03.609","ms":12870,"kind":"eip1193","phase":"ok","id":3,"method":"eth_blockNumber","result":"0xa982e","src":"page"}
+{"t":"12:00:03.612","ms":12873,"kind":"eip1193","phase":"call","id":4,"method":"eth_chainId","src":"page"}
+{"t":"12:00:03.614","ms":12875,"kind":"eip1193","phase":"ok","id":4,"method":"eth_chainId","result":"0x7614d1","src":"page"}
+{"t":"12:00:03.614","ms":12875,"kind":"eip1193","phase":"call","id":5,"method":"eth_sendTransaction","params":[{"data":"<2660 bytes>","from":"0xba699ff35a42…ff9d97","to":"0x440000000000…000044"}],"src":"page"}
+{"t":"12:00:04.644","ms":13905,"kind":"mm-target-changed","type":"page","url":"/sidepanel.html"}
+{"t":"12:00:05.534","ms":14795,"kind":"mm-target-changed","type":"page","url":"/sidepanel.html#/confirm-transaction/49966d50-ca22-11f1-9b63-dd22aec10e73"}
+{"t":"12:05:33.431","ms":342692,"kind":"gave-up","afterMs":330224,"status":"Confirm in your wallet...","open":["eth_sendTransaction"]}
+{"t":"12:05:34.939","ms":344200,"kind":"final","status":"Confirm in your wallet...","resultLinks":[],"open":["eth_sendTransaction"]}
