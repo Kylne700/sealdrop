@@ -63,8 +63,17 @@ export function localSigner(privateKey: Hex, rpcUrl: string = RPC_HTTP): Signer 
 
 const CHAIN_HEX = '0x' + CHAIN_ID.toString(16)
 
+/** Calls `onSent` when the wallet has answered a transaction request, i.e. the user confirmed it (or it threw). */
+export function notifyOnSend(provider: EIP1193Provider, onSent: () => void): EIP1193Provider {
+  return { ...provider, request: (async (args: { method: string }) => {
+    const res = await provider.request(args as never)
+    if (args.method === 'eth_sendTransaction') onSent()
+    return res
+  }) as EIP1193Provider['request'] }
+}
+
 /** Connects an injected EIP-1193 wallet (MetaMask etc.) and makes sure it is on Tiramisu. */
-export async function injectedSigner(provider: EIP1193Provider): Promise<Signer> {
+export async function injectedSigner(provider: EIP1193Provider, onSent?: () => void): Promise<Signer> {
   const accounts = (await provider.request({ method: 'eth_requestAccounts' })) as Address[]
   const address = accounts[0]
   if (!address) throw new Error('The wallet returned no account. Unlock the wallet and allow this page to connect, then try again.')
@@ -82,7 +91,7 @@ export async function injectedSigner(provider: EIP1193Provider): Promise<Signer>
     // Some wallets add the network without switching to it.
     if ((await chainId()) !== CHAIN_HEX) throw new Error(`Your wallet is on a different network. Switch it to Arkiv Tiramisu (chain id ${CHAIN_ID}) and try again.`)
   }
-  return { address, client: createWalletClient({ chain: tiramisu, transport: custom(provider), account: address }), kind: 'injected' }
+  return { address, client: createWalletClient({ chain: tiramisu, transport: custom(onSent ? notifyOnSend(provider, onSent) : provider), account: address }), kind: 'injected' }
 }
 
 // ---- small utilities --------------------------------------------------------------------------------
@@ -127,6 +136,10 @@ export function explainError(e: unknown): string {
   if (limited) {
     const mins = Math.max(1, Math.ceil(limited.retryAfterSeconds / 60))
     return `The free query budget of the public Arkiv RPC is used up${limited.retryAfterSeconds ? ` (it renews in about ${mins} min)` : ''}. Wait a little, or enter your own RPC URL under Settings.`
+  }
+  for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) {
+    const status = (cur as { status?: unknown }).status
+    if (typeof status === 'number' && status >= 500 && status < 600) return `The Arkiv RPC is having trouble (HTTP ${status}). Try again in a minute, or use another RPC under Settings.`
   }
   const err = e as { code?: number; shortMessage?: string; message?: string; cause?: { code?: number; message?: string } }
   const text = errorText(e)

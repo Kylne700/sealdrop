@@ -183,7 +183,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         link(entityUrl(tip.key), 'entity on Data Explorer'),
       ),
       mine ? h('div', { class: 'actions' },
-        h('button', { type: 'button', class: 'secondary', onclick: () => pin(tip) }, `Keep ${PIN_DAYS} more days`),
+        h('button', { type: 'button', class: 'secondary', onclick: () => pin(tip) }, `Keep until ${PIN_DAYS} days from now`),
         h('button', { type: 'button', class: 'danger', onclick: () => burn(tip) }, 'Burn now'),
       ) : null,
     )
@@ -459,6 +459,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
           },
         }, 'Forget this newsroom'),
       ),
+      h('p', { class: 'hint' }, 'Export the key file: if you clear the browser data, or close Tor Browser, the keys are gone and so is the access to every tip.'),
     ),
     body,
     tipsSection,

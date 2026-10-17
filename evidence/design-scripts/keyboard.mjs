@@ -6,7 +6,7 @@
 // (click, Enter, Back/Forward, the #/demo redirect) puts focus on the new h1 and the title names the page, the first load does not;
 // in-page updates (a tip over the WebSocket, the connection chip, a lease renewal, the footer meter) never move focus while the user types.
 // Re-renders (A9-A13): when a rebuild removes the focused control, or a disabled button drops focus, focus goes back to the same control of the same tip
-// (a live tip, "Keep N more days", Refresh, Renew now, Seal and send after an error), to the next tip, the previous tip and then the "Tips" heading after
+// (a live tip, "Keep until N days from now", Refresh, Renew now, Seal and send after an error), to the next tip, the previous tip and then the "Tips" heading after
 // "Burn now", to a heading when the whole panel or page is replaced (Create the inbox, Forget / Create a newsroom), and to the message box after
 // "Send another". Focus that is anywhere else stays where it is.
 import { serve, launch, sleep } from '../qa-scripts/lib.mjs'
@@ -283,7 +283,7 @@ async function liveTip(page) {
   await page.evaluate((age) => { const t = window.__MOCK.tips; t.push({ text: 'SYNTHETIC TEST TIP: live', ageMin: age, days: 14, live: true }); window.__push.tip(t.length - 1) }, 9 - newer++)
   await page.waitForFunction((k) => document.querySelectorAll('[data-testid=tip]').length === k, { timeout: 5000 }, n + 1)
 }
-const KEEP = /^Keep \d+ more days$/
+const KEEP = /^Keep until \d+ days from now$/
 
 // A9: the list is rebuilt when a tip arrives and when one is kept; focus stays on the same control of the same tip, and moves nowhere it was not
 const a = await opened(room(3), 3)
@@ -301,7 +301,7 @@ while (at && at.key === rowKey && walked.length < 8) { // every control of the r
   await a.keyboard.press('Tab')
   at = await here(a)
 }
-check('A9 the walk covered the whole row: address link, copy button, explorer link, "Keep 30 more days", "Burn now"', walked.length === 5 && walked.some((n) => /^Copy/.test(n)) && walked.some((n) => /Data Explorer/.test(n)) && walked.some((n) => KEEP.test(n)) && walked.includes('Burn now'), walked.join(' > '))
+check('A9 the walk covered the whole row: address link, copy button, explorer link, "Keep until 30 days from now", "Burn now"', walked.length === 5 && walked.some((n) => /^Copy/.test(n)) && walked.some((n) => /Data Explorer/.test(n)) && walked.some((n) => KEEP.test(n)) && walked.includes('Burn now'), walked.join(' > '))
 r = await tabTo(a, (s) => s.key === rowKey && KEEP.test(s.name), 4, 'Shift+Tab')
 if (r.found) { // Enter anywhere else could open an explorer link in a new tab, which hides this page
   await remember(a)
@@ -309,7 +309,7 @@ if (r.found) { // Enter anywhere else could open an explorer link in a new tab, 
   await a.waitForFunction(() => /^Kept:/.test(document.querySelector('[data-testid=status]')?.textContent ?? ''), { timeout: 5000 }).catch(() => {}) // a wait that times out shows up as a failed check below, not as a crash
 }
 now = await here(a)
-check('A9 Enter on "Keep 30 more days": the row stays or is rebuilt, focus is on that tip\'s button again with its ring and the status line says "Kept:"', Boolean(r.found && now && now.key === rowKey && KEEP.test(now.name) && now.ring), `now ${spot(now)}`)
+check('A9 Enter on "Keep until 30 days from now": the row stays or is rebuilt, focus is on that tip\'s button again with its ring and the status line says "Kept:"', Boolean(r.found && now && now.key === rowKey && KEEP.test(now.name) && now.ring), `now ${spot(now)}`)
 await a.evaluate(() => document.activeElement.blur())
 await liveTip(a)
 check('A9 nothing has focus: a tip that arrives gives focus to nothing', (await here(a)) === null)
@@ -322,7 +322,7 @@ await a.evaluate((k) => { window.__was = document.querySelector(`[data-key^="${k
 await a.click(`[data-key^="${mouseRow}"] button.secondary`) // a mouse user: the rebuilt row must not grow a ring out of nowhere
 await a.waitForFunction(() => !window.__was.isConnected, { timeout: 5000 }).catch(() => {}) // a wait that times out shows up as a failed check below, not as a crash
 now = await here(a)
-check('A9 a mouse click on "Keep 30 more days": the list is rebuilt, focus is on that tip\'s button again and no ring appears (:focus-visible stays off)', Boolean(now && now.key === mouseRow && KEEP.test(now.name) && !now.fv && !now.ring), `now ${spot(now)}, :focus-visible=${now && now.fv}`)
+check('A9 a mouse click on "Keep until 30 days from now": the list is rebuilt, focus is on that tip\'s button again and no ring appears (:focus-visible stays off)', Boolean(now && now.key === mouseRow && KEEP.test(now.name) && !now.fv && !now.ring), `now ${spot(now)}, :focus-visible=${now && now.fv}`)
 await a.close()
 
 // A10: "Burn now" removes the tip that has focus: the same button on the next tip, else on the previous tip, else the "Tips" heading

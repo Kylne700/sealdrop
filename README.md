@@ -86,7 +86,7 @@ each of those becomes an operator you have to trust:
 | Atomic batch: create plus ownership change | One click makes the tip and hands it to the newsroom in one transaction. The shared demo key can no longer delete or extend anyone's tip; the newsroom can keep or burn it. | `sendTip` in [src/arkiv.ts](src/arkiv.ts) |
 | Query by `$owner` | The console shows only tips handed to the newsroom. A stranger can create an entity that mentions the inbox, but it never appears. | `sweepTips` in [src/arkiv.ts](src/arkiv.ts) |
 | Entity Expiration per type | The source picks 1, 7, 14 or 30 days and sees the exact expiry on the result screen. The inbox itself lives for 7 days. | `sendTip`, `createInbox` |
-| Lifetime Extension as a lease | The console renews the inbox when the newsroom opens it with under 6 days left (a wallet newsroom presses "Renew now"), so an inbox the newsroom stops opening lapses within 7 days and sources see "no live inbox" instead of writing into it. "Keep 30 more days" extends a single tip. | `renewInbox`, `pinTip` |
+| Lifetime Extension as a lease | The console renews the inbox when the newsroom opens it with under 6 days left (a wallet newsroom presses "Renew now"), so an inbox the newsroom stops opening lapses within 7 days and sources see "no live inbox" instead of writing into it. "Keep until 30 days from now" extends a single tip. | `renewInbox`, `pinTip` |
 | Range query on `$expiresAt` | One query finds every inbox of this creator that has less than 6 days left. | `inboxesDueForRenewal` |
 | `watchEntityEvents` over WebSocket | The tip shows up in the open console within seconds, with no polling for tips (the socket itself costs no queries; reading the new tip afterwards is one; a 30 s `eth_blockNumber` heartbeat on the same socket only detects a dead connection). If the connection drops the page says "Reconnecting", retries with a growing delay and, once it is back, makes one catch-up query, so a tip sent during the outage still appears without a refresh. | `watchHandovers` |
 | Cursor pagination | The console loads an inbox 200 tips at a time, up to 2,000 tips, and says when it shows only the first pages. | `sweepTips` |
@@ -186,7 +186,7 @@ written from the contract, that decrypts a newsroom's tips (in the builder's run
 
 **What it does not protect**
 
-* **Your network address.** The RPC node (and a WebSocket) sees your IP. Use Tor Browser if that matters. A local
+* **Your network address.** The RPC node (and a WebSocket) sees your IP. Use Tor Browser if that matters; the RPC budget is per exit IP, so Tor's New Identity gives a fresh budget. A local
   network or ISP observer sees that you use Sealdrop and the RPC (clearnet). The WebSocket operator learns which inbox a
   console watches, and when. The explorer links on the receipt send your IP and the tip's key to the explorer operator
   when clicked.

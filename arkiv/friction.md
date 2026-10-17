@@ -16,7 +16,7 @@ appended to as the build goes on; the last section lists what was checked and fo
 | F4 | Fundamentals page | Low | "Every other transaction reverts" is not what happens for a plain GLM transfer |
 | F5 | Faucet | Low | Only usable from an interactive browser session, no scriptable path for CI or agents |
 | F6 | Concurrent batches from one wallet | Medium | The docs' nonce fix stops the collision, but the second `predictEntityKeys` + `executeBatch` batch then reverts on chain (5 of 5 runs) because its predicted key is stale; the docs do not say a prediction holds for one batch in flight only |
-| F7 | Public RPC anonymous budget | High | `arkiv_query` costs 100 units against an undocumented anonymous budget of 10,000; only the 429 says so, and the SDK (viem) sleeps through the `Retry-After` (about 30 min) instead of failing |
+| F7 | Public RPC anonymous budget | High | `arkiv_query` costs 100 units against an undocumented anonymous budget of 10,000; only the 429 says so, and the SDK (viem) sleeps through the `Retry-After` (up to 60 minutes; the RPC's Retry-After says when) instead of failing |
 | F8 | Writes from an account with no GLM | Low | An entity write from an empty account fails as `out of gas: gas required exceeds: N` ("Execution error without revert data" on top), a plain transfer from the same account as geth's `insufficient funds`; an app matching only the usual wording misses the first |
 
 ---

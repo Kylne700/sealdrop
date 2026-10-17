@@ -17,7 +17,7 @@ Block numbers: `$createdAt` and `$expiresAt` are block numbers (2 s blocks, 43,2
 | Content type | `application/json` | `application/octet-stream` |
 | Creation flags | none | `readonly` (the sealed bytes can never be rewritten) |
 | Entity Expiration | **7 days**, renewed by Lifetime Extension | **chosen by the source: 1, 7, 14 or 30 days** (default 14) |
-| Who may extend or delete | the owner (newsroom) | the owner (newsroom): "Keep 30 more days" or "Burn" |
+| Who may extend or delete | the owner (newsroom) | the owner (newsroom): "Keep until 30 days from now" or "Burn" |
 
 `permissionlessExtension` (anyone may extend an entity's expiry) is off for both types, which is the SDK default. So only
 the newsroom can renew its inbox, and a stranger cannot postpone the 7-day lapse; only the owner can extend a tip past
