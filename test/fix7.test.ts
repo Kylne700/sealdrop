@@ -117,7 +117,7 @@ describe('R2-S3: a failed Keep or Burn says so inside its row (source checks; th
     expect(css).toMatch(/\.warn-text \{[^}]*overflow-wrap: anywhere;/) // the unknown-outcome text carries a 66-character hash
   })
   it('a failed Keep or Burn writes the action and the status text into its row; the next action on that row clears it', () => {
-    expect(page).toMatch(/rowError\(tip, `\$\{did\} did not complete\. \$\{why\}`\)\n\s*return status\.error\(why\)/)
+    expect(page).toMatch(/rowError\(tip, `\$\{did\} \$\{mayHaveBeenSent\(e\) \? 'may not have completed' : 'did not complete'\}\. \$\{why\}`\)\n\s*return status\.error\(why\)/)
     expect(page).toMatch(/actionFailed\(tip, e, 'Burn'\)/)
     expect(page).toMatch(/actionFailed\(tip, e, 'Keep'\)/)
     expect(page).toMatch(/async function pin\(tip: TipView\) \{\n\s*rowError\(tip\)/)

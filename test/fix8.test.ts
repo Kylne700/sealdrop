@@ -2,6 +2,7 @@
 // The browser measurements (W-2 to W-6, Chromium and WebKit, before and after) are in evidence/fix-8/.
 import { readFileSync } from 'node:fs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { burnedAway } from '../src/codec'
 import { COPY_BLOCKED, copyButton } from '../src/ui/dom'
 
 const read = (p: string) => readFileSync(new URL(p, import.meta.url), 'utf8')
@@ -137,5 +138,51 @@ describe('W-1 and I-2: words', () => {
   })
   it('the home page says the inbox takes longer over Tor', () => {
     expect(home).toContain('and create an inbox (about 15 seconds, longer over Tor).')
+  })
+})
+
+describe('R4-L1: the row note does not contradict itself', () => {
+  it('an unknown outcome opens with "may not have completed", every other failure with "did not complete"', () => {
+    expect(page).toContain("rowError(tip, `${did} ${mayHaveBeenSent(e) ? 'may not have completed' : 'did not complete'}. ${why}`)")
+  })
+})
+
+describe('R4-L2: an unknown-outcome Burn that went through leaves the list once a complete sweep no longer returns it', () => {
+  const created = new Map<string, bigint>([['0xa', 10n], ['0xb', 12n], ['0xlive', 20n]])
+  const at = (key: string) => created.get(key)
+  const sweep = (keys: string[], truncated = false) => ({ tips: keys.map((key) => ({ key })), truncated })
+
+  it('drops a row whose Burn had an unknown outcome and that the complete sweep no longer returns', () => {
+    expect(burnedAway(['0xa'], at, sweep(['0xb']), 15n)).toEqual(['0xa'])
+    expect(burnedAway(['0xa'], at, sweep([]), 10n)).toEqual(['0xa']) // the sweep node is exactly at the block the tip was created in
+  })
+  it('keeps the row while the sweep still returns it: that Burn did not go through', () => {
+    expect(burnedAway(['0xa'], at, sweep(['0xa', '0xb']), 15n)).toEqual([])
+  })
+  it('keeps every row after a truncated sweep: it did not see them all', () => {
+    expect(burnedAway(['0xa'], at, sweep(['0xb'], true), 15n)).toEqual([])
+  })
+  it('keeps a row whose block the sweep node had not reached: a lagging sweep never drops a live tip', () => {
+    expect(burnedAway(['0xa'], at, sweep(['0xb']), 9n)).toEqual([])
+    expect(burnedAway(['0xlive'], at, sweep(['0xb']), 15n)).toEqual([]) // created at block 20, the sweep node is at 15
+  })
+  it('only the rows it is asked about can go: a tip nobody burned is never in the answer', () => {
+    expect(burnedAway([], at, sweep(['0xb']), 99n)).toEqual([])
+    expect(burnedAway(['0xa'], at, sweep(['0xb']), 99n)).not.toContain('0xlive')
+  })
+  it('ignores a key the page has no row for any more', () => {
+    expect(burnedAway(['0xgone'], at, sweep([]), 99n)).toEqual([])
+  })
+
+  const sweepBody = page.slice(page.indexOf('async function fullSweep'), page.indexOf('function listen'))
+  it('the page asks about the unknown-Burn rows only, after the rows of the sweep were added, and drops them with dropTip', () => {
+    expect(sweepBody).toMatch(/addTips\(swept\.tips, 'sweep'\)[^]*for \(const key of burnedAway\(burnUnknown, \(k\) => tips\.get\(k\)\?\.tip\.createdAt, swept, t\.head\)\) dropTip\(key\)/)
+    expect(sweepBody.match(/dropTip\(/g)).toHaveLength(2) // the expired rows (L-06) and these; no other row leaves because of a sweep
+  })
+  it('a row joins the set only when a Burn had an unknown outcome, and leaves it with the next action on the row or when it is dropped', () => {
+    expect(page.match(/burnUnknown\.add\(/g)).toHaveLength(1)
+    expect(page).toMatch(/if \(did === 'Burn' && mayHaveBeenSent\(e\)\) burnUnknown\.add\(tip\.key\)\n\s*rowError\(tip,/)
+    expect(page).toMatch(/function rowError\(tip: TipView, text = ''\) \{\n\s*if \(!text\) burnUnknown\.delete\(tip\.key\)/)
+    expect(page).toMatch(/function dropTip\(key: string\) \{[^}]*burnUnknown\.delete\(key\)/)
   })
 })

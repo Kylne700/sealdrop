@@ -1,7 +1,7 @@
 // #/newsroom: create a throwaway newsroom (or use a wallet), open an inbox, receive and decrypt tips.
 import { formatEther, parseEther, type Address, type EIP1193Provider } from 'viem'
 import { DEMO_SENDER_ADDRESS, FAUCET_URL, INBOX_LIFETIME_DAYS, PIN_DAYS, RENEW_BELOW_DAYS, addressUrl, entityUrl, ownerUrl } from '../config'
-import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, keyFingerprint, secondsLeft, type Timing } from '../codec'
+import { INBOX_LIMITS, blockToUnix, burnedAway, formatDuration, formatSendHash, formatUtc, keyFingerprint, secondsLeft, type Timing } from '../codec'
 import { SEAL_OVERHEAD, boxKeyPairFromSecret, fromB64, openText, sealedDigest } from '../crypto'
 import {
   balanceOf, burnTip, createInbox, explainError, findInbox, fundAccount, getTip, getTiming, inboxesDueForRenewal, injectedSigner, isOutOfFunds,
@@ -159,6 +159,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   // Chain time, not the device clock: a clock that is days off must not show a live tip as expired.
   const untilSeconds = (block: bigint) => (timing ? secondsLeft(block, timing) : 0)
   const rowEls = new Map<string, HTMLElement>()
+  /** R4-L2: rows whose last Burn had an unknown outcome and that have had no action since. Only these may leave the list because a complete sweep no longer returns them. */
+  const burnUnknown = new Set<string>()
   /** sealedDigest -> the first tip seen with those bytes. Anyone can copy public ciphertext into a new entity. */
   const firstWithBytes = new Map<string, string>()
 
@@ -221,6 +223,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   function dropTip(key: string) {
     const restore = keepFocus(tipsSection, () => tipsHeading)
     tips.delete(key)
+    burnUnknown.delete(key)
     rowEls.get(key)?.remove()
     rowEls.delete(key)
     emptyEl.hidden = tips.size > 0
@@ -237,6 +240,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   }
   /** R2-S3: the status line can be a screen above the buttons, so a failed Keep or Burn also says so in its row. Plain text: the status announces it. */
   function rowError(tip: TipView, text = '') {
+    if (!text) burnUnknown.delete(tip.key) // the next action on a row clears its last failure
     const note = rowEls.get(tip.key)?.querySelector<HTMLElement>('[data-testid=tip-action-error]')
     if (!note) return
     note.textContent = text
@@ -245,7 +249,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   function actionFailed(tip: TipView, e: unknown, did: 'Keep' | 'Burn') {
     if (!/expired at block|no entity/i.test(String((e as Error)?.message))) {
       const why = explainError(e)
-      rowError(tip, `${did} did not complete. ${why}`)
+      if (did === 'Burn' && mayHaveBeenSent(e)) burnUnknown.add(tip.key)
+      rowError(tip, `${did} ${mayHaveBeenSent(e) ? 'may not have completed' : 'did not complete'}. ${why}`)
       return status.error(why)
     }
     dropTip(tip.key)
@@ -292,6 +297,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       timing = t
       addTips(swept.tips, 'sweep')
       for (const [key, { tip }] of tips) if (tip.expiresAt <= t.head) dropTip(key) // expired: Arkiv no longer has them (L-06)
+      for (const key of burnedAway(burnUnknown, (k) => tips.get(k)?.tip.createdAt, swept, t.head)) dropTip(key) // R4-L2: that Burn went through
       setLastSeen(live.key, t.head)
       status.info(swept.tips.length ? `${swept.tips.length} tip${swept.tips.length === 1 ? '' : 's'} on Arkiv${swept.truncated ? ' (showing the first pages only)' : ''}.` : 'No tips yet.')
       return true

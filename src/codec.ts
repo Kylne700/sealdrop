@@ -105,3 +105,16 @@ export function formatUtc(unixSeconds: number) {
   const d = new Date(unixSeconds * 1000)
   return Number.isNaN(d.getTime()) ? 'an unknown time' : d.toISOString().replace('T', ' ').slice(0, 16) + ' UTC'
 }
+
+// ---- a Burn whose outcome was unknown (R4-L2, the narrow part of R2-S10) --------------------------------------------
+
+/**
+ * Of the rows whose last Burn had an unknown outcome (`unknown`), the keys that a COMPLETE sweep no longer returns: those Burns went through.
+ * Never after a truncated sweep, never for a row whose block the sweep's node had not reached (`head` is behind `createdAt`), never for a row that
+ * is not in `unknown`: a live tip that a lagging sweep has not seen yet stays listed.
+ */
+export function burnedAway(unknown: Iterable<string>, createdAt: (key: string) => bigint | undefined, sweep: { tips: { key: string }[]; truncated: boolean }, head: bigint): string[] {
+  if (sweep.truncated) return []
+  const returned = new Set(sweep.tips.map((t) => t.key))
+  return [...unknown].filter((key) => { const at = createdAt(key); return at !== undefined && at <= head && !returned.has(key) })
+}
