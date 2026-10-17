@@ -158,7 +158,7 @@ describe('fix stage 4: the console (source checks; the browser runs are in evide
   it('L-06: Refresh drops expired rows; Keep and Burn check the expiry first and say so', () => {
     expect(page).toMatch(/if \(tip\.expiresAt <= t\.head\) dropTip\(key\)/)
     expect(page.match(/if \(await expired\(tip\)\) return/g)?.length).toBe(2)
-    expect(page.match(/actionFailed\(tip, e\)/g)?.length).toBe(2)
+    expect(page.match(/actionFailed\(tip, e, '(?:Keep|Burn)'\)/g)?.length).toBe(2) // fix 7 (R2-S3): it also names the action for the row text
   })
   it('L-07: a failed lease check or renewal still shows the inbox, then says what to do', () => {
     expect(page).toMatch(/inbox = await leaseCheck\(read\)\.catch/)

@@ -232,7 +232,7 @@ details.settings { background: transparent; }
 /* ---- send ------------------------------------------------------------------------------------------------ */
 .inbox-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-3); }
 .inbox .desc { color: var(--muted); }
-.warn-text { display: block; color: var(--danger); }
+.warn-text { display: block; color: var(--danger); overflow-wrap: anywhere; }
 .meter { display: grid; gap: var(--s-1); }
 .meter-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-1) var(--s-3); font-size: var(--fs-0); color: var(--muted); }
 .meter [data-testid='counter'] { font: var(--fs-0) / 1.4 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--ink); }

@@ -109,3 +109,22 @@ describe('R3-L2, R3-L4, R3-L5: layout (source checks; the pictures and measures 
     expect(css).toMatch(/summary \{[^}]*min-height: 44px; padding: var\(--s-2\) var\(--s-3\);/)
   })
 })
+
+describe('R2-S3: a failed Keep or Burn says so inside its row (source checks; the browser run is evidence/fix-7/row-note.mjs)', () => {
+  it('every own tip row carries a hidden plain-text note, not a live region (the status already announces)', () => {
+    expect(page).toMatch(/mine \? h\('p', \{ class: 'warn-text', 'data-testid': 'tip-action-error', hidden: true \}\) : null,/)
+    expect(page).not.toMatch(/tip-action-error'[^\n]*(role|aria-live)/)
+    expect(css).toMatch(/\.warn-text \{[^}]*overflow-wrap: anywhere;/) // the unknown-outcome text carries a 66-character hash
+  })
+  it('a failed Keep or Burn writes the action and the status text into its row; the next action on that row clears it', () => {
+    expect(page).toMatch(/rowError\(tip, `\$\{did\} did not complete\. \$\{why\}`\)\n\s*return status\.error\(why\)/)
+    expect(page).toMatch(/actionFailed\(tip, e, 'Burn'\)/)
+    expect(page).toMatch(/actionFailed\(tip, e, 'Keep'\)/)
+    expect(page).toMatch(/async function pin\(tip: TipView\) \{\n\s*rowError\(tip\)/)
+    expect(page).toMatch(/Arkiv deletes the entity[^\n]*\) return\n\s*rowError\(tip\) \/\/ the next action on this row clears its last failure\n\s*try \{/)
+    expect(page).toMatch(/note\.textContent = text\n\s*note\.hidden = !text/)
+  })
+  it('a tip that is gone from Arkiv still drops its row with an info status, with no note', () => {
+    expect(page).toMatch(/dropTip\(tip\.key\)\n\s*status\.info\('This tip is no longer on Arkiv: it expired, or it was burned already\.'\)/)
+  })
+})

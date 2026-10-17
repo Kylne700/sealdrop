@@ -192,6 +192,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         h('button', { type: 'button', class: 'secondary', onclick: () => pin(tip) }, `Keep until ${PIN_DAYS} days from now`),
         h('button', { type: 'button', class: 'danger', onclick: () => burn(tip) }, 'Burn now'),
       ) : null,
+      mine ? h('p', { class: 'warn-text', 'data-testid': 'tip-action-error', hidden: true }) : null,
     )
   }
 
@@ -234,14 +235,26 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     status.info('This tip has expired, so it is no longer on Arkiv.')
     return true
   }
-  function actionFailed(tip: TipView, e: unknown) {
-    if (!/expired at block|no entity/i.test(String((e as Error)?.message))) return status.error(explainError(e))
+  /** R2-S3: the status line can be a screen above the buttons, so a failed Keep or Burn also says so in its row. Plain text: the status announces it. */
+  function rowError(tip: TipView, text = '') {
+    const note = rowEls.get(tip.key)?.querySelector<HTMLElement>('[data-testid=tip-action-error]')
+    if (!note) return
+    note.textContent = text
+    note.hidden = !text
+  }
+  function actionFailed(tip: TipView, e: unknown, did: 'Keep' | 'Burn') {
+    if (!/expired at block|no entity/i.test(String((e as Error)?.message))) {
+      const why = explainError(e)
+      rowError(tip, `${did} did not complete. ${why}`)
+      return status.error(why)
+    }
     dropTip(tip.key)
     status.info('This tip is no longer on Arkiv: it expired, or it was burned already.')
   }
 
   async function burn(tip: TipView) {
     if (!confirm('Burn this tip? Arkiv deletes the entity. The ciphertext stays in chain history, which is why it is sealed.')) return
+    rowError(tip) // the next action on this row clears its last failure
     try {
       if (await expired(tip)) return
       status.info('Burning the tip...')
@@ -249,11 +262,12 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       dropTip(tip.key)
       status.info('Burned.')
     } catch (e) {
-      actionFailed(tip, e)
+      actionFailed(tip, e, 'Burn')
     }
   }
 
   async function pin(tip: TipView) {
+    rowError(tip)
     try {
       if (await expired(tip)) return
       status.info(`Extending the tip's lifetime to ${PIN_DAYS} days from now...`)
@@ -263,7 +277,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       if (fresh) addTips([fresh], 'sweep')
       status.info(`Kept: this tip now expires ${PIN_DAYS} days from now.`)
     } catch (e) {
-      actionFailed(tip, e)
+      actionFailed(tip, e, 'Keep')
     }
   }
 
