@@ -141,13 +141,13 @@ export class PlainError extends Error {}
  * transaction was on its way. A retry would send it a second time.
  */
 export function mayHaveBeenSent(e: unknown): boolean {
-  // A revert, or a 429 that failFast turned into an error (viem wraps it as a lost connection), is an answer.
-  if (rateLimit(e) || /reverted/i.test((e as Error)?.message ?? '')) return false
+  if (/reverted/i.test((e as Error)?.message ?? '')) return false
   for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) {
     const c = cur as { txHash?: unknown; name?: string; body?: { method?: string } }
     if (c.txHash || c.name === 'WaitForTransactionReceiptTimeoutError') return true
-    // Only a lost connection: an RPC error answer ("nonce too low", "already known") means the node rejected it.
-    if ((c.name === 'HttpRequestError' || c.name === 'TimeoutError') && /^(eth|wallet)_send(Raw)?Transaction$/.test(c.body?.method ?? '')) return true
+    // Only a lost connection: an RPC error answer ("nonce too low", "already known") means the node rejected it,
+    // and so does a 429 to the send, which failFast throws and viem wraps like a lost connection.
+    if ((c.name === 'HttpRequestError' || c.name === 'TimeoutError') && /^(eth|wallet)_send(Raw)?Transaction$/.test(c.body?.method ?? '')) return !rateLimit(c)
   }
   return false
 }

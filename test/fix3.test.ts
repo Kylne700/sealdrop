@@ -16,6 +16,8 @@ function fakeNode(fault: (method: string) => Response | Error | undefined) {
     eth_chainId: '0x' + CHAIN_ID.toString(16), eth_blockNumber: '0x10', eth_call: '0x' + '0'.repeat(64), eth_estimateGas: '0x100000',
     eth_getTransactionCount: '0x0', eth_maxPriorityFeePerGas: '0x1', eth_gasPrice: '0x2', eth_sendRawTransaction: HASH,
     eth_getBlockByNumber: { number: '0x10', hash: '0x' + '11'.repeat(32), parentHash: '0x' + '22'.repeat(32), timestamp: '0x1', baseFeePerGas: '0x1', gasLimit: '0x1c9c380', gasUsed: '0x0', transactions: [] },
+    // pending, so viem's receipt wait goes on to eth_getTransactionReceipt (without it the wait fails on this call)
+    eth_getTransactionByHash: { hash: HASH, blockHash: null, blockNumber: null, nonce: '0x0', input: '0x' },
   }
   vi.stubGlobal('fetch', async (_url: string, init: { body: string }) => {
     const { id, method, params } = JSON.parse(init.body)
@@ -63,8 +65,11 @@ describe('fix stage 3', () => {
     expect(msg).not.toContain(UNKNOWN)
   })
 
-  it('R4: the hash came back but the receipt answer is lost: no "RPC trouble, try again"', async () => {
-    const raws = fakeNode((m) => (m === 'eth_getTransactionReceipt' ? new Response('bad gateway', { status: 502 }) : undefined))
+  it.each([
+    ['HTTP 502', () => new Response('bad gateway', { status: 502 })],
+    ['429, query budget spent', () => new Response('', { status: 429, headers: { 'retry-after': '1800' } })],
+  ])('R4: the hash came back but the receipt answer is lost (%s): no "try again" or "wait a little"', async (_why, fault) => {
+    const raws = fakeNode((m) => (m === 'eth_getTransactionReceipt' ? fault() : undefined))
     vi.useFakeTimers() // viem polls and retries the receipt for about 30 s before it gives up
     let e: unknown, settled = false
     send().catch((x) => x).then((x) => { e = x; settled = true })
