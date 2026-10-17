@@ -36,6 +36,8 @@ export const FAUCET_URL = 'https://hub.arkiv.network/faucet'
 export const DEMO_DESK = {
   address: '0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6',
   inboxId: 'demo-desk',
+  /** Its public box key (as on Arkiv), so the Demo Desk link can carry the key check. */
+  boxPublicKey: 'iC3caoc4/4c6fyLZaQ4eSTLkBFIuaOK/kAxDBrasEQU=',
 } as const
 
 /** Public address of the shared demo sender (its key ships in the build on purpose, see README). */

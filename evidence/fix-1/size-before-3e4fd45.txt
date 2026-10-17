@@ -1,0 +1,5 @@
+dist/index.html                   2.30 kB │ gzip:   1.15 kB
+dist/assets/index-otW4gFqG.css   17.25 kB │ gzip:   4.53 kB
+dist/assets/native-BKj27wfc.js    0.30 kB │ gzip:   0.17 kB
+dist/assets/ccip-gKU4NSMu.js      2.83 kB │ gzip:   1.30 kB
+dist/assets/index-0l6zaB1q.js   418.34 kB │ gzip: 131.50 kB

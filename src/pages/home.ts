@@ -1,6 +1,6 @@
-import { DEMO_DESK, REPO_URL } from '../config'
+import { REPO_URL } from '../config'
 import { parseInboxInput, formatSendHash } from '../codec'
-import { DESK_ADDRESS } from '../env'
+import { DESK_HASH } from '../env'
 import { h, link, statusLine } from '../ui/dom'
 import { flowDiagram } from '../ui/flow'
 
@@ -11,7 +11,7 @@ export function renderHome(root: HTMLElement, notice?: string) {
   const status = statusLine()
   const open = () => {
     const ref = parseInboxInput(input.value)
-    if (!ref) return status.error('That does not look like a Sealdrop inbox link.')
+    if (!ref) return status.error('That does not look like a Sealdrop inbox link. Paste the whole link the newsroom gave you, starting with https://.')
     location.hash = formatSendHash(ref)
   }
   root.append(
@@ -30,19 +30,19 @@ export function renderHome(root: HTMLElement, notice?: string) {
         h('li', null, h('strong', null, 'Open the inbox link in a second tab'), ' and send a made-up message. You are the source.'),
         h('li', null, h('strong', null, 'Switch back to the first tab.'), ' The tip arrives within seconds and is decrypted in your browser only.'),
       ),
-      h('p', { class: 'quiet-links' }, h('span', null, 'Short on time?'), h('a', { href: `#/send/${DESK_ADDRESS}/${DEMO_DESK.inboxId}`, 'data-testid': 'open-desk' }, 'Send a made-up tip to the Demo Desk'), h('span', null, 'or'), link(REPO_URL, 'read the source code')),
+      h('p', { class: 'quiet-links' }, h('span', null, 'Short on time?'), h('a', { href: DESK_HASH, 'data-testid': 'open-desk' }, 'Send a made-up tip to the Demo Desk'), h('span', null, 'or'), link(REPO_URL, 'read the source code')),
     ),
     h('section', { class: 'aside' },
       h('h2', null, 'Got an inbox link?'),
       h('label', { for: 'paste' }, 'Paste the link'),
-      h('div', { class: 'row' }, input, h('button', { type: 'button', class: 'secondary', onclick: open }, 'Open')),
+      h('form', { class: 'row', onsubmit: (e: Event) => { e.preventDefault(); open() } }, input, h('button', { type: 'submit', class: 'secondary' }, 'Open')),
       status.el,
     ),
     h('section', null,
       h('h2', null, 'How it works'),
       h('ol', { class: 'numbered' },
         h('li', null, 'The newsroom creates an inbox entity: its public key, a name and a 7-day Entity Expiration that renews whenever the newsroom is active.'),
-        h('li', null, 'A source opens the inbox link. The page finds the inbox by its on-chain creator ($creator), so nobody can publish a look-alike under the newsroom\'s link.'),
+        h('li', null, 'A source opens the inbox link. The page finds the inbox created by the address in the link and refuses it if its key does not match the key check in the link.'),
         h('li', null, 'The message is padded and sealed in the browser. One atomic batch creates the tip, read-only and with only three attributes, and hands it to the newsroom.'),
         h('li', null, 'The newsroom\'s open console hears the hand-over over a WebSocket, reads the tip and decrypts it locally. It can burn the tip or keep it longer; otherwise it expires on the date the source chose.'),
       ),

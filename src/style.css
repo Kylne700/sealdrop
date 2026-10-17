@@ -259,7 +259,8 @@ details.stores { background: var(--surface-2); border-color: transparent; }
 .tip .meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-2); }
 .tip .meta strong { margin-right: var(--s-1); font-variant-numeric: tabular-nums; }
 .badge { font-size: var(--fs-0); color: var(--muted); }
-.tip-text { margin: var(--s-3) 0; font: var(--fs-3) / 1.55 var(--font-serif); white-space: pre-wrap; overflow-wrap: anywhere; }
+/* Sender-controlled text: bidi controls stay inside it and stacked combining marks cannot paint over the next row. */
+.tip-text { margin: var(--s-3) 0; font: var(--fs-3) / 1.55 var(--font-serif); white-space: pre-wrap; overflow-wrap: anywhere; unicode-bidi: isolate; overflow: hidden; }
 .undecryptable { margin: var(--s-3) 0; color: var(--danger); font-size: var(--fs-1); }
 .tip .hint { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-1) var(--s-2); font-size: var(--fs-0); }
 .actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
@@ -273,4 +274,9 @@ details.stores { background: var(--surface-2); border-color: transparent; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+/* Forced colours paint the bar track and fill the same Canvas colour: outline the track, keep the fill visible. */
+@media (forced-colors: active) {
+  .bar { border: 1px solid CanvasText; }
+  .bar > i { forced-color-adjust: none; background: Highlight; }
 }

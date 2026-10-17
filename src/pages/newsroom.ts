@@ -1,19 +1,19 @@
 // #/newsroom: create a throwaway newsroom (or use a wallet), open an inbox, receive and decrypt tips.
 import { formatEther, parseEther, type EIP1193Provider } from 'viem'
 import { DEMO_SENDER_ADDRESS, FAUCET_URL, INBOX_LIFETIME_DAYS, PIN_DAYS, RENEW_BELOW_DAYS, addressUrl, entityUrl, ownerUrl } from '../config'
-import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, type Timing } from '../codec'
-import { SEAL_OVERHEAD, boxKeyPairFromSecret, fromB64, openText } from '../crypto'
+import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, keyFingerprint, secondsLeft, type Timing } from '../codec'
+import { SEAL_OVERHEAD, boxKeyPairFromSecret, fromB64, openText, sealedDigest } from '../crypto'
 import {
   balanceOf, burnTip, createInbox, explainError, findInbox, fundAccount, getTip, getTiming, inboxesDueForRenewal, injectedSigner, isOutOfFunds,
-  localSigner, pinTip, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
+  localSigner, pinTip, rateLimit, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
 } from '../arkiv'
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
 import {
-  downloadIdentity, forgetIdentity, getLastSeen, loadIdentity, newLocalIdentity, newWalletIdentity, parseIdentity,
+  IDENTITY_BACKUP, downloadIdentity, forgetIdentity, getLastSeen, hasUnreadableIdentity, loadIdentity, newLocalIdentity, newWalletIdentity, parseIdentity,
   saveIdentity, setLastSeen, type Identity,
 } from '../store'
-import { bar, chip, copyButton, h, hex, keepFocus, kib, link, mark, onLeave, queriesPanel, runCleanups, statusLine } from '../ui/dom'
+import { bar, chip, copyButton, focusFromScript, h, hex, keepFocus, kib, link, mark, onLeave, queriesPanel, runCleanups, short, statusLine } from '../ui/dom'
 import { rpcSettings } from '../ui/settings'
 
 /** About 16 writes. Below this a throwaway newsroom is topped up from the shared demo sender. */
@@ -46,7 +46,7 @@ function renderOnboarding(root: HTMLElement, again: () => void) {
   const useWallet = async () => {
     try {
       const provider = wallet()
-      if (!provider) throw new Error('No browser wallet found.')
+      if (!provider) throw new Error('No browser wallet found. Install a wallet extension such as MetaMask, or create a throwaway newsroom instead.')
       status.info('Waiting for your wallet...')
       const signer = await injectedSigner(provider)
       saveIdentity(newWalletIdentity(signer.address))
@@ -63,7 +63,7 @@ function renderOnboarding(root: HTMLElement, again: () => void) {
       h('div', { class: 'card' },
         h('h2', null, 'Throwaway newsroom'),
         h('p', null, 'The fastest way. The keys are generated here, and a few cents of testnet GLM come from the shared demo sender.'),
-        h('button', { type: 'button', 'data-testid': 'create-newsroom', onclick: () => { saveIdentity(newLocalIdentity()); again() } }, 'Create a throwaway newsroom'),
+        h('button', { type: 'button', 'data-testid': 'create-newsroom', onclick: () => { try { saveIdentity(newLocalIdentity()); again() } catch (e) { status.error(explainError(e)) } } }, 'Create a throwaway newsroom'),
       ),
       h('div', { class: 'card' },
         h('h2', null, 'My wallet'),
@@ -77,8 +77,9 @@ function renderOnboarding(root: HTMLElement, again: () => void) {
         file,
       ),
     ),
-    h('p', { class: 'hint' }, 'The keys are stored in this browser\'s local storage and nowhere else. Export the key file once the inbox exists: if you clear the browser data, or close Tor Browser, the keys are gone and so is the access to every tip. The key file holds secrets, keep it private.'),
+    h('p', { class: 'hint' }, 'The keys are stored in this browser\'s local storage and nowhere else. Export the key file once the inbox exists: if you clear the browser data, or close Tor Browser, the keys are gone and so is the access to every tip. The key file holds secrets; keep it private.'),
   )
+  if (hasUnreadableIdentity()) status.error(`The newsroom stored in this browser cannot be read. Creating or importing a newsroom keeps a copy of it in this browser's local storage under "${IDENTITY_BACKUP}".`)
 }
 
 // ---- the console -----------------------------------------------------------------------------------------
@@ -111,7 +112,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   let local: Signer | undefined
   async function getSigner(): Promise<Signer> {
     if (identity.kind === 'local') {
-      if (!identity.evmPrivateKey) throw new Error('The key file has no wallet key.')
+      if (!identity.evmPrivateKey) throw new Error('This newsroom has no wallet key, so it cannot sign. Import its key file again, or create a new newsroom.')
       return (local ??= localSigner(identity.evmPrivateKey, rpcUrl()))
     }
     const provider = wallet()
@@ -149,7 +150,11 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   }
 
   // ---- tips -------------------------------------------------------------------------------------------------
-  const untilSeconds = (block: bigint) => (timing ? blockToUnix(block, timing) - Date.now() / 1000 : 0)
+  // Chain time, not the device clock: a clock that is days off must not show a live tip as expired.
+  const untilSeconds = (block: bigint) => (timing ? secondsLeft(block, timing) : 0)
+  const rowEls = new Map<string, HTMLElement>()
+  /** sealedDigest -> the first tip seen with those bytes. Anyone can copy public ciphertext into a new entity. */
+  const firstWithBytes = new Map<string, string>()
 
   function tipRow(tip: TipView, source: 'live' | 'sweep') {
     const text = openText(tip.sealed, box)
@@ -159,6 +164,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     const total = timing ? blockToUnix(tip.expiresAt, timing) - blockToUnix(tip.createdAt, timing) : 0
     const bucket = tip.sealed.length - SEAL_OVERHEAD
     const sized = [1024, 4096, 16384, 65536].includes(bucket) ? `${kib(tip.sealed.length)} sealed (${bucket / 1024} KiB bucket)` : `${kib(tip.sealed.length)} sealed`
+    const digest = sealedDigest(tip.sealed)
+    const first = firstWithBytes.get(digest) ?? (firstWithBytes.set(digest, tip.key), tip.key)
     return h('li', { class: 'tip', 'data-testid': 'tip', 'data-source': source, 'data-key': tip.key },
       h('div', { class: 'meta' },
         h('strong', null, timing ? formatUtc(blockToUnix(tip.createdAt, timing)) : `block ${tip.createdAt}`),
@@ -169,6 +176,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       text === null
         ? h('p', { class: 'undecryptable', 'data-testid': 'tip-text' }, 'This entity could not be decrypted with your key. It is not a tip sealed for this inbox.')
         : h('p', { class: 'tip-text', dir: 'auto', 'data-testid': 'tip-text' }, text),
+      first === tip.key ? null : h('p', { class: 'warn-text', 'data-testid': 'tip-copy' }, `Same sealed bytes as tip ${short(first)}: a copy, not a second source.`),
       h('p', { class: 'hint' },
         '$creator ', hex(tip.creator, { href: addressUrl(tip.creator), label: 'creator address' }),
         viaDemo ? ' (the shared demo sender: it says nothing about who wrote this)' : ' (a wallet address, public)',
@@ -181,17 +189,35 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     )
   }
 
-  function renderTips() {
-    const rows = [...tips.values()].sort((a, b) => Number(b.tip.createdAt - a.tip.createdAt))
-    const restore = keepFocus(tipsSection, () => tipsHeading) // a rebuilt row would drop the focus on its button or link
-    tipList.replaceChildren(...rows.map((r) => tipRow(r.tip, r.source)))
-    emptyEl.hidden = rows.length > 0
+  /**
+   * Adds new rows and redraws changed ones only, newest first. Rebuilding (and decrypting) every row for each event froze the
+   * console under a tip flood. Oldest first, so the first tip seen with some sealed bytes is the original, not the copy.
+   */
+  function addTips(list: TipView[], source: 'live' | 'sweep') {
+    const restore = keepFocus(tipsSection, () => tipsHeading) // a redrawn row would drop the focus on its button or link
+    for (const tip of [...list].sort((a, b) => Number(a.createdAt - b.createdAt))) {
+      const old = tips.get(tip.key)
+      if (old && old.tip.expiresAt === tip.expiresAt && old.tip.owner === tip.owner) continue
+      const entry = { tip, source: old?.source ?? source }
+      let el: HTMLElement
+      try { el = tipRow(entry.tip, entry.source) } catch { continue } // one row the page cannot draw must not hide the others
+      tips.set(tip.key, entry)
+      const prev = rowEls.get(tip.key)
+      if (prev) prev.replaceWith(el)
+      else tipList.insertBefore(el, [...tipList.children].find((r) => (tips.get((r as HTMLElement).dataset.key ?? '')?.tip.createdAt ?? 0n) < tip.createdAt) ?? null)
+      rowEls.set(tip.key, el)
+    }
+    emptyEl.hidden = tips.size > 0
     restore()
   }
 
-  function addTips(list: TipView[], source: 'live' | 'sweep') {
-    for (const tip of list) tips.set(tip.key, { tip, source: tips.get(tip.key)?.source ?? source })
-    renderTips()
+  function dropTip(key: string) {
+    const restore = keepFocus(tipsSection, () => tipsHeading)
+    tips.delete(key)
+    rowEls.get(key)?.remove()
+    rowEls.delete(key)
+    emptyEl.hidden = tips.size > 0
+    restore()
   }
 
   async function burn(tip: TipView) {
@@ -199,8 +225,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     try {
       status.info('Burning the tip...')
       await burnTip(await getSigner(), tip.key)
-      tips.delete(tip.key)
-      renderTips()
+      dropTip(tip.key)
       status.info('Burned.')
     } catch (e) {
       status.error(explainError(e))
@@ -242,6 +267,10 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   function listen(live: InboxView) {
     if (listening) return
     listening = true
+    let retry: ReturnType<typeof setTimeout> | undefined
+    onLeave(() => clearTimeout(retry))
+    /** One pending catch-up at a time, however many events hit the spent budget. */
+    const retryWhenBudgetRenews = (seconds: number) => { retry ??= setTimeout(() => { retry = undefined; void catchUp() }, (Math.max(60, seconds) + 5) * 1000) }
     // Tips created since the last sweep, read in one query. Used after a long sleep and after a reconnect, because events are not replayed.
     const catchUp = async () => {
       try {
@@ -253,6 +282,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         addTips(r.tips, 'sweep')
         setLastSeen(live.key, t.head)
       } catch (e) {
+        const limited = rateLimit(e)
+        if (limited) retryWhenBudgetRenews(limited.retryAfterSeconds)
         status.error(explainError(e))
       }
     }
@@ -264,7 +295,10 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
           addTips([tip], 'live')
           status.info('A new tip just arrived.')
         } catch (e) {
-          status.error(explainError(e))
+          const limited = rateLimit(e)
+          if (!limited) return status.error(explainError(e))
+          retryWhenBudgetRenews(limited.retryAfterSeconds)
+          status.error(`A new tip may have arrived, but the free query budget of the public Arkiv RPC is used up, so it cannot be read yet. It loads by itself when the budget renews (in about ${Math.max(1, Math.ceil(limited.retryAfterSeconds / 60))} min).`)
         }
       },
       onState: (state) => {
@@ -322,18 +356,22 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     )
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault()
-      const restore = keepFocus(body, () => body.querySelector('h2')) // the form is replaced by the inbox panel; a disabled button drops focus
+      // The button is disabled and then the form replaced, which would drop focus to the page for the whole write (about 20 s live).
+      // Focus waits on the status line, which says each step, then moves to the inbox heading, or back to the button after an error.
+      const lost = () => document.activeElement === status.el || document.activeElement === document.body
+      if (document.activeElement === submit) focusFromScript(status.el)
       submit.disabled = true
       try {
         await ensureFunds()
         status.info('Creating the inbox entity on Arkiv (about 5 s)...')
         await createInbox(await getSigner(), { inboxId: identity.inboxId, name: name.value, description: desc.value, publicKey: fromB64(identity.boxPublicKey) })
         await load()
+        const heading = body.querySelector('h2')
+        if (lost() && heading) focusFromScript(heading)
       } catch (e) {
         status.error(explainError(e))
         submit.disabled = false
-      } finally {
-        restore()
+        if (lost() && submit.isConnected) submit.focus()
       }
     })
     body.replaceChildren(form)
@@ -341,7 +379,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   }
 
   function showInbox(live: InboxView) {
-    const url = location.origin + location.pathname + formatSendHash({ creator: live.creator, inboxId: identity.inboxId })
+    // The key fingerprint in the link lets the send page refuse any other key, even from a dishonest RPC.
+    const url = location.origin + location.pathname + formatSendHash({ creator: live.creator, inboxId: identity.inboxId, fp: keyFingerprint(fromB64(identity.boxPublicKey)) })
     const field = h('input', { id: 'inbox-link', type: 'text', readonly: true, value: url, 'data-testid': 'inbox-link' })
     const renew = h('button', { type: 'button', class: 'secondary', 'data-testid': 'renew' }, 'Renew now')
     renew.addEventListener('click', async () => {
@@ -360,10 +399,10 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         restore()
       }
     })
-    const left = timing ? blockToUnix(live.expiresAt, timing) - Date.now() / 1000 : 0
+    const left = untilSeconds(live.expiresAt)
     body.replaceChildren(
       h('section', { class: 'inbox', 'data-testid': 'inbox' },
-        h('h2', null, live.payload.name),
+        h('h2', null, h('bdi', { dir: 'auto' }, live.payload.name)),
         h('p', { class: 'desc' }, live.payload.description || 'No description.'),
         h('div', null,
           h('label', { for: 'inbox-link' }, 'Your inbox link: give it to sources'),

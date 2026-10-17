@@ -59,6 +59,17 @@ export function open(sealed: Uint8Array, recipient: BoxKeyPair): Uint8Array | nu
   return padded ? unpad(padded) : null
 }
 
+/**
+ * Identifies the sealed bytes, so the console can mark a copied tip (anyone can copy public ciphertext into a new
+ * entity). The top bit of the ephemeral key's last byte is cleared first: X25519 ignores it, so flipping it gives a
+ * second ciphertext that opens the same.
+ */
+export function sealedDigest(sealed: Uint8Array): string {
+  const c = Uint8Array.from(sealed)
+  if (c.length > PK) c[PK]! &= 0x7f
+  return toB64(nacl.hash(c).subarray(0, 16))
+}
+
 /** Tip plaintext. Versioned JSON so fields can be added later; nothing about the sender goes in. */
 export type TipMessage = { v: 1; text: string }
 

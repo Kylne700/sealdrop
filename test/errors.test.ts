@@ -18,3 +18,9 @@ describe('out of GLM', () => {
     expect(explainError(err('User rejected the request.', { code: 4001 }))).toBe('The request was rejected in the wallet.')
   })
 })
+
+describe('an error with no known cause (QA B2-4)', () => {
+  it('still tells the person what to do next', () => {
+    expect(explainError(err('fetch failed\nstack...'))).toBe('fetch failed. Try again; if it keeps failing, reload the page or set your own RPC under Settings.')
+  })
+})

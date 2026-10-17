@@ -23,9 +23,10 @@ export function statusLine(testid = 'status') {
   const el = h('p', { class: 'status', role: 'status', 'aria-live': 'polite', 'data-testid': testid })
   return {
     el,
-    info(text: string) { el.className = 'status'; el.setAttribute('role', 'status'); el.textContent = text },
-    busy(text: string) { el.className = 'status busy'; el.setAttribute('role', 'status'); el.textContent = text },
-    error(text: string) { el.className = 'status error'; el.setAttribute('role', 'alert'); el.textContent = text },
+    info(text: string) { el.className = 'status'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); el.textContent = text },
+    busy(text: string) { el.className = 'status busy'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); el.textContent = text },
+    // role=alert implies aria-live=assertive; an explicit polite would downgrade it
+    error(text: string) { el.className = 'status error'; el.setAttribute('role', 'alert'); el.setAttribute('aria-live', 'assertive'); el.textContent = text },
     clear() { el.className = 'status'; el.textContent = '' },
   }
 }

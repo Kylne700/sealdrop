@@ -1,5 +1,5 @@
 // Pure encode/decode helpers: inbox payload, entity attributes, inbox links, block-time maths.
-import { getAddress, isAddress, type Address, type Hex } from 'viem'
+import { getAddress, isAddress, sha256, type Address, type Hex } from 'viem'
 import { key } from '@arkiv-network/sdk/attr'
 import { APP, BLOCKS_PER_DAY } from './config'
 import { fromB64, toB64 } from './crypto'
@@ -13,8 +13,13 @@ export const TIP_CONTENT_TYPE = 'application/octet-stream'
 export type InboxPayload = { v: 1; name: string; description: string; pk: string }
 export const INBOX_LIMITS = { name: 80, description: 500 } as const
 
+/** Bidi controls, zero-width characters and C0/C1 controls: invisible, and able to make a name read as something else. */
+const INVISIBLE = /[\u0000-\u001f\u007f-\u009f\u061c\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]/g
+/** An inbox name as it may be shown: invisible characters removed, trimmed. Empty means "no name". */
+export const cleanName = (name: string) => name.replace(INVISIBLE, '').trim()
+
 export function encodeInbox(input: { name: string; description: string; publicKey: Uint8Array }): Uint8Array {
-  const name = input.name.trim()
+  const name = cleanName(input.name)
   const description = input.description.trim()
   if (!name || name.length > INBOX_LIMITS.name) throw new RangeError(`inbox name must be 1-${INBOX_LIMITS.name} characters`)
   if (description.length > INBOX_LIMITS.description) throw new RangeError(`description is limited to ${INBOX_LIMITS.description} characters`)
@@ -28,9 +33,10 @@ export function decodeInbox(bytes: Uint8Array): InboxPayload | null {
   try {
     const p = JSON.parse(new TextDecoder().decode(bytes)) as Partial<InboxPayload>
     if (p.v !== 1 || typeof p.name !== 'string' || typeof p.description !== 'string' || typeof p.pk !== 'string') return null
-    if (!p.name || p.name.length > INBOX_LIMITS.name || p.description.length > INBOX_LIMITS.description) return null
-    if (fromB64(p.pk).length !== 32) return null
-    return { v: 1, name: p.name, description: p.description, pk: p.pk }
+    const name = cleanName(p.name)
+    if (!name || name.length > INBOX_LIMITS.name || p.description.length > INBOX_LIMITS.description) return null
+    if (fromB64(p.pk).length !== 32 || toB64(fromB64(p.pk)) !== p.pk) return null // canonical base64 only, so one key has one spelling
+    return { v: 1, name, description: p.description, pk: p.pk }
   } catch {
     return null
   }
@@ -43,9 +49,14 @@ export const inboxPublicKey = (p: InboxPayload) => fromB64(p.pk)
 export const inboxAttributes = (inboxId: string) => ({ type: 'inbox', app: APP, inbox_id: inboxId })
 export const tipAttributes = (inboxKey: Hex) => ({ type: 'tip', app: APP, inbox: key(inboxKey) })
 
-// ---- inbox links: #/send/<creator>/<inboxId> ---------------------------------------------------
+// ---- inbox links: #/send/<creator>/<inboxId>/<fp> ----------------------------------------------
 
-export type InboxRef = { creator: Address; inboxId: string }
+/** fp: the inbox key fingerprint the newsroom put in its link. Old links have none. */
+export type InboxRef = { creator: Address; inboxId: string; fp?: string }
+
+/** base64url of the first 16 bytes of sha256(inbox box public key): 22 characters. */
+export const keyFingerprint = (publicKey: Uint8Array) =>
+  toB64(sha256(publicKey, 'bytes').slice(0, 16)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 
 export const isValidInboxId = (id: string) => /^[a-z0-9][a-z0-9-]{1,30}[a-z0-9]$/.test(id)
 
@@ -55,12 +66,13 @@ export function newInboxId(): string {
   return 'inbox-' + Array.from(bytes, (b) => alphabet[b % alphabet.length]).join('')
 }
 
-export const formatSendHash = (ref: InboxRef) => `#/send/${ref.creator}/${ref.inboxId}`
+export const formatSendHash = (ref: InboxRef) => `#/send/${ref.creator}/${ref.inboxId}${ref.fp ? `/${ref.fp}` : ''}`
 
 export function parseSendHash(hash: string): InboxRef | null {
-  const m = /^#?\/send\/(0x[0-9a-fA-F]{40})\/([^/?#]+)$/.exec(hash)
-  if (!m || !m[1] || !m[2] || !isAddress(m[1], { strict: false }) || !isValidInboxId(m[2])) return null
-  return { creator: getAddress(m[1]), inboxId: m[2] }
+  const m = /^#?\/send\/(0x[0-9a-fA-F]{40})\/([^/?#]+)(?:\/([A-Za-z0-9_-]{22}))?$/.exec(hash)
+  // isAddress is strict: a mixed-case address must carry a valid EIP-55 checksum, so a mistyped link is caught.
+  if (!m || !m[1] || !m[2] || !isAddress(m[1]) || !isValidInboxId(m[2])) return null
+  return m[3] ? { creator: getAddress(m[1]), inboxId: m[2], fp: m[3] } : { creator: getAddress(m[1]), inboxId: m[2] }
 }
 
 /** Accepts a full link, a bare "#/send/..." fragment or "<creator>/<inboxId>" pasted by a human. */
@@ -89,4 +101,7 @@ export function formatDuration(seconds: number): string {
   return `${Math.max(m, 1)} min`
 }
 
-export const formatUtc = (unixSeconds: number) => new Date(unixSeconds * 1000).toISOString().replace('T', ' ').slice(0, 16) + ' UTC'
+export function formatUtc(unixSeconds: number) {
+  const d = new Date(unixSeconds * 1000)
+  return Number.isNaN(d.getTime()) ? 'an unknown time' : d.toISOString().replace('T', ' ').slice(0, 16) + ' UTC'
+}

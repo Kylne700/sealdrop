@@ -1,4 +1,4 @@
-// #/send/<creator>/<inboxId>: what a source sees. Resolve the inbox by its on-chain creator, seal, send.
+// #/send/<creator>/<inboxId>/<fp>: what a source sees. Resolve the inbox by its on-chain creator, check its key against the link, seal, send.
 import { bytesToHex, type EIP1193Provider } from 'viem'
 import { DEFAULT_TIP_DAYS, DEMO_SENDER_ADDRESS, INBOX_LIFETIME_DAYS, TIP_LIFETIME_CHOICES, addressUrl, entityUrl, ownerUrl, txUrl } from '../config'
 import { blockToUnix, formatDuration, formatUtc, inboxPublicKey, secondsLeft, type InboxRef } from '../codec'
@@ -21,14 +21,21 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
 
   let inbox: InboxView | null
   let timing
+  let keyMismatch = false
   try {
     const found = await findInbox(reader, ref)
     queries.add('Inbox lookup', found.query)
     inbox = found.inbox
+    keyMismatch = found.keyMismatch
     timing = await getTiming(reader)
   } catch (e) {
     status.error(explainError(e))
     root.append(rpcSettings())
+    return
+  }
+  if (keyMismatch) {
+    status.error('The key of this inbox does not match the key check in your link, so you cannot send to it from here. Someone may be answering in the newsroom\'s place, for example a dishonest RPC. Do not send anything; ask the newsroom for its current link.')
+    root.append(queries.el, rpcSettings())
     return
   }
   if (!inbox) {
@@ -43,11 +50,14 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
   const sameOwner = live.owner.toLowerCase() === live.creator.toLowerCase()
   root.append(
     h('section', { class: 'inbox', 'data-testid': 'inbox' },
-      h('div', { class: 'inbox-head' }, h('h2', null, live.payload.name), chip('ok', 'Creator verified ✓')),
+      // bdi + dir=auto: a right-to-left name cannot reorder the chip or the text around it.
+      h('div', { class: 'inbox-head' }, h('h2', null, h('bdi', { dir: 'auto' }, live.payload.name)), ref.fp ? chip('ok', 'Key matches this link ✓') : chip('warn', 'No key check')),
+      ref.fp ? null : h('p', { class: 'status error', role: 'alert', 'data-testid': 'no-key-check' }, 'This link has no key check. Ask the newsroom for its current link.'),
       h('p', { class: 'desc' }, live.payload.description || 'No description.'),
       h('dl', { class: 'facts' },
-        h('dt', null, 'Created by ($creator)'), h('dd', null, hex(live.creator, { href: addressUrl(live.creator), label: 'creator address', full: true }), h('span', { class: 'hint' }, '(matches the link you opened)')),
-        h('dt', null, 'Owned by ($owner)'), h('dd', null, hex(live.owner, { href: addressUrl(live.owner), label: 'owner address' }), sameOwner ? ' ' : null, sameOwner ? chip('ok', 'Owner is the creator ✓') : h('strong', { class: 'warn-text' }, 'WARNING: the owner is not the creator. Be careful.')),
+        h('dt', null, 'Created by'), h('dd', null, hex(live.creator, { href: addressUrl(live.creator), label: 'creator address', full: true }), h('span', { class: 'hint' }, '(the address in this link)'),
+          h('p', { class: 'hint' }, 'Compare this address with the one the newsroom publishes elsewhere, for example on its website. A look-alike link has a different address.')),
+        h('dt', null, 'Owned by'), h('dd', null, hex(live.owner, { href: addressUrl(live.owner), label: 'owner address' }), sameOwner ? ' ' : null, sameOwner ? chip('ok', 'Owner is the creator ✓') : h('strong', { class: 'warn-text' }, 'WARNING: the owner is not the creator. Be careful.')),
         h('dt', null, 'Inbox is alive for'), h('dd', null, `${formatDuration(left)} (until ${formatUtc(blockToUnix(live.expiresAt, timing))}); the newsroom renews it while its console is open`, bar(left / (INBOX_LIFETIME_DAYS * 86400), 'wide')),
         h('dt', null, 'Inbox entity'), h('dd', null, hex(live.key, { href: entityUrl(live.key), label: 'inbox entity key' })),
       ),
@@ -115,6 +125,8 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
     const mode = demoRadio.checked ? 'demo' : 'wallet'
     const days = Number(form.querySelector<HTMLInputElement>(`input[name=${daysName}]:checked`)?.value ?? DEFAULT_TIP_DAYS) as (typeof TIP_LIFETIME_CHOICES)[number]
     const restore = keepFocus(form) // a disabled button drops focus; after an error it goes back to "Seal and send"
+    const stay = (e: BeforeUnloadEvent) => e.preventDefault() // leaving mid-write loses the message and the receipt
+    window.addEventListener('beforeunload', stay)
     sendBtn.disabled = true
     try {
       progress.busy('Sealing the message in your browser...')
@@ -125,7 +137,7 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
         signer = localSigner(DEMO_SENDER_KEY, rpcUrl())
       } else {
         const provider = wallet()
-        if (!provider) throw new Error('No browser wallet found.')
+        if (!provider) throw new Error(`No browser wallet found. Install a wallet extension such as MetaMask${DEMO_SENDER_KEY ? ', or choose the shared demo key' : ''}.`)
         progress.busy('Waiting for your wallet...')
         signer = await injectedSigner(provider)
       }
@@ -168,6 +180,7 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
         : explainError(e))
       sendBtn.disabled = false
     } finally {
+      window.removeEventListener('beforeunload', stay)
       restore()
     }
   })

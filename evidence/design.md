@@ -83,7 +83,7 @@ Weights: 400 body, 600 labels and buttons, 700 headlines. Hex and byte counts us
 2. Never show a bare 0x value. Use `hex(value, opts)`: mono, middle-truncated (`0x3A3E…42c7`: 6 leading characters including `0x`, 4 trailing), `title` and `aria-label` hold the full value, a copy button follows, and the value itself is the explorer link. The full text stays in the DOM (hidden middle) so tools and assistive tech can read it. The send page shows the creator address in full, in two balanced lines of 21 characters, because that is the one value a source may compare against another channel.
 3. Time is always shown as a chip: "Expires in 13 d 23 h" with a bar whose fill is the share of the lifetime that is left. Lease for the inbox: same chip, 7 d scale.
 4. Live connection state is a chip: "Live" (teal, pulsing dot), "Reconnecting" (neutral, hollow dot), connecting/offline states in neutral text.
-5. Verified facts get a teal "verified" chip (`Creator verified ✓`). Warnings and destructive controls use danger only.
+5. Verified facts get a teal "verified" chip (`Key matches this link ✓`, `Owner is the creator ✓`). Warnings and destructive controls use danger only.
 6. Headlines serif, UI sans, data mono. No more than three type sizes in any card.
 7. Cards never nest. Secondary blocks ("Got an inbox link?", the world panel, settings) are plain bordered blocks with muted headings.
 8. Keep every testid and structural selector used by `scripts/smoke.ts`, `evidence/qa-scripts/*`: see "Markup contract".
@@ -204,6 +204,49 @@ For the video stage: these are the words on screen after the design stage (state
 | Header (every page) | the word "Sealdrop" | the word "Sealdrop" with a small envelope mark; the nav words "Open a newsroom", "Demo Desk", "Source" are unchanged |
 
 Unchanged on purpose (so captions can keep using them): the headlines "An anonymous tip line with no server to seize", "Newsroom console", "Tips" and "Send a tip"; the lead paragraph; the three 60-second steps and the button "Start: open a newsroom"; "Got an inbox link?"; "Create a throwaway newsroom", "Create the inbox", "Export key file", "Forget this newsroom", "Refresh (full sweep)", "Keep 30 more days", "Burn now", "Seal and send", "Send another"; the sentence "Everyone in demo mode shares one public testnet address, so it cannot identify you. ..."; "What can anyone see on Arkiv for this inbox?", "Queries this page runs", "Settings"; the footer.
+
+### Fix stage 1 (2026-10-17, security and browser QA)
+
+Words and screens changed by the first fix stage (findings C2-C15, B1-B12, A1 of the final QA). The video must be re-recorded against these.
+
+| Where | Before | After |
+|---|---|---|
+| Inbox link (console, Copy inbox link; Demo Desk link; #/demo redirect) | `#/send/<creator>/<inbox id>` | `#/send/<creator>/<inbox id>/<key check>`: 22 more characters, the base64url of the first 16 bytes of SHA-256 of the inbox public key |
+| Send page, inbox card heading chip | "Creator verified ✓" (teal) | link with key check: "Key matches this link ✓" (teal); old link: "No key check" (danger colour) |
+| Send page, under the inbox card (old link only) | nothing | alert, danger colour: "This link has no key check. Ask the newsroom for its current link." Sending stays possible |
+| Send page, key does not match the link | the inbox loaded | no inbox card; alert: "The key of this inbox does not match the key check in your link, so you cannot send to it from here. Someone may be answering in the newsroom's place, for example a dishonest RPC. Do not send anything; ask the newsroom for its current link." followed by the queries and Settings |
+| Send page, detail labels (A1) | "Created by ($creator)", "Owned by ($owner)" | "Created by", "Owned by" |
+| Send page, under the creator address | "(matches the link you opened)" | "(the address in this link)" and a new hint line: "Compare this address with the one the newsroom publishes elsewhere, for example on its website. A look-alike link has a different address." |
+| Send page and console, inbox name | plain text | wrapped in `<bdi dir="auto">`; bidi and zero-width characters are removed from names, and an inbox whose name is empty after that does not load |
+| Send page, error while showing an inbox (B10) | "Something went wrong: <raw message>" | "Something went wrong while showing this inbox: <explained error>" (see the last rows: every explained error now ends with a next step) |
+| Send page, while sending (B7) | nothing | the browser's own "Leave site?" prompt on reload or close |
+| Invalid link notice | "... looks like https://.../#/send/0x<40 hex characters>/<inbox-id>. ..." | "... looks like https://.../#/send/0x<40 hex characters>/<inbox-id>/<key check>. ..." |
+| Home, how-it-works step 3 | "The page finds the inbox by its on-chain creator ($creator), so nobody can publish a look-alike under the newsroom's link." | "The page finds the inbox created by the address in the link and refuses it if its key does not match the key check in the link." |
+| Settings (every page that has it) | nothing | warning hint (danger colour): "Use only an RPC you trust. It sees your IP address and answers every inbox lookup, so a dishonest one could show you a different inbox key. A link with a key check refuses such a key; a link without one cannot tell." |
+| Settings, save fails | the page reloaded with the setting lost | alert: "This browser would not store the setting (its storage is full or blocked). Allow site data for this page, then try again." |
+| Footer, while a custom RPC is set | "Public RPC: this tab has made N queries ..." (only after a query) | always: "Custom RPC: <host>. Change it under Settings." plus "This tab has made N queries (M cost units)." once it has queried |
+| Any page inside a frame (C14) | the app ran | only "Sealdrop does not run inside another page. Open it in its own tab." |
+| Console, Create a throwaway newsroom when storage is blocked or full (C6, B1) | nothing visible, or keys kept in memory only | alert before anything is written on chain: "This browser would not store the newsroom keys (its storage is full, or site data is blocked, as in some private windows), so nothing was created. Allow site data for this page or use another browser, then try again." |
+| Console start, stored newsroom unreadable (B2) | the new-user screen, and Create overwrote the old value | alert: "The newsroom stored in this browser cannot be read. Creating or importing a newsroom keeps a copy of it in this browser's local storage under "sealdrop:newsroom:v1:backup"." |
+| Console, key file import errors (C8, B2-3) | raw parser messages | "This is not a Sealdrop newsroom file." or a named problem ("The file has no valid address.", "The file is incomplete.", "The file has no valid creation date.", "The file has no valid inbox id.", "The file has no valid decryption key.", "The decryption key does not match its public key.", "The wallet key does not match the address.", "A wallet newsroom file must not hold a wallet key."), always followed by "Choose the key file Sealdrop exported for this newsroom (sealdrop-newsroom-<inbox id>.json), unchanged." |
+| Console, tip list | the whole list re-rendered on each new tip; one bad row emptied it | rows are added in place (newest first) and a bad row is skipped (C5, C9); a tip whose sealed bytes repeat an earlier one shows "Same sealed bytes as tip <short key>: a copy, not a second source." (C10) |
+| Console, live tip while the RPC budget is spent (C4) | nothing | status: "A new tip may have arrived, but the free query budget of the public Arkiv RPC is used up, so it cannot be read yet. It loads by itself when the budget renews (in about N min)." |
+| Console, countdowns (B6) | device clock | the chain's latest block time |
+| Console, Create the inbox (B4) | focus fell to the page body for the whole creation (about 20 s live) | focus moves to the status line at once, then to the inbox heading when it appears; back to the button on error |
+| Console, onboarding hint | "The key file holds secrets, keep it private." | "The key file holds secrets; keep it private." |
+| Expiry and padding bars, forced-colors mode (B3) | invisible | track outlined in CanvasText, fill in Highlight |
+| Video slide 3 ("$creator and $owner") | "Reject look-alike inboxes; hand each tip over." | "Load only the linked address's inbox; hand each tip over." |
+| Narration, verify and Arkiv lines | "first verifies the inbox on Arkiv: its creator, its owner, and its lease."; "uses the creator to reject look-alike inboxes" | "first checks the inbox on Arkiv: its key against the link, then its creator, owner and lease."; "loads only the inbox made by the address in the link" |
+| Home, "Got an inbox link?" (B2-1) | Enter in the paste field did nothing | Enter opens the link, like the Open button (the field and button are now a form) |
+| Home, paste error | "That does not look like a Sealdrop inbox link." | "That does not look like a Sealdrop inbox link. Paste the whole link the newsroom gave you, starting with https://." |
+| Every error status line (B2-2) | role=alert with aria-live=polite | role=alert with aria-live=assertive (no visible change) |
+| Settings, URL not https | "The RPC URL must start with https://." | "The RPC URL must start with https://. Copy the full URL your RPC provider gave you." |
+| Any unexplained error (B2-4) | the raw first line only | the first line, then "Try again; if it keeps failing, reload the page or set your own RPC under Settings." |
+| No browser wallet (send page; console "Use my wallet") | "No browser wallet found." | send page: "No browser wallet found. Install a wallet extension such as MetaMask, or choose the shared demo key." (the last part only in a build with the demo key); console: "No browser wallet found. Install a wallet extension such as MetaMask, or create a throwaway newsroom instead." |
+| Wallet gives no account | "The wallet returned no account." | "The wallet returned no account. Unlock the wallet and allow this page to connect, then try again." |
+| Throwaway newsroom without its wallet key | "The key file has no wallet key." | "This newsroom has no wallet key, so it cannot sign. Import its key file again, or create a new newsroom." |
+| Send replaced by a concurrent transaction | "This tip was replaced by a concurrent transaction from the same sender key" | "This tip was replaced by another transaction from the same sender key, so it was not sent. Send it again." |
+| Console, tip text (B2-5) | a U+202E in a tip could reverse text past it, and stacked combining marks painted over the next row | the text is bidi-isolated and clipped to its own box |
 
 ## Results
 

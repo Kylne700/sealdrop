@@ -4,12 +4,12 @@
 // crypto, so the console decrypts them through the normal code path.
 import { getAddress, parseEther, type Address, type Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { DEMO_SENDER_ADDRESS } from './config'
-import { daysToBlocks } from './codec'
+import { DEMO_DESK, DEMO_SENDER_ADDRESS } from './config'
+import { daysToBlocks, keyFingerprint } from './codec'
 import { fromB64, sealText, toB64 } from './crypto'
 import { RateLimitedError, budget } from 'real-arkiv'
 import type { InboxView, Reader, Signer, TipView } from 'real-arkiv'
-export { budget, RateLimitedError, explainError, isOutOfFunds, retryHook, withRetry } from 'real-arkiv'
+export { budget, RateLimitedError, explainError, isOutOfFunds, rateLimit, retryHook, withRetry } from 'real-arkiv'
 
 type MockTip = { text: string; ageMin: number; days: number; mine?: boolean; demo?: boolean; bad?: boolean; live?: boolean }
 type Mock = { inbox?: 'ok' | 'none' | 'setup' | 'risky' | 'hang' | 'limited'; tips?: MockTip[]; live?: 'live' | 'reconnecting' | 'connecting'; sendMs?: number; sendFail?: string; sweepMs?: number; renewFail?: string; budget?: [number, number] }
@@ -35,18 +35,20 @@ export const getTiming = async () => ({ head: HEAD, headTime: Math.floor(Date.no
 function inboxView(creator: Address, kind: string): InboxView {
   return {
     key: INBOX_KEY, creator, owner: kind === 'risky' ? addr(9) : creator, createdAt: HEAD - DAY, expiresAt: HEAD + (kind === 'risky' ? DAY / 3n : DAY * 6n + DAY / 2n),
-    payload: { v: 1, name: 'Synthetic demo newsroom', description: 'Demo inbox. Please send made-up test messages only.', pk: identity()?.boxPublicKey ?? toB64(new Uint8Array(32).fill(7)) },
+    payload: { v: 1, name: 'Synthetic demo newsroom', description: 'Demo inbox. Please send made-up test messages only.', pk: creator.toLowerCase() === DEMO_DESK.address.toLowerCase() ? DEMO_DESK.boxPublicKey : identity()?.boxPublicKey ?? toB64(new Uint8Array(32).fill(7)) },
   }
 }
 
 let created = false // createInbox() flips the 'setup' state to a live inbox, so the keyboard script can walk the whole flow
-export async function findInbox(_r: Reader, ref: { creator: Address; inboxId: string }) {
+export async function findInbox(_r: Reader, ref: { creator: Address; inboxId: string; fp?: string }) {
   const c = cfg()
   const query = `type = "inbox" && app = "sealdrop-v1" && inbox_id = "${ref.inboxId}" && $creator = ${ref.creator}`
   if (c.inbox === 'hang') await new Promise(() => {})
   if (c.inbox === 'limited') throw new RateLimitedError(1354)
-  if (c.inbox === 'none' || (c.inbox === 'setup' && !created)) return { inbox: null, matches: 0, query }
-  return { inbox: inboxView(ref.creator, c.inbox), matches: 1, query }
+  if (c.inbox === 'none' || (c.inbox === 'setup' && !created)) return { inbox: null, matches: 0, query, keyMismatch: false }
+  const inbox = inboxView(ref.creator, c.inbox)
+  const keyMismatch = Boolean(ref.fp) && keyFingerprint(fromB64(inbox.payload.pk)) !== ref.fp // the same check as the real findInbox
+  return { inbox: keyMismatch ? null : inbox, matches: 1, query, keyMismatch }
 }
 export const listInboxes = async () => ({ inboxes: [] as InboxView[], query: 'mock' })
 export const inboxesDueForRenewal = async () => ({ inboxes: [] as InboxView[], query: 'type = "inbox" && app = "sealdrop-v1" && $creator = 0x... && $expiresAt < 1086400' })

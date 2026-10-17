@@ -114,7 +114,7 @@ try {
   log(`  inbox created in ${secs(Date.now() - tCreate)}: ${inboxLink.replace(base, '<site>/')}`)
   await A.waitForFunction(() => /^Live: listening/.test(document.querySelector('[data-testid=live-status]')?.textContent ?? ''))
   await A.waitForFunction(() => /No tips yet\./.test(document.querySelector('[data-testid=status]')?.textContent ?? ''))
-  check(inboxLink.startsWith(base + '#/send/0x'), 'the inbox link points at #/send/<creator>/<inbox id>')
+  check(inboxLink.startsWith(base + '#/send/0x') && /\/[A-Za-z0-9_-]{22}$/.test(inboxLink), 'the inbox link points at #/send/<creator>/<inbox id>/<key check>')
   check((await A.$('[data-testid=export]')) !== null, 'the key file can be exported')
   const address = await A.$eval('.me dd a', (el) => el.textContent ?? '')
 
@@ -124,6 +124,7 @@ try {
   await B.goto(inboxLink)
   await B.waitForSelector('[data-testid=inbox]')
   check((await B.$eval('[data-testid=inbox]', (el) => el.textContent ?? '')).includes(address), 'the send page shows the newsroom as $creator (found by creator, not by a writable field)')
+  check((await B.$eval('[data-testid=inbox]', (el) => el.textContent ?? '')).includes('Key matches this link'), 'the inbox key matches the key check in the link')
   const tB = Date.now()
   fo = await focusOf(B)
   check(fo.body && /^Send a tip/.test(fo.title), 'first load of the send page: the page does not grab focus and the title says "Send a tip"', where(fo))

@@ -1,0 +1,60 @@
+ × test/pocC-flood-render.test.ts > newsroom console under a tip flood > does not rebuild and re-decrypt every row for each new tip
+ × test/poc-duplicates.test.ts > sealedDigest > is the same for a copy, and for the copy with the ignored bit flipped
+ ✓ test/poc-sendhash.test.ts > wrong-checksum mixed-case creator address > sanity: bad differs from good and is mixed case
+ × test/poc-sendhash.test.ts > wrong-checksum mixed-case creator address > parseSendHash rejects it
+ × test/poc-sendhash.test.ts > wrong-checksum mixed-case creator address > parseInboxInput rejects it
+ ✓ test/poc-sendhash.test.ts > wrong-checksum mixed-case creator address > still accepts all-lowercase and correct checksum
+ × test/poc-sendhash.test.ts > send link with the key fingerprint (C2) > formats and parses #/send/<creator>/<id>/<fp>
+ ✓ test/poc-sendhash.test.ts > send link with the key fingerprint (C2) > an old link without fp still parses, with no fp
+ ✓ test/poc-sendhash.test.ts > send link with the key fingerprint (C2) > a malformed fp is not a valid link
+ × test/pocC-storage-quota.test.ts > saving the newsroom when storage does not work > quota exceeded: tells the caller the keys were not stored
+ × test/pocC-storage-quota.test.ts > saving the newsroom when storage does not work > storage blocked: does not let a memory-only identity look saved
+ × test/pocC-storage-quota.test.ts > a stored newsroom that cannot be read (B2) > is kept under a backup key before a new newsroom overwrites it
+ ✓ test/poc-tip-rows.test.ts > toTip (via getTip) type validation > accepts a well-formed row
+ × test/poc-tip-rows.test.ts > toTip (via getTip) type validation > rejects payload that is not a Uint8Array
+ × test/poc-tip-rows.test.ts > toTip (via getTip) type validation > rejects createdAt / expiresAt that are not bigint
+ × test/poc-tip-rows.test.ts > toTip (via getTip) type validation > rejects key/owner/creator that are not hex strings
+ ✓ test/errors.test.ts > out of GLM > is recognised for a plain transfer and for an Arkiv entity write
+ ✓ test/errors.test.ts > out of GLM > is not claimed for other failures
+ × test/poc-identity.test.ts > parseIdentity strictness (src/store.ts:38) > rejects an inboxId that fails isValidInboxId
+ × test/poc-identity.test.ts > parseIdentity strictness (src/store.ts:38) > rejects a createdAt that is not a date string
+ × test/poc-identity.test.ts > parseIdentity strictness (src/store.ts:38) > wallet kind must not carry an evmPrivateKey
+ × test/poc-identity.test.ts > parseIdentity strictness (src/store.ts:38) > does not keep unknown or __proto__ keys when re-saved
+ × test/poc-identity.test.ts > parseIdentity strictness (src/store.ts:38) > rejects non-canonical base64 secret key (whitespace / missing padding)
+ × test/poc-identity.test.ts > parseIdentity strictness (src/store.ts:38) > stores the address checksummed / rejects a wrong-checksum mixed-case address
+ × test/poc-identity.test.ts > parseIdentity strictness (src/store.ts:38) > every failure is an Error with a user-readable message (no raw TypeError/SyntaxError/DOMException)
+ ✓ test/pocC-lookalike.test.ts > look-alike send link > parses as a normal link (nothing marks it as a different creator)
+ × test/pocC-lookalike.test.ts > look-alike send link > does not call an unknown creator "verified"
+ × test/pocC-rpc-trust.test.ts > inbox lookup against a lying RPC > rejects a row whose $creator differs from the link (cheap defence in depth)
+ ✓ test/pocC-rpc-trust.test.ts > inbox lookup against a lying RPC > cannot tell a forged key under the right $creator (needs a documented trust note, not code)
+ × test/pocC-rpc-trust.test.ts > inbox lookup against a lying RPC > a link with the key fingerprint refuses a forged key under the right $creator
+ ✓ test/codec.test.ts > inbox payload > round-trips and exposes the public key
+ ✓ test/codec.test.ts > inbox payload > validates on encode
+ ✓ test/codec.test.ts > inbox payload > treats foreign payloads as untrusted and returns null
+ ✓ test/codec.test.ts > attributes > keeps the on-chain footprint to a few lowercase attributes
+ ✓ test/codec.test.ts > inbox links > formats and parses
+ ✓ test/codec.test.ts > inbox links > normalises the address case and rejects bad input
+ ✓ test/codec.test.ts > inbox links > accepts a pasted full URL or creator/id pair
+ ✓ test/codec.test.ts > inbox links > generates valid inbox ids and the demo desk constant is valid
+ ✓ test/codec.test.ts > block time > converts blocks to time and remaining time
+ ✓ test/codec.test.ts > block time > formats durations
+ × test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > whitespace-only name
+ × test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > zero-width-only name
+ × test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > bidi override/isolate characters are stripped from the name
+ × test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > non-canonical base64 pk (whitespace)
+ × test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > non-canonical base64 pk (missing padding)
+ × test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > control characters are stripped from the name
+ ✓ test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > a plain name is kept as it is
+ × test/poc-decodeinbox.test.ts > decodeInbox rejects deceptive payloads from strangers > encodeInbox applies the same rule, so a newsroom cannot publish a name its own console rejects
+ × test/pocC-gettip-ratelimit.test.ts > getTip under a spent RPC budget > surfaces a rate limit instead of answering "no tip"
+ ✓ test/crypto.test.ts > sealed box > round-trips text, including multi-byte characters
+ ✓ test/crypto.test.ts > sealed box > round-trips raw bytes of every size class
+ ✓ test/crypto.test.ts > sealed box > pads ciphertext to buckets so length leaks only a size class
+ ✓ test/crypto.test.ts > sealed box > rejects messages over the maximum
+ ✓ test/crypto.test.ts > sealed box > cannot be opened with another key
+ ✓ test/crypto.test.ts > sealed box > detects tampering anywhere in the box
+ ✓ test/crypto.test.ts > sealed box > returns null for garbage and truncated input instead of throwing
+ ✓ test/crypto.test.ts > sealed box > uses a fresh ephemeral key and nonce every time
+ ✓ test/crypto.test.ts > sealed box > rebuilds the same key pair from a stored secret
+ ✓ test/crypto.test.ts > padding and base64 > pad/unpad are inverse and reject a corrupt length prefix
+ ✓ test/crypto.test.ts > padding and base64 > base64 round-trips large arrays without overflowing the stack

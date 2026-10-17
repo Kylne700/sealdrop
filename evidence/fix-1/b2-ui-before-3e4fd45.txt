@@ -1,0 +1,4 @@
+FAIL B2-1 Enter in the paste field opens the link (here: says it is not one): ""
+FAIL B2-2 an error status is an alert that is not downgraded to polite: role=alert aria-live=polite
+FAIL B2-5 tip text isolates bidi and clips combining marks: {"bidi":"isolate","overflow":"visible"}
+3 FAIL

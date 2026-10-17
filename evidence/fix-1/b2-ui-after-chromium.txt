@@ -1,0 +1,4 @@
+PASS B2-1 Enter in the paste field opens the link (here: says it is not one): "That does not look like a Sealdrop inbox link. Paste the whole link the newsroom gave you, starting with https://."
+PASS B2-2 an error status is an alert that is not downgraded to polite: role=alert aria-live=assertive
+PASS B2-5 tip text isolates bidi and clips combining marks: {"bidi":"isolate","overflow":"hidden"}
+ALL PASS

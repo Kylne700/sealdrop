@@ -7,7 +7,7 @@ import { and, eq, lt } from '@arkiv-network/sdk/query'
 import { custom, http, parseEther, webSocket, type Address, type EIP1193Provider, type Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { APP, CHAIN_ID, FUND_AMOUNT_GLM, INBOX_LIFETIME_DAYS, PAGE_SIZE, RENEW_BELOW_DAYS, RPC_HTTP, RPC_WS, TIP_LIFETIME_CHOICES } from './config'
-import { INBOX_CONTENT_TYPE, TIP_CONTENT_TYPE, daysToBlocks, decodeInbox, encodeInbox, inboxAttributes, tipAttributes, type InboxPayload, type InboxRef, type Timing } from './codec'
+import { INBOX_CONTENT_TYPE, TIP_CONTENT_TYPE, daysToBlocks, decodeInbox, encodeInbox, inboxAttributes, inboxPublicKey, keyFingerprint, tipAttributes, type InboxPayload, type InboxRef, type Timing } from './codec'
 
 // ---- clients ----------------------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ const CHAIN_HEX = '0x' + CHAIN_ID.toString(16)
 export async function injectedSigner(provider: EIP1193Provider): Promise<Signer> {
   const accounts = (await provider.request({ method: 'eth_requestAccounts' })) as Address[]
   const address = accounts[0]
-  if (!address) throw new Error('The wallet returned no account.')
+  if (!address) throw new Error('The wallet returned no account. Unlock the wallet and allow this page to connect, then try again.')
   const chainId = async () => ((await provider.request({ method: 'eth_chainId' })) as string).toLowerCase()
   if ((await chainId()) !== CHAIN_HEX) {
     try {
@@ -116,20 +116,25 @@ const errorText = (e: unknown) => {
 /** The signer cannot pay the gas. The pages say whose GLM ran out: the visitor's wallet or the shared demo key. */
 export const isOutOfFunds = (e: unknown) => /insufficient funds|exceeds the balance|out of gas|gas required exceeds|have no (testnet )?GLM/i.test(errorText(e))
 
+/** The RateLimitedError somewhere in the cause chain (viem wraps the one failFast throws), if any. */
+export function rateLimit(e: unknown): RateLimitedError | undefined {
+  for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) if (cur instanceof RateLimitedError) return cur
+}
+
 /** One line a person can act on. */
 export function explainError(e: unknown): string {
-  for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) {
-    if (cur instanceof RateLimitedError) {
-      const mins = Math.max(1, Math.ceil(cur.retryAfterSeconds / 60))
-      return `The free query budget of the public Arkiv RPC is used up${cur.retryAfterSeconds ? ` (it renews in about ${mins} min)` : ''}. Wait a little, or enter your own RPC URL under Settings.`
-    }
+  const limited = rateLimit(e)
+  if (limited) {
+    const mins = Math.max(1, Math.ceil(limited.retryAfterSeconds / 60))
+    return `The free query budget of the public Arkiv RPC is used up${limited.retryAfterSeconds ? ` (it renews in about ${mins} min)` : ''}. Wait a little, or enter your own RPC URL under Settings.`
   }
   const err = e as { code?: number; shortMessage?: string; message?: string; cause?: { code?: number; message?: string } }
   const text = errorText(e)
   if (err?.code === 4001 || err?.cause?.code === 4001 || /user rejected|denied/i.test(text)) return 'The request was rejected in the wallet.'
   if (isOutOfFunds(e)) return 'This wallet has no testnet GLM left. Get some at the Arkiv faucet (hub.arkiv.network/faucet).'
   const first = (err?.shortMessage ?? err?.message ?? String(e)).split('\n')[0] ?? 'Unknown error'
-  return first.length > 240 ? first.slice(0, 240) + '...' : first
+  const cut = first.length > 240 ? first.slice(0, 240) + '...' : first
+  return `${cut.replace(/\.?$/, '.')} Try again; if it keeps failing, reload the page or set your own RPC under Settings.`
 }
 
 export async function getTiming(reader: Reader): Promise<Timing> {
@@ -150,8 +155,12 @@ export type InboxView = {
 
 type Row = { key?: Hex; owner?: Hex; creator?: Hex; createdAt?: bigint; expiresAt?: bigint; payload?: Uint8Array; attributes?: Record<string, { value: unknown }> }
 
+const isHex = (v: unknown, bytes: number): v is Hex => typeof v === 'string' && new RegExp(`^0x[0-9a-fA-F]{${bytes * 2}}$`).test(v)
+/** The RPC's answer is checked field by field, so one malformed row is skipped instead of breaking the whole list. */
+const wellFormed = (row: Row): row is Row & Required<Omit<Row, 'attributes'>> => isHex(row.key, 32) && isHex(row.owner, 20) && isHex(row.creator, 20) && typeof row.createdAt === 'bigint' && typeof row.expiresAt === 'bigint' && row.payload instanceof Uint8Array
+
 function toInbox(row: Row): InboxView | null {
-  if (!row.key || !row.owner || !row.creator || row.createdAt === undefined || row.expiresAt === undefined || !row.payload) return null
+  if (!wellFormed(row)) return null
   const payload = decodeInbox(row.payload)
   return payload ? { key: row.key, owner: row.owner, creator: row.creator, createdAt: row.createdAt, expiresAt: row.expiresAt, payload } : null
 }
@@ -161,8 +170,10 @@ const INBOX_SELECT = { key: true, owner: true, creator: true, createdAt: true, e
 /**
  * Looks an inbox up by who created it. `$creator` is set by the protocol and cannot be forged, so a
  * stranger cannot publish an inbox under the newsroom's link. Returns the newest valid match.
+ * The RPC could still lie, so rows from another creator are dropped here, and a link that carries a key
+ * fingerprint (`ref.fp`) only accepts an inbox whose key matches it: keyMismatch says one was refused.
  */
-export async function findInbox(reader: Reader, ref: InboxRef): Promise<{ inbox: InboxView | null; matches: number; query: string }> {
+export async function findInbox(reader: Reader, ref: InboxRef): Promise<{ inbox: InboxView | null; matches: number; query: string; keyMismatch: boolean }> {
   const builder = reader.http
     .select(INBOX_SELECT)
     .where(eq('type', 'inbox'), eq('app', APP), eq('inbox_id', ref.inboxId))
@@ -170,8 +181,11 @@ export async function findInbox(reader: Reader, ref: InboxRef): Promise<{ inbox:
     .limit(20)
   const query = builder.toString()
   const page = await builder.fetch()
-  const found = (page.entities as readonly Row[]).map(toInbox).filter((i): i is InboxView => i !== null).sort((a, b) => Number(b.createdAt - a.createdAt))
-  return { inbox: found[0] ?? null, matches: found.length, query }
+  const found = (page.entities as readonly Row[]).map(toInbox)
+    .filter((i): i is InboxView => i !== null && i.creator.toLowerCase() === ref.creator.toLowerCase())
+    .sort((a, b) => Number(b.createdAt - a.createdAt))
+  const keyed = ref.fp ? found.filter((i) => keyFingerprint(inboxPublicKey(i.payload)) === ref.fp) : found
+  return { inbox: keyed[0] ?? null, matches: found.length, query, keyMismatch: found.length > 0 && keyed.length === 0 }
 }
 
 /** All inboxes this address created that are still alive. */
@@ -238,10 +252,10 @@ export type TipView = {
 const TIP_SELECT = { key: true, owner: true, creator: true, createdAt: true, expiresAt: true, payload: true, attributes: true } as const
 
 function toTip(row: Row): TipView | null {
-  if (!row.key || !row.owner || !row.creator || row.createdAt === undefined || row.expiresAt === undefined || !row.payload) return null
+  if (!wellFormed(row)) return null
   if (row.attributes?.type?.value !== 'tip') return null
   const inbox = row.attributes?.inbox?.value
-  return { key: row.key, owner: row.owner, creator: row.creator, createdAt: row.createdAt, expiresAt: row.expiresAt, sealed: row.payload, inbox: typeof inbox === 'string' ? (inbox as Hex) : undefined }
+  return { key: row.key, owner: row.owner, creator: row.creator, createdAt: row.createdAt, expiresAt: row.expiresAt, sealed: row.payload, inbox: isHex(inbox, 32) ? inbox : undefined }
 }
 
 /**
@@ -266,7 +280,7 @@ export function sendTip(reader: Reader, signer: Signer, inbox: InboxView, sealed
       stored = (await reader.http.getEntity(entityKey).catch(() => null)) as { payload?: Uint8Array; expiresAt?: bigint } | null
     }
     if (!stored?.payload || stored.payload.length !== sealed.length || !stored.payload.every((b, i) => b === sealed[i])) {
-      throw new Error('This tip was replaced by a concurrent transaction from the same sender key')
+      throw new Error('This tip was replaced by another transaction from the same sender key, so it was not sent. Send it again.')
     }
     return { entityKey, txHash: result.txHash, expiresAt: stored.expiresAt }
   })
@@ -334,11 +348,12 @@ export function tipsSince(reader: Reader, inboxKey: Hex, sinceBlock: bigint, opt
 
 /**
  * Reads one entity and returns it only if it is a tip for one of the given inboxes. A pushed event can
- * arrive a moment before the indexer serves the entity, so a miss is retried briefly.
+ * arrive a moment before the indexer serves the entity, so a miss is retried briefly. A spent query budget
+ * is thrown at once (no retry: each one would cost more), so the caller can say so and read the tip later.
  */
 export async function getTip(reader: Reader, entityKey: Hex, inboxKeys: Hex[], tries = 4): Promise<TipView | null> {
   for (let i = 0; i < tries; i++) {
-    const entity = (await reader.http.getEntity(entityKey).catch(() => null)) as Row | null
+    const entity = (await reader.http.getEntity(entityKey).catch((e) => { if (rateLimit(e)) throw e; return null })) as Row | null
     if (entity) {
       const tip = toTip(entity)
       return tip && tip.inbox && inboxKeys.some((k) => k.toLowerCase() === tip.inbox!.toLowerCase()) ? tip : null

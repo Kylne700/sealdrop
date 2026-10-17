@@ -296,7 +296,7 @@ while (at && at.key === rowKey && walked.length < 8) { // every control of the r
   await remember(a)
   await liveTip(a)
   now = await here(a)
-  check(`A9 a tip arrives while focus is on ${at.tag}:${at.name}: the row is rebuilt, focus stays on that control of that tip and keeps its ring`, Boolean(now && now.key === at.key && now.tag === at.tag && now.name === at.name && now.ring) && (await replaced(a)), `now ${spot(now)}`)
+  check(`A9 a tip arrives while focus is on ${at.tag}:${at.name}: the row stays (fix stage 1 adds rows in place) or is rebuilt, focus stays on that control of that tip and keeps its ring`, Boolean(now && now.key === at.key && now.tag === at.tag && now.name === at.name && now.ring), `now ${spot(now)}`)
   walked.push(at.name)
   await a.keyboard.press('Tab')
   at = await here(a)
@@ -309,7 +309,7 @@ if (r.found) { // Enter anywhere else could open an explorer link in a new tab, 
   await a.waitForFunction(() => /^Kept:/.test(document.querySelector('[data-testid=status]')?.textContent ?? ''), { timeout: 5000 }).catch(() => {}) // a wait that times out shows up as a failed check below, not as a crash
 }
 now = await here(a)
-check('A9 Enter on "Keep 30 more days": the list is rebuilt, focus is on that tip\'s button again with its ring and the status line says "Kept:"', Boolean(r.found && now && now.key === rowKey && KEEP.test(now.name) && now.ring) && (await replaced(a)), `now ${spot(now)}`)
+check('A9 Enter on "Keep 30 more days": the row stays or is rebuilt, focus is on that tip\'s button again with its ring and the status line says "Kept:"', Boolean(r.found && now && now.key === rowKey && KEEP.test(now.name) && now.ring), `now ${spot(now)}`)
 await a.evaluate(() => document.activeElement.blur())
 await liveTip(a)
 check('A9 nothing has focus: a tip that arrives gives focus to nothing', (await here(a)) === null)

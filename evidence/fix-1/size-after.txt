@@ -1,0 +1,6 @@
+dist/index.html                   2.30 kB │ gzip:   1.15 kB
+dist/THIRD-PARTY-LICENSES.md      9.10 kB
+dist/assets/index-DDAqYEIZ.css   17.40 kB │ gzip:   4.59 kB
+dist/assets/native-BKj27wfc.js    0.30 kB │ gzip:   0.17 kB
+dist/assets/ccip-BciriwTV.js      2.83 kB │ gzip:   1.30 kB
+dist/assets/index-BNGU7joO.js   424.08 kB │ gzip: 133.38 kB

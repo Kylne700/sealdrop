@@ -1,8 +1,9 @@
 import './style.css'
 import { parseSendHash } from './codec'
-import { ANON_BUDGET_UNITS, DEMO_DESK, REPO_URL } from './config'
-import { DESK_ADDRESS } from './env'
-import { budget } from './arkiv'
+import { ANON_BUDGET_UNITS, REPO_URL } from './config'
+import { DESK_HASH } from './env'
+import { budget, explainError } from './arkiv'
+import { rpcUrl } from './app'
 import { focusFromScript, h, runCleanups } from './ui/dom'
 import { renderHome } from './pages/home'
 import { renderNewsroom } from './pages/newsroom'
@@ -17,18 +18,20 @@ document.querySelector('.skip')?.addEventListener('click', (e) => { e.preventDef
 let loaded = false // the first render is the page load, where the browser decides where focus is
 function route() {
   runCleanups()
+  // Framed by another page, a click could be steered onto "Seal and send" (clickjacking); the app only runs in its own tab.
+  if (window.top !== window.self) return root.replaceChildren(h('p', { class: 'status error', role: 'alert' }, 'Sealdrop does not run inside another page. Open it in its own tab.'))
   root.replaceChildren()
   const hash = location.hash
   const ref = parseSendHash(hash)
   if (ref) {
-    renderSend(root, ref).catch((e) => root.append(h('p', { class: 'status error', role: 'alert' }, `Something went wrong: ${e instanceof Error ? e.message : e}`)))
+    renderSend(root, ref).catch((e) => root.append(h('p', { class: 'status error', role: 'alert' }, `Something went wrong while showing this inbox: ${explainError(e)}`)))
   } else if (hash === '#/newsroom') {
     renderNewsroom(root)
   } else if (hash === '#/demo') {
-    location.replace(`#/send/${DESK_ADDRESS}/${DEMO_DESK.inboxId}`)
+    location.replace(DESK_HASH)
   } else {
     // A mistyped or truncated link must not look like the page simply ignored it.
-    const notice = hash.startsWith('#/send') ? 'That inbox link is not valid. A Sealdrop link looks like https://.../#/send/0x<40 hex characters>/<inbox-id>. Ask the newsroom for the link again, or paste it below.'
+    const notice = hash.startsWith('#/send') ? 'That inbox link is not valid. A Sealdrop link looks like https://.../#/send/0x<40 hex characters>/<inbox-id>/<key check>. Ask the newsroom for the link again, or paste it below.'
       : /^#?\/?$/.test(hash) ? undefined : 'There is no such page. Here is the start page.'
     renderHome(root, notice)
   }
@@ -44,8 +47,14 @@ route()
 
 // The public RPC meters anonymous queries (friction F7); show what this tab has used.
 const budgetEl = document.getElementById('budget')
+// A custom RPC answers every lookup, so it stays visible while it is set. Host only: the path can hold an access key.
+const custom = rpcUrl()
+const customHost = custom ? (() => { try { return new URL(custom).host } catch { return 'an unreadable URL' } })() : undefined
+if (budgetEl && customHost) budgetEl.textContent = `Custom RPC: ${customHost}. Change it under Settings.`
 setInterval(() => {
   if (budgetEl && budget.queries > 0) {
-    budgetEl.textContent = `Public RPC: this tab has made ${budget.queries} queries (${budget.spent} cost units). The anonymous allowance is about ${ANON_BUDGET_UNITS} units per window; live tips arrive over a WebSocket instead of polling (one entity read each).`
+    budgetEl.textContent = customHost
+      ? `Custom RPC: ${customHost}. Change it under Settings. This tab has made ${budget.queries} queries (${budget.spent} cost units).`
+      : `Public RPC: this tab has made ${budget.queries} queries (${budget.spent} cost units). The anonymous allowance is about ${ANON_BUDGET_UNITS} units per window; live tips arrive over a WebSocket instead of polling (one entity read each).`
   }
 }, 1000)
