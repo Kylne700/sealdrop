@@ -1,0 +1,83 @@
+PASS A1 first load: the page does not grab focus (it stays where the browser puts it) and the title names the page: body, title="Sealdrop: an anonymous tip line with no server"
+PASS K1 home: "Start: open a newsroom" reached with Tab: 6 Tab(s): a:Skip to content > a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:Start: open a newsroom
+PASS K1 home: every stop on the way shows a focus ring and is on screen
+PASS A2 Tab stop 1 of the walk is the skip link ("Skip to content"), on screen, with a ring: a:Skip to content
+PASS K2 Enter on Start opens the newsroom page
+INFO focus right after the page change: h1:Open a newsroom
+PASS A4 Enter on a link: focus lands on the new page's h1 and the title names the page: h1:Open a newsroom, title="Newsroom console: Sealdrop"
+PASS A4 the h1 shows a ring after a keyboard move, exactly when the browser says :focus-visible: :focus-visible=true, ring=true
+PASS K2 newsroom page: "Create a throwaway newsroom" reached with Tab: 1 Tab(s): button:Create a throwaway newsroom
+PASS K2 the first Tab after the page change lands inside the page content, not the header: button:Create a throwaway newsroom
+PASS K2 every stop shows a ring
+PASS K3 "Create the inbox" reached with Tab: 8 Tab(s): a:0x493f29e8B78d25AF0B5BdEF1889a2210Cd > button:Copy newsroom address > a:faucet > button:Export key file > button:Forget this newsroom > input:Name > textarea:Description > button:Create the inbox
+PASS K3 every stop shows a ring
+PASS K3 the inbox link is shown: http://127.0.0.1:34043/#/send/0x493f.../inbox-ymg4yx/4pAJV3s_mBLsAYaNzOfrDQ
+PASS A13 "Create the inbox": the form is replaced by the inbox panel and focus goes to its heading (it was on the button that went away): h2:Synthetic demo newsroom, title="Newsroom console: Sealdrop"
+PASS K3 "Copy inbox link" reachable by keyboard: 2 Tab(s)
+PASS A7 the Settings field (RPC URL) is reachable by keyboard: input:Custom RPC URL
+PASS A7 a tip arrives over the WebSocket while typing: the tip appears and focus, text and caret stay in the field: focus is on rpc
+PASS A7 the connection chip flips to Reconnecting and back to Live without moving focus: focus is on rpc
+PASS A7 a lease renewal re-renders the inbox panel without moving focus: focus is on rpc
+PASS A7 the footer meter ticks without moving focus: focus is on rpc
+PASS A7 typing carries on where it was
+PASS A1 first load of the send page: focus stays with the browser and the title says "Send a tip": body, title="Send a tip: Sealdrop"
+PASS K4 send page: the message box is reached with Tab: 12 Tab(s): a:Skip to content > a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:0x493f29e8B78d25AF0B5BdEF1889a2210Cd > button:Copy creator address > a:0x493f29e8B78d25AF0B5BdEF1889a2210Cd > button:Copy owner address > a:0x113613cf933b2c68cb5d4e3b176e7de07e > button:Copy inbox entity key > textarea:Your message
+PASS K4 every stop shows a ring
+PASS K4 typing shows the byte count
+PASS A8 focus and text stay in the message box while the page updates
+PASS K4 the lifetime group is the next stop (default 14 days): input:14 days
+PASS K4 ArrowRight moves the lifetime to 30 days: checked=30
+PASS K4 ArrowLeft x2 moves it to 7 days: checked=7
+PASS K4 "Seal and send" reached with Tab: 2 Tab(s): input:Shared demo key (no wallet needed). > button:Seal and send
+PASS K4 every stop shows a ring
+INFO focus after sending: h2:Sealed and sent ✓
+PASS K5 after sending, focus is on the success heading (not lost): h2:Sealed and sent ✓
+PASS K7 bar fills set through CSSOM take effect under the production CSP: receipt bar fill / track = 1.00
+PASS K5 the next Tab is "Send another": button:Send another
+PASS K5 it shows a ring
+PASS K8 the receipt links and copy buttons show a ring and "What Arkiv stores" is reachable: a:0x272865842a4bdb32ff6099437158c19764 > button:Copy tip entity key > a:0xa1fefbf611d5e916c382ec238696fdb05a > button:Copy transaction hash > summary:What Arkiv stores
+PASS K8 Enter opens "What Arkiv stores"
+PASS K8 the stops inside it, up to "What can anyone see", show a ring: a:0xa05d5Bd99440d95526120062364518ddfe > button:Copy creator address > a:0x493f29e8B78d25AF0B5BdEF1889a2210Cd > button:Copy owner address > summary:What can anyone see on Arkiv for thi
+PASS K8 Enter opens "What can anyone see"
+PASS K8 the stops inside the open panel, up to "Queries this page runs", show a ring: a:Everything this owner holds, in the  > summary:Queries this page runs
+PASS K5 "Send another" returns to the message box with focus in it: textarea:Your message
+PASS A2 the skip link is hidden until focused (above the viewport, but not display:none or visibility:hidden): bottom=-26px
+PASS A2 focused, the skip link is fully on screen with a ring
+PASS A3 Enter on the skip link puts focus on <main>
+PASS A3 ... without changing the location: same URL, no hashchange, no new history entry: hashchange events=0
+PASS A3 ... and without rendering the page again (same h1 node)
+PASS A3 the next Tab lands in the page content, not back in the header, with a ring: a:Start: open a newsroom
+PASS A3 <main> keeps no tabindex once focus has left it (never a Tab stop or click target)
+PASS A3 a script click on the skip link does the same: focus on <main>, location untouched
+PASS A5 mouse click on a link: focus lands on the new h1 and the title names the page: h1:Newsroom console, title="Newsroom console: Sealdrop"
+PASS A5 after a mouse click the h1 shows no ring (the browser says :focus-visible is off): :focus-visible=false, ring=false
+PASS A5 Back: focus lands on the home h1 and the title is the home title: h1:An anonymous tip line with no server to seiz, title="Sealdrop: an anonymous tip line with no server"
+PASS A5 Forward: focus lands on the newsroom h1 again: h1:Newsroom console, title="Newsroom console: Sealdrop"
+PASS A5 the ring and :focus-visible agree after Back/Forward too: :focus-visible=false, ring=false
+PASS A6 #/demo (a redirect) from inside the app: focus lands on the send page's h1, the title says "Send a tip": h1:Send a tip, title="Send a tip: Sealdrop"
+PASS A6 loading #/demo directly is still a first load: the redirect does not grab focus: hash=#/send/0x6a3..., body, title="Send a tip: Sealdrop"
+PASS A9 a tip arrives while focus is on a:0xa05d5Bd99440d95526120062364518ddfe: the row stays (fix stage 1 adds rows in place) or is rebuilt, focus stays on that control of that tip and keeps its ring: now a:0xa05d5Bd99440d95526120062364518ddfe (tip 0x29adb3f7, row 2)
+PASS A9 a tip arrives while focus is on button:Copy creator address: the row stays (fix stage 1 adds rows in place) or is rebuilt, focus stays on that control of that tip and keeps its ring: now button:Copy creator address (tip 0x29adb3f7, row 3)
+PASS A9 a tip arrives while focus is on a:entity on Data Explorer: the row stays (fix stage 1 adds rows in place) or is rebuilt, focus stays on that control of that tip and keeps its ring: now a:entity on Data Explorer (tip 0x29adb3f7, row 4)
+PASS A9 a tip arrives while focus is on button:Keep until 30 days from now: the row stays (fix stage 1 adds rows in place) or is rebuilt, focus stays on that control of that tip and keeps its ring: now button:Keep until 30 days from now (tip 0x29adb3f7, row 5)
+PASS A9 a tip arrives while focus is on button:Burn now: the row stays (fix stage 1 adds rows in place) or is rebuilt, focus stays on that control of that tip and keeps its ring: now button:Burn now (tip 0x29adb3f7, row 6)
+PASS A9 the walk covered the whole row: address link, copy button, explorer link, "Keep until 30 days from now", "Burn now": 0xa05d5Bd99440d95526120062364518ddfe > Copy creator address > entity on Data Explorer > Keep until 30 days from now > Burn now
+PASS A9 Enter on "Keep until 30 days from now": the row stays or is rebuilt, focus is on that tip's button again with its ring and the status line says "Kept:": now button:Keep until 30 days from now (tip 0x29adb3f7, row 6)
+PASS A9 nothing has focus: a tip that arrives gives focus to nothing
+PASS A9 focus is on "Copy inbox link", outside the tip list: a tip that arrives leaves it there: now button:Copy inbox link (tip -, row -1)
+PASS A9 a mouse click on "Keep until 30 days from now": the list is rebuilt, focus is on that tip's button again and no ring appears (:focus-visible stays off): now button:Keep until 30 days from now (tip 0xd5cef61c, row 1), :focus-visible=false
+PASS A10 burn the middle tip: focus goes to "Burn now" of the next tip and the status line says "Burned.": now button:Burn now (tip 0x238d5e33, row 1); status "Burned."
+PASS A10 burn the last tip in the list: there is no next tip, so focus goes to "Burn now" of the previous tip: now button:Burn now (tip 0x03211806, row 0); status "Burned."
+PASS A10 burn the only tip left: focus goes to the "Tips" heading (tabindex=-1 while it has focus), the empty state shows and the status line says "Burned.": now h2:Tips (tip -, row -1) tabindex=-1; status "Burned."
+PASS A10 the heading is not a Tab stop: tabindex is gone once focus leaves it, and Tab goes on to "Refresh (full sweep)"
+PASS A10 the next tip has no "Burn now" (the sender still owns it): focus goes to "Burn now" of the previous tip: now button:Burn now (tip 0x03211806, row 0)
+PASS A11 Enter on "Renew now": the inbox panel is rebuilt and focus is on the new "Renew now" button, with its ring: now button:Renew now (tip -, row -1)
+PASS A11 a renewal that fails: "Renew now" is enabled again and keeps focus (same button), and the status line shows the error: now button:Renew now (tip -, row -1)
+PASS A12 the space bar on "Send another": the result is hidden, the form is back and focus is in the empty message box, with its ring: now textarea:Your message (tip -, row -1); {"resultHidden":true,"formShown":true,"text":""}
+PASS A13 "Refresh (full sweep)" is disabled while it reads Arkiv: when it is enabled again, focus is on it: now button:Refresh (full sweep) (tip -, row -1)
+PASS A13 "Seal and send" fails: the button is enabled again, focus is on it and the error is announced: now button:Seal and send (tip -, row -1)
+PASS A13 "Forget this newsroom": the page is rebuilt as "Open a newsroom" and focus goes to its h1: h1:Open a newsroom, title="Newsroom console: Sealdrop"
+PASS A13 "Create a throwaway newsroom": the page is rebuilt as the console and focus goes to its h1: h1:Newsroom console, title="Newsroom console: Sealdrop"
+PASS K6 no console errors or page errors (production CSP active)
+
+ALL PASS
