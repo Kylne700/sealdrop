@@ -21,7 +21,9 @@ Block numbers: `$createdAt` and `$expiresAt` are block numbers (2 s blocks, 43,2
 
 `permissionlessExtension` (anyone may extend an entity's expiry) is off for both types, which is the SDK default. So only
 the newsroom can renew its inbox, and a stranger cannot postpone the 7-day lapse; only the owner can extend a tip past
-the date its source chose. This is the SDK's own description of the flag (`CreationFlags`); it has not been tested against the node.
+the date its source chose. This is the SDK's own description of the flag (`CreationFlags`), and a live test on the node (2026-10-17) agrees: the owner
+can extend an entity without the flag, a stranger's extension of it is refused ("entity ... is owned by X, not Y"), and with
+the flag set a stranger can extend it.
 
 ### Attributes (typed, all lowercase: the engine rejects uppercase names)
 
@@ -68,8 +70,14 @@ class. The message itself is UTF-8 JSON `{ "v": 1, "text": "<the tip>" }` (at mo
 
 ## Inbox links
 
-`<site>/#/send/<creator address>/<inbox_id>`. The page looks the inbox up by `inbox_id` **and** `$creator`, so nobody
-can publish a look-alike under a newsroom's link: `$creator` is set by the protocol and cannot be forged.
+`<site>/#/send/<creator address>/<inbox_id>/<key check>`. The page looks the inbox up by `inbox_id` **and** `$creator`,
+so nobody can publish a look-alike under a newsroom's link: `$creator` is set by the protocol and cannot be forged. A
+look-alike link carries a different address, so a source should compare it with the one the newsroom publishes elsewhere.
+
+The key check is the first 16 bytes of SHA-256 over the inbox's 32-byte public key, in base64url without padding
+(22 characters). A reader must refuse to seal to an inbox whose `pk` does not match it, so an RPC that answers with
+another key is caught. Links made before the key check (no third segment) still open; the page then warns that the link
+has no key check. The creator address must be all lower case or carry a correct EIP-55 checksum.
 
 ## What a reader must check
 

@@ -22,7 +22,7 @@ We create a throwaway newsroom, a fresh keypair made in this browser, and then a
 ### copy
 Copy the inbox link, and open it as a source in a second window.
 ### verify
-The source's page first verifies the inbox on Arkiv: its creator, its owner, and its lease.
+The source's page first checks the inbox on Arkiv: its key against the link, then its creator, owner and lease.
 ### send
 We type a made-up tip and send.
 It is sealed in the browser first, so only ciphertext goes to Arkiv.
@@ -39,7 +39,7 @@ In the public explorer, the same entity: ciphertext, a few attributes, and in de
 ## 4. How it uses Arkiv
 The inbox and every tip are Arkiv entities, found by typed attributes and range queries.
 Entity Expiration enforces each lease in the protocol, not in a server's promise.
-Creator and owner are protocol fields: the page uses the creator to reject look-alike inboxes, and the owner to hand each tip to the newsroom.
+Creator and owner are protocol fields: the page loads only the inbox made by the address in the link, and uses the owner to hand each tip to the newsroom.
 Lifetime Extension renews the inbox, and an event subscription feeds the live view.
 Private keys and plaintext never touch Arkiv.
 

@@ -62,6 +62,7 @@ and the decrypted tip appeared in the newsroom tab 2.6 s after Send was clicked.
 | Tip entity: sealed bytes, padded to a size class, and three attributes (`type`, `app`, `inbox`). | The message text (sealed in the sender's browser). |
 | Protocol fields: `$creator`, `$owner`, `$createdAt`, `$expiresAt`. | A sender field, a name, an email, a topic, a timestamp of ours. |
 | | Analytics, logs, accounts: there is no backend to hold them. |
+| | Browser state, in this browser's localStorage only: the newsroom keys (`sealdrop:newsroom:v1`, and `sealdrop:newsroom:v1:backup` if an unreadable copy was set aside), the last-seen tip per inbox (`sealdrop:seen:*`) and the custom RPC URL (`sealdrop:rpc`). |
 
 Details and the exact byte layout: [arkiv/schema.md](arkiv/schema.md).
 
@@ -81,7 +82,7 @@ each of those becomes an operator you have to trust:
 
 | Arkiv feature | What the user sees | Code |
 |---|---|---|
-| Lookup by `$creator` (`createdBy`) | A source opens a newsroom's link and only that address's inbox loads. A look-alike inbox with the same id under another address never shows, and the page prints the creator. | `findInbox` in [src/arkiv.ts](src/arkiv.ts) |
+| Lookup by `$creator` (`createdBy`) | A source opens a newsroom's link and only that address's inbox loads. A look-alike inbox with the same id under another address never shows, and the page prints the creator. The link also carries a key check (the first 16 bytes of the SHA-256 of the inbox's public key), so the page refuses an inbox whose key does not match it. | `findInbox` in [src/arkiv.ts](src/arkiv.ts) |
 | Atomic batch: create plus ownership change | One click makes the tip and hands it to the newsroom in one transaction. The shared demo key can no longer delete or extend anyone's tip; the newsroom can keep or burn it. | `sendTip` in [src/arkiv.ts](src/arkiv.ts) |
 | Query by `$owner` | The console shows only tips handed to the newsroom. A stranger can create an entity that mentions the inbox, but it never appears. | `sweepTips` in [src/arkiv.ts](src/arkiv.ts) |
 | Entity Expiration per type | The source picks 1, 7, 14 or 30 days and sees the exact expiry on the result screen. The inbox itself lives for 7 days. | `sendTip`, `createInbox` |
@@ -128,9 +129,9 @@ The [threat model](#threat-model-read-this-before-sending-anything-real) below s
 **Who is censored today.** Sources and newsrooms whose tip line is one server: a hosting provider, a domain or a court can
 take it down, block it, or demand its logs, and the newsroom's inbox disappears with it.
 
-**What changes from day one.** The inbox is an Arkiv entity. The link carries only the newsroom's address and the inbox
-id, and the page looks the inbox up on the chain, not on a Sealdrop server. Someone outside the team reads and queries the
-data with no help from us: [[`arkiv/schema.md`](arkiv/schema.md)](arkiv/schema.md#read-it-without-sealdrop) has the one `curl` that lists a newsroom's sealed
+**What changes from day one.** The inbox is an Arkiv entity. The link carries only the newsroom's address, the inbox
+id and a key check, and the page looks the inbox up on the chain, not on a Sealdrop server. Someone outside the team reads and queries the
+data with no help from us: [`arkiv/schema.md`](arkiv/schema.md#read-it-without-sealdrop) has the one `curl` that lists a newsroom's sealed
 tips, and [`arkiv/examples/read-tips.mjs`](arkiv/examples/read-tips.mjs) does the same with plain JSON-RPC and no Sealdrop code (a recorded run is in
 [`evidence/read-tips.txt`](evidence/read-tips.txt)). The app is a static file that anyone can host; Settings lets a visitor point it at their own
 RPC URL. There is no Sealdrop backend to shut down. Honest limits: whoever hosts the page can take that copy down (anyone
@@ -149,14 +150,17 @@ tests check this without creating a look-alike entity: the integration test asks
 creator and gets no inbox, and the smoke test opens a link with that inbox id and another creator, which shows "no live
 inbox" ([`evidence/integration.txt`](evidence/integration.txt), [`evidence/smoke.txt`](evidence/smoke.txt)). The console shows only tips whose `$owner` is the newsroom, so
 entities that merely mention the inbox never appear. Tips are `readonly` and are handed over in one atomic batch, and the
-send page prints "WARNING: the owner is not the creator" if an inbox has changed hands. What this does not solve: the
-newsroom must publish its address over a channel the source already trusts; the page prints the creator so the source can
-compare it.
+send page prints "WARNING: the owner is not the creator" if an inbox has changed hands. The link also carries a key check
+of the inbox's public key: the send page shows "Key matches this link" only when the key it read matches, and refuses to
+send otherwise, so an RPC that answers with another key is caught. What this does not solve: the page proves only that
+the inbox was created by the address in the link. A look-alike link has a different address, so the newsroom must publish
+its address (or its link) over a channel the source already trusts, and the page prints the creator and asks the source
+to compare it. An old link without a key check still opens, with the warning "This link has no key check".
 
 ### Open Source
 
-**Who is locked out today.** Other builders. A tip line that runs as one organisation's server keeps its inbox in that
-server's private store, so a second client, a notifier or a relay can only work through that organisation, and when it
+**Who is locked out today.** Other builders. A tip line that runs as one organization's server keeps its inbox in that
+server's private store, so a second client, a notifier or a relay can only work through that organization, and when it
 stops, the inboxes go with it.
 
 **What changes from day one.** [`arkiv/schema.md`](arkiv/schema.md) is a data contract: entity types, attribute names and types, per-type Entity
@@ -165,7 +169,7 @@ Expiration, the byte layout of the sealed box, the rules a reader must apply, an
 dataset, without asking anyone. A sender written from the contract should produce tips the existing console opens; so far
 only the app's own sender has been tested. [`arkiv/examples/read-tips.mjs`](arkiv/examples/read-tips.mjs) is the proof for the read side: a 43-line reader,
 written from the contract, that decrypts a newsroom's tips (in the builder's run, the Demo Desk's; saved in
-[`evidence/read-tips.txt`](evidence/read-tips.txt)) without importing anything from the app. MIT licence and unit tests for the wire format.
+[`evidence/read-tips.txt`](evidence/read-tips.txt)) without importing anything from the app. MIT license and unit tests for the wire format.
 
 ## Threat model (read this before sending anything real)
 
@@ -175,11 +179,20 @@ written from the contract, that decrypts a newsroom's tips (in the builder's run
   padded to one of four size classes. Only the newsroom's secret key opens it. No server and no chain node sees plaintext.
 * There is no Sealdrop server holding messages or keys, so there is no tip-line server to compel or seize. The newsroom, the page host and the RPC node can still be compelled.
 * The source chooses the initial retention limit (the newsroom can extend it); the protocol enforces it. An inbox that is not renewed lapses within 7 days.
-* A look-alike inbox under a newsroom's link does not load: the page checks the inbox's on-chain `$creator`.
+* A look-alike inbox under a newsroom's link does not load: the page checks the inbox's on-chain `$creator`. A link
+  with a different address is a different newsroom as far as the page knows: compare the address with the one the
+  newsroom publishes elsewhere.
+* A link with a key check (`#/send/<creator>/<inbox id>/<key check>`) only sends to the key it names, even if the RPC lies.
 
 **What it does not protect**
 
-* **Your network address.** The RPC node (and a WebSocket) sees your IP. Use Tor Browser if that matters.
+* **Your network address.** The RPC node (and a WebSocket) sees your IP. Use Tor Browser if that matters. A local
+  network or ISP observer sees that you use Sealdrop and the RPC (clearnet). The WebSocket operator learns which inbox a
+  console watches, and when. The explorer links on the receipt send your IP and the tip's key to the explorer operator
+  when clicked.
+* **Trust in the RPC.** The page believes what the RPC node answers. A dishonest RPC (the public one, or a custom one in
+  Settings) can hide an inbox or tips, or answer with another inbox key. A link with a key check refuses such a key; an
+  old link without one cannot tell. While a custom RPC is set, the footer shows "Custom RPC: <host>".
 * **History.** After Entity Expiration the entity is gone from queries, but the ciphertext stays in chain history. If the
   newsroom's key is ever stolen, anyone who archived the chain can open old tips. Expiry limits exposure; it does not
   erase history, and the encryption is what protects an expired tip. There is no forward secrecy for the newsroom key.
@@ -190,7 +203,8 @@ written from the contract, that decrypts a newsroom's tips (in the builder's run
 * **Timing.** Someone watching the chain can correlate when a tip arrived with other events.
 * **The demo key is public on purpose.** Demo mode ships a testnet-only sender key in the page so a visitor needs no
   wallet. Anyone can lift it out of the bundle and spend its faucet GLM or spam inboxes (the console ignores entities
-  that were not handed to the newsroom, but the public view would show them). Production would use a relayer or a
+  that were not handed to the newsroom, but the public view would show them). Spam that is handed over does reach the
+  console, like any tip; the console marks a tip whose sealed bytes repeat an earlier one as a copy. Production would use a relayer or a
   paymaster; the key holds nothing of value.
 * **Retraction.** A source cannot retract a tip after it is handed over. The newsroom (the owner) can extend it, so
   "expiry the source controls" applies to the initial lifetime.
@@ -198,6 +212,11 @@ written from the contract, that decrypts a newsroom's tips (in the builder's run
 * **Trust in the JavaScript you load.** The page's code comes from whoever hosts it, and a malicious host could serve
   modified code that reads a message before it is sealed. Mitigations: the code is open source, a Content Security Policy (a `<meta>` tag with `script-src 'self'`) limits which
   scripts the page runs, though it cannot stop the host from serving different code, and you can run it yourself (`npm run dev`) or host your own copy.
+* **Shared origin.** The keys and the RPC setting live in localStorage on the site's origin. On GitHub Pages every site of
+  the same account shares that origin (the `/sealdrop/` path does not isolate it), so another Pages site of that account
+  could read them. Serve it from a dedicated account, organization or custom domain.
+* **Framing.** GitHub Pages cannot send `frame-ancestors`, so the page refuses to run inside another page instead: it
+  shows "Sealdrop does not run inside another page" and renders nothing else.
   Signed releases and reproducible builds are not done.
 * **The Demo Desk is not a real newsroom.** The builder holds its key and reads what arrives. Test messages only.
 * **Your device.** Browser history, malware, screenshots, a stolen laptop, and clearing site data (which deletes an
@@ -281,6 +300,7 @@ not) is in [evidence/qa.md](evidence/qa.md).
 
 The Demo Desk inbox: entity [`0x65a2d0b9…25a1`](https://data.arkiv.network/entity/0x65a2d0b97fe693af3916c4a954564dda4d44a584ee4ec206454ac9c0148c25a1),
 created in tx [`0xc9ca55aa…9acc`](https://tiramisu.explorer.arkiv.network/tx/0xc9ca55aab9c19049296890a80dbb518b0874daaa9c7358826c4d57cdf35c9acc).
+Its link, with the key check: `{{LIVE_URL}}#/send/0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6/demo-desk/4JL_elI5QI6aemyST_9gJA` (the home page's Demo Desk link and `#/demo` lead there).
 
 ## Repository map
 

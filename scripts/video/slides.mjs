@@ -124,7 +124,7 @@ function step4(id) {
     <div class="col" style="gap:14px">
       <div class="feat ${hit('attrs')}"><span class="n">1</span><div><b>Typed attributes, range queries</b><span class="mono" style="font-size:16px">type · app · inbox · $expiresAt · $createdAt</span></div></div>
       <div class="feat ${hit('expire')}"><span class="n">2</span><div><b>Entity Expiration</b><span>Each lease is enforced by the protocol.</span></div></div>
-      <div class="feat ${hit('owner')}"><span class="n">3</span><div><b>$creator and $owner</b><span>Reject look-alike inboxes; hand each tip over.</span></div></div>
+      <div class="feat ${hit('owner')}"><span class="n">3</span><div><b>$creator and $owner</b><span>Load only the linked address's inbox; hand each tip over.</span></div></div>
       <div class="feat ${hit('extend')}"><span class="n">4</span><div><b>Lifetime Extension + events</b><span>Renew the inbox; feed the live view over a WebSocket.</span></div></div>
       <div class="off-panel ${hit('off')}"><b>Stays off Arkiv</b>Private keys and plaintext live only in the browsers.</div></div></div>`,
     `.main{top:96px}.feat{padding:11px 18px}.feat b{font-size:21px}.feat span{font-size:17px}.ent{padding:16px 22px}.ent h3{font-size:25px}.line{font-size:18px;margin-top:9px}.off-panel{padding:12px 20px;font-size:18px;margin-top:2px}.off-panel b{font-size:21px}`)
