@@ -1,0 +1,124 @@
+--- L/scripts/h.mjs
++++ fix-4/harness/h.mjs
+@@ -4,7 +4,7 @@
+ import { appendFileSync, writeFileSync } from 'node:fs'
+ export { sleep }
+ export const PROJECT = new URL('..', import.meta.url).pathname
+-export const OUT = '/tmp/fq-L/out'
++export const OUT = '/tmp/fq-F4/out'
+ export function reporter(name) {
+   const fails = []
+   const say = (s) => { console.log(s); appendFileSync(`${OUT}/${name}.txt`, s + '\n') }
+@@ -69,7 +69,7 @@
+ /** Hold the shared live lock until release() is called (or this process dies). */
+ let lockSeq = 0
+ export async function lock() {
+-  const flag = `/tmp/fq-L/out/rel.${process.pid}.${++lockSeq}`
++  const flag = `/tmp/fq-F4/out/rel.${process.pid}.${++lockSeq}`
+   const c = spawn('flock', ['/tmp/sealdrop-live.lock', 'sh', '-c', `echo got; while kill -0 ${process.pid} 2>/dev/null && [ ! -e ${flag} ]; do sleep 1; done`], { stdio: ['ignore', 'pipe', 'ignore'] })
+   await new Promise((res) => c.stdout.once('data', res))
+   return () => { writeFileSync(flag, '') }
+--- L/scripts/l.mjs
++++ fix-4/harness/l.mjs
+@@ -175,7 +175,7 @@
+   const { proxy } = h
+   const { A, link } = await setup(h)
+   const B = await h.page('source')
+-  const what = { before: 'connection cut before the signed transaction leaves the proxy', after: 'transaction forwarded to the node, the answer is lost', 'then-dead': 'transaction answered normally, then every HTTP call fails for 25 s (receipt polling)' }
++  const what = { before: 'connection cut before the signed transaction leaves the proxy', after: 'transaction forwarded to the node, the answer is lost', 'then-dead': 'transaction answered normally, then every HTTP call fails for 25 s (receipt polling)', 'after-hang': 'transaction forwarded to the node, the answer never comes (the request times out)', 'after-once': 'transaction forwarded, only the first answer is lost (a resend gets the real answer)' }
+   for (const mode of (process.env.MODES ?? 'before,after,then-dead').split(',')) {
+     const text = `SYNTHETIC TEST TIP L kill ${mode}`
+     say(`=== network killed during send, mode ${mode}: ${what[mode]}`)
+@@ -217,7 +217,7 @@
+ sections.expire = async (h) => {
+   const { A, link, creator, id } = await setup(h)
+   const probes = []
+-  for (const sec of [2, 4, 10, 20, 30]) {
++  for (const sec of process.env.NOPROBE ? [] : [2, 4, 10, 20, 30]) {
+     const o = await shortTipS(creator, id, sec, `SYNTHETIC TEST TIP L probe ${sec} s`)
+     probes.push(o); say(`probe lease ${sec} s: ${JSON.stringify(o)}`)
+     if (o.ok) { if (o.readBack) break }
+@@ -228,18 +228,27 @@
+   const text = 'SYNTHETIC TEST TIP L short lease'
+   const t0 = Date.now()
+   const o = await shortTipS(creator, id, L, text); say(`tip with a ${L} s lease: ${JSON.stringify(o)}`)
++  // F4: two more tips with the same lease, for Keep and Burn on an expired row before any Refresh drops it
++  const textK = text + ' keep', textB = text + ' burn'
++  for (const t of [textK, textB]) say(`tip with a ${L} s lease: ${JSON.stringify(await shortTipS(creator, id, L, t))}`)
++  const tLast = Date.now()
+   const seen = await waitFor(() => has(A, text), 40_000)
+   say(`console showed it after ${seen} s (data-source=${await srcOf(A, text)})`)
+   const meta = (p) => p.evaluate((t) => [...document.querySelectorAll('[data-testid=tip]')].find((r) => r.querySelector('[data-testid=tip-text]')?.textContent === t)?.querySelector('.meta')?.textContent.replace(/\s+/g, ' ').trim(), text).catch(() => null)
+   say(`row meta before expiry: ${await meta(A)}`); await shot(A, 'expire-before')
+   const s = sampler(A, [ST])
+-  while (Date.now() - t0 < (L + 20) * 1000) await sleep(2000)
++  while (Date.now() - tLast < (L + 20) * 1000) await sleep(2000)
+   say(`row meta ${((Date.now() - t0) / 1000).toFixed(0)} s after the send (lease ${L} s), no user action: ${await meta(A)}; tip still listed=${await has(A, text)}; status: ${await stInfo(A)}`)
+   await shot(A, 'expire-after')
++  const act = async (label, tt = text) => { const ok = await A.evaluate((t, l) => { const li = [...document.querySelectorAll('[data-testid=tip]')].find((r) => r.querySelector('[data-testid=tip-text]')?.textContent === t); const b = [...(li?.querySelectorAll('button') ?? [])].find((x) => x.textContent.trim().startsWith(l)); b?.click(); return Boolean(b) }, tt, label); await sleep(12_000); return ok }
++  say(`F4 before Refresh, Keep on the expired "keep" row: clicked=${await withLock(() => act('Keep until', textK))}; status: ${await stInfo(A)}; row still listed=${await has(A, textK)}`)
++  await shot(A, 'expire-keep-before-refresh')
++  say(`F4 before Refresh, Burn on the expired "burn" row: clicked=${await withLock(() => act('Burn now', textB))}; status: ${await stInfo(A)}; row still listed=${await has(A, textB)}`)
++  await shot(A, 'expire-burn-before-refresh')
+   await A.click(REFRESH); await freeBtn(A); await sleep(2000)
+   say(`after Refresh: tip still listed=${await has(A, text)}; status: ${await stInfo(A)}; empty-state text visible=${await A.$eval('[data-testid=empty]', (e) => !e.hidden).catch(() => 'n/a')}`)
+   await shot(A, 'expire-after-refresh')
+-  const act = async (label) => { const ok = await A.evaluate((t, l) => { const li = [...document.querySelectorAll('[data-testid=tip]')].find((r) => r.querySelector('[data-testid=tip-text]')?.textContent === t); const b = [...(li?.querySelectorAll('button') ?? [])].find((x) => x.textContent.trim().startsWith(l)); b?.click(); return Boolean(b) }, text, label); await sleep(12_000); return ok }
++  const act0 = async (label) => { const ok = await A.evaluate((t, l) => { const li = [...document.querySelectorAll('[data-testid=tip]')].find((r) => r.querySelector('[data-testid=tip-text]')?.textContent === t); const b = [...(li?.querySelectorAll('button') ?? [])].find((x) => x.textContent.trim().startsWith(l)); b?.click(); return Boolean(b) }, text, label); await sleep(12_000); return ok }
+   say(`Keep (pin) on the expired row: clicked=${await withLock(() => act('Keep until'))}; status: ${await stInfo(A)}`)
+   say(`Burn on the expired row: clicked=${await withLock(() => act('Burn now'))}; status: ${await stInfo(A)}; still listed=${await has(A, text)}`)
+   await shot(A, 'expire-after-actions')
+@@ -303,7 +312,7 @@
+ sections.twotabs = async (h) => {
+   const { proxy } = h
+   say('setup (mkdue 3 days): ' + (await locked(['npx', 'tsx', 'qa-net/mkdue.mts', '3'])).slice(0, 200))
+-  const st = JSON.parse(readFileSync('/tmp/fq-L/out/due-id.json', 'utf8'))
++  const st = JSON.parse(readFileSync('/tmp/fq-F4/out/due-id.json', 'utf8'))
+   const exp = async () => JSON.parse((await locked(['npx', 'tsx', 'qa-net/inboxexp.mts', st.identity.address, st.identity.inboxId])).split('\n').pop())
+   const e0 = await exp(); say(`inbox on chain before: ${JSON.stringify(e0)}`)
+   const ctx = await h.browser.createBrowserContext()
+@@ -329,7 +338,7 @@
+ sections.duefail = async (h) => {
+   const { proxy } = h
+   say('setup (mkdue 3 days): ' + (await locked(['npx', 'tsx', 'qa-net/mkdue.mts', '3'])).slice(0, 200))
+-  const st = JSON.parse(readFileSync('/tmp/fq-L/out/due-id.json', 'utf8'))
++  const st = JSON.parse(readFileSync('/tmp/fq-F4/out/due-id.json', 'utf8'))
+   const text = 'SYNTHETIC TEST TIP L waiting while the lease renewal fails'
+   say('tip already waiting in the inbox: ' + (await shortTip(st.identity.address, st.identity.inboxId, 1440, text)).slice(0, 90))
+   const ctx = await h.browser.createBrowserContext()
+--- L/scripts/mkdue.mts
++++ fix-4/harness/mkdue.mts
+@@ -1,4 +1,4 @@
+-// Makes a throwaway newsroom whose inbox has only <days> days left (so a console open triggers auto-renew). Writes /tmp/fq-L/out/due-id.json (throwaway keys).
++// Makes a throwaway newsroom whose inbox has only <days> days left (so a console open triggers auto-renew). Writes /tmp/fq-F4/out/due-id.json (throwaway keys).
+ import '../scripts/load-env'
+ import { writeFileSync } from 'node:fs'
+ import { ExpirationTime } from '@arkiv-network/sdk'
+@@ -12,5 +12,5 @@
+ await fundAccount(localSigner(needKey('VITE_DEMO_SENDER_PRIVATE_KEY')), id.address, '0.02')
+ const signer = localSigner(id.evmPrivateKey!)
+ const r = await signer.client.createEntity({ payload: encodeInbox({ name: 'SYNTHETIC TEST newsroom (due)', description: 'QA only', publicKey: fromB64(id.boxPublicKey) }), contentType: INBOX_CONTENT_TYPE, attributes: inboxAttributes(id.inboxId), expires: ExpirationTime.fromDays(days) })
+-writeFileSync('/tmp/fq-L/out/due-id.json', JSON.stringify({ identity: id, entity: r.entityKey }))
++writeFileSync('/tmp/fq-F4/out/due-id.json', JSON.stringify({ identity: id, entity: r.entityKey }))
+ console.log('inbox', id.inboxId, 'creator', id.address, 'entity', r.entityKey)
+--- L/scripts/proxy2.mjs
++++ fix-4/harness/proxy2.mjs
+@@ -31,7 +31,7 @@
+     let calls
+     try { const j = JSON.parse(body); calls = Array.isArray(j) ? j : [j] } catch { calls = [] }
+     for (const c of calls) st.methods[c.method] = (st.methods[c.method] ?? 0) + 1
+-    if (calls.some((c) => c.method === 'arkiv_query') && !st.sampleQuery) { st.sampleQuery = body; try { writeFileSync('/tmp/fq-L/out/sample-query.json', body) } catch {} }
++    if (calls.some((c) => c.method === 'arkiv_query') && !st.sampleQuery) { st.sampleQuery = body; try { writeFileSync('/tmp/fq-F4/out/sample-query.json', body) } catch {} }
+     const isQuery = calls.some((c) => c.method === 'arkiv_query')
+     if (ctl.trace) for (const c of calls) {
+       let extra = ''
+@@ -56,6 +56,9 @@
+     if (isQuery && ctl.cacheQueries && cache.has(body)) { st.cached++; const c = cache.get(body); return send(200, { 'arkiv-cost': '0' }, c) }
+     const up = await fetch(UP_HTTP, { method: 'POST', headers: { 'content-type': 'application/json', accept: 'application/json', 'user-agent': UA }, body })
+     const text = await up.text()
++    if (isSend) note(`send answer ${up.status} ${text.slice(0, 200)}`)
++    if (isSend && ctl.sendMode === 'after-hang') { st.sendDropped = (st.sendDropped ?? 0) + 1; hung.add(req.socket); note('tx forwarded, answer withheld until the client gives up'); return }
++    if (isSend && ctl.sendMode === 'after-once' && !st.onceDone) { st.onceDone = true; st.sendDropped = (st.sendDropped ?? 0) + 1; note('tx forwarded, only this first answer dropped'); return void req.socket.destroy() }
+     if (isSend && ctl.sendMode === 'after') { st.sendDropped = (st.sendDropped ?? 0) + 1; note('tx forwarded, response dropped (network killed after send)'); return void req.socket.destroy() }
+     if (isSend && ctl.sendMode === 'then-dead') { st.sendForwarded = (st.sendForwarded ?? 0) + 1; note(`tx forwarded and answered, then the network dies for ${ctl.deadMs ?? 20000} ms`); ctl.loss = 1; setTimeout(() => { ctl.loss = 0; note('network back') }, ctl.deadMs ?? 20000) }
+     const cost = Number(up.headers.get('arkiv-cost'))

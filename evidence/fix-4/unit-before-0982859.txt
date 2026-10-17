@@ -1,0 +1,75 @@
+# vitest on 0982859 with the fix-4 tests copied in (test/fix3.test.ts with the new wording, test/fix4.test.ts). Summary lines and assertion messages only; the full output (122 kB, mostly stack traces) stays in the scratch clone.
+ ❯ test/fix3.test.ts (7 tests | 4 failed) 1099ms
+   ❯ fix stage 3 (7)
+     × R4: the connection drops after the signed tip left (F4 "after"): the user is told it may have been sent 198ms
+     × R4: the hash came back but the receipt answer is lost (HTTP 502): no "try again" or "wait a little" 10ms
+     × R4: the hash came back but the receipt answer is lost (429, query budget spent): no "try again" or "wait a little" 6ms
+     × W5/R4: a receipt timeout (viem waits 180 s) is not retried, because a retry sends the tip a second time 1ms
+ ❯ test/fix4.test.ts (15 tests | 14 failed) 4399ms
+   ❯ fix stage 4: one Send click, one tip (L-04) (6)
+     × "429" inside quoted hex is no reason to retry; "nonce too low" and "underpriced" still are 7ms
+     × the answer to the send times out after the node got it: one signed transaction, outcome unknown 41ms
+     × "already known" means the node holds this very transaction: not re-signed, outcome unknown 8ms
+     × the tip was written but the read-back fails (HTTP 502): not sent again, outcome unknown with the hash 1ms
+     × Nit 2: the unknown-outcome text reads right on the send page and in the console, with and without a hash 2ms
+   ❯ fix stage 4: reading and the live feed (3)
+     × L-01: a 5xx while reading a live tip is thrown, not turned into "no tip"; a missing entity is still null 810ms
+     × L-03: a WebSocket handshake that never answers counts as lost after 15 s, and is tried again 5ms
+     × L-03: refused WebSocket upgrades follow the backoff, one socket per attempt 3511ms
+   ❯ fix stage 4: the console (source checks; the browser runs are in evidence/design.md) (6)
+     × L-01: a live tip that cannot be read schedules a catch-up for any error, not only a spent budget 3ms
+     × L-02: a successful catch-up replaces a stale read error or "No tips yet." 2ms
+     × L-06: Refresh drops expired rows; Keep and Burn check the expiry first and say so 2ms
+     × L-07: a failed lease check or renewal still shows the inbox, then says what to do 2ms
+     × L-08: every way into the console goes through open(), which leaves the link and a working Refresh 2ms
+     × Nit 1: "1 query", not "1 queries" 1ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 18 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  test/fix3.test.ts > fix stage 3 > R4: the connection drops after the signed tip left (F4 "after"): the user is told it may have been sent
+AssertionError: expected 'The result of this transaction is unk…' to contain 'it may have gone through, so trying a…'
+ ❯ test/fix3.test.ts:57:29
+ FAIL  test/fix3.test.ts > fix stage 3 > R4: the hash came back but the receipt answer is lost (HTTP 502): no "try again" or "wait a little"
+ FAIL  test/fix3.test.ts > fix stage 3 > R4: the hash came back but the receipt answer is lost (429, query budget spent): no "try again" or "wait a little"
+AssertionError: expected 'The result of this transaction (0xaba…' to contain 'it may have gone through, so trying a…'
+ ❯ test/fix3.test.ts:80:29
+ FAIL  test/fix3.test.ts > fix stage 3 > W5/R4: a receipt timeout (viem waits 180 s) is not retried, because a retry sends the tip a second time
+ ❯ test/fix3.test.ts:89:29
+ FAIL  test/fix4.test.ts > fix stage 4: one Send click, one tip (L-04) > "429" inside quoted hex is no reason to retry; "nonce too low" and "underpriced" still are
+AssertionError: expected 3 to be 1 // Object.is equality
+ ❯ test/fix4.test.ts:55:19
+ FAIL  test/fix4.test.ts > fix stage 4: one Send click, one tip (L-04) > the answer to the send times out after the node got it: one signed transaction, outcome unknown
+ ❯ test/fix4.test.ts:67:25
+ FAIL  test/fix4.test.ts > fix stage 4: one Send click, one tip (L-04) > "already known" means the node holds this very transaction: not re-signed, outcome unknown
+ ❯ test/fix4.test.ts:75:25
+ FAIL  test/fix4.test.ts > fix stage 4: one Send click, one tip (L-04) > the tip was written but the read-back fails (HTTP 502): not sent again, outcome unknown with the hash
+ ❯ test/fix4.test.ts:90:21
+ FAIL  test/fix4.test.ts > fix stage 4: one Send click, one tip (L-04) > Nit 2: the unknown-outcome text reads right on the send page and in the console, with and without a hash
+ ❯ test/fix4.test.ts:104:17
+ FAIL  test/fix4.test.ts > fix stage 4: reading and the live feed > L-01: a 5xx while reading a live tip is thrown, not turned into "no tip"; a missing entity is still null
+AssertionError: promise resolved "null" instead of rejecting
+ ❯ test/fix4.test.ts:115:60
+ FAIL  test/fix4.test.ts > fix stage 4: reading and the live feed > L-03: a WebSocket handshake that never answers counts as lost after 15 s, and is tried again
+AssertionError: expected [] to deeply equal [ 'reconnecting' ]
+ ❯ test/fix4.test.ts:127:20
+ FAIL  test/fix4.test.ts > fix stage 4: reading and the live feed > L-03: refused WebSocket upgrades follow the backoff, one socket per attempt
+AssertionError: expected 14 to be less than or equal to 3
+ ❯ test/fix4.test.ts:143:22
+ FAIL  test/fix4.test.ts > fix stage 4: the console (source checks; the browser runs are in evidence/design.md) > L-01: a live tip that cannot be read schedules a catch-up for any error, not only a spent budget
+AssertionError: expected '// #/newsroom: create a throwaway new…' not to match /if \(!limited\) return status\.error/
+ ❯ test/fix4.test.ts:151:22
+ FAIL  test/fix4.test.ts > fix stage 4: the console (source checks; the browser runs are in evidence/design.md) > L-02: a successful catch-up replaces a stale read error or "No tips yet."
+AssertionError: expected '// #/newsroom: create a throwaway new…' to match /if \(\[stale, 'No tips yet\.'\]\.incl…/
+ ❯ test/fix4.test.ts:156:18
+ FAIL  test/fix4.test.ts > fix stage 4: the console (source checks; the browser runs are in evidence/design.md) > L-06: Refresh drops expired rows; Keep and Burn check the expiry first and say so
+AssertionError: expected '// #/newsroom: create a throwaway new…' to match /if \(tip\.expiresAt <= t\.head\) drop…/
+ ❯ test/fix4.test.ts:159:18
+ FAIL  test/fix4.test.ts > fix stage 4: the console (source checks; the browser runs are in evidence/design.md) > L-07: a failed lease check or renewal still shows the inbox, then says what to do
+AssertionError: expected '// #/newsroom: create a throwaway new…' to match /inbox = await leaseCheck\(read\)\.cat…/
+ ❯ test/fix4.test.ts:164:18
+ FAIL  test/fix4.test.ts > fix stage 4: the console (source checks; the browser runs are in evidence/design.md) > L-08: every way into the console goes through open(), which leaves the link and a working Refresh
+AssertionError: expected 2 to be 1 // Object.is equality
+ ❯ test/fix4.test.ts:168:51
+ FAIL  test/fix4.test.ts > fix stage 4: the console (source checks; the browser runs are in evidence/design.md) > Nit 1: "1 query", not "1 queries"
+AssertionError: expected 'import \'./style.css\'\nimport { pars…' not to match /\$\{budget\.queries\} queries/
+ ❯ test/fix4.test.ts:174:22
+ Test Files  2 failed (2)
+      Tests  18 failed | 4 passed (22)

@@ -1,0 +1,18 @@
+browser chromium Chrome/154.0.8037.92; inbox inbox-jzcan2; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+shortest lease the chain accepted in this probe: none up to 30 s s (smaller values tried before it: none)
+tip with a 60 s lease: {"ok":true,"seconds":60,"tip":"0xa0ad6cc381273dfe85c1ab2240b05d1111569162639affe26b3f7a45e98c3526","confirmedAfterMs":8411,"readBack":true,"expiresAt":"699855"}
+tip with a 60 s lease: {"ok":true,"seconds":60,"tip":"0x4ace765b545c4d25abd0a9d1ab96066332d39527b5a38884a293a0226f607ade","confirmedAfterMs":6972,"readBack":true,"expiresAt":"699863"}
+tip with a 60 s lease: {"ok":true,"seconds":60,"tip":"0xebf16321623ed55980e75761270501f13e7dea77e900127e955f1ac2476b0d94","confirmedAfterMs":9863,"readBack":true,"expiresAt":"699869"}
+console showed it after 0.014 s (data-source=live)
+row meta before expiry: 2026-10-17 15:03 UTC1.1 KiB sealed (1 KiB bucket)Expires in 1 min owned by you
+row meta 122 s after the send (lease 60 s), no user action: 2026-10-17 15:03 UTC1.1 KiB sealed (1 KiB bucket)Expires in 1 min owned by you; tip still listed=true; status: class="status" role=status text="A new tip just arrived."
+F4 before Refresh, Keep on the expired "keep" row: clicked=true; status: class="status" role=status text="This tip has expired, so it is no longer on Arkiv."; row still listed=false
+F4 before Refresh, Burn on the expired "burn" row: clicked=true; status: class="status" role=status text="This tip has expired, so it is no longer on Arkiv."; row still listed=false
+after Refresh: tip still listed=false; status: class="status" role=status text="No tips yet."; empty-state text visible=n/a
+Keep (pin) on the expired row: clicked=false; status: class="status" role=status text="No tips yet."
+Burn on the expired row: clicked=false; status: class="status" role=status text="No tips yet."; still listed=false
+after a page reload: tip listed=false; status: class="status" role=status text="Reading your inbox from Arkiv..."
+page problems (errors+warnings): 1: newsroom pageerror: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.
+proxy: forwarded arkiv_query=9 units=900 real429=0; methods {"arkiv_getBlockTiming":7,"arkiv_query":10,"eth_getBalance":5,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":3,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":2,"eth_getTransactionReceipt":5,"eth_blockNumber":4,"eth_getTransactionByHash":2}
+proxy log tail: 15:03:09 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0x00e21223d0eb88a2adea0fe4e5a6b0e7b23dee255fcaae02ae2bdbf01c0f160a"} / 15:03:15 send answer 200 {"jsonrpc":"2.0","id":21,"result":"0x535ca92a9950f203ffca3a344d0d339d07c71fad2d8a0d86cfce8948ee8b37c2"} / 15:03:27 ws client connected
+no failed checks

@@ -1,0 +1,23 @@
+browser chromium Chrome/154.0.8037.92; inbox inbox-qkjdkq; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+=== network killed during send, mode after-hang: transaction forwarded to the node, the answer never comes (the request times out)
+after-hang: outcome=alert after 23.2 s; proxy dropped 1 send(s), forwarded-then-dead 0; result shown=false; send button enabled=true; progress element: class="status error" role=alert text="The result of this transaction is unknown: it may have gone through, so trying again could do it twice."
+after-hang: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 21.9s progress="The result of this transaction is unknown: it may have gone through, so trying again could do it twice."
+after-hang: proxy trace: 15:00:47 call eth_call / 15:00:48 call eth_fillTransaction / 15:00:48 call eth_getTransactionCount / 15:00:48 call eth_maxPriorityFeePerGas / 15:00:49 call eth_estimateGas / 15:00:49 call eth_sendRawTransaction nonce=553 hash=0xd40b1bab59 / 15:00:49 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0xd40b1bab597ab3915f28320d26c997c3a2fa211dae6fc13226a0802fd4cc4b30"} / 15:00:49 tx forwarded, answer withheld until the client gives up / 15:00:52 call arkiv_query
+after-hang: network back, console Refresh: copies of this tip=1 (data-source=live)
+after-hang: user presses Send again: class="status" role=status text=""; result shown=true
+after-hang: after the second Send: copies=2
+PASS kill after-hang: tip never lost silently (told it failed, or delivered): result shown=false, copies after network back=1
+FAIL kill after-hang: no duplicate after the user's retry: copies=2
+=== network killed during send, mode after-once: transaction forwarded, only the first answer is lost (a resend gets the real answer)
+after-once: outcome=alert after 4.1 s; proxy dropped 1 send(s), forwarded-then-dead 0; result shown=false; send button enabled=true; progress element: class="status error" role=alert text="The result of this transaction is unknown: it may have gone through, so trying again could do it twice."
+after-once: what the source saw: 0.0s progress="" | 0.0s status="" | 0.0s send="Seal and send" | 0.3s progress="Writing to Arkiv: create the tip and hand it to the newsroom in one batch (about 5 s)..." | 2.8s progress="The result of this transaction is unknown: it may have gone through, so trying again could do it twice."
+after-once: proxy trace: 15:01:57 call eth_call / 15:01:58 call eth_fillTransaction / 15:01:58 call eth_getTransactionCount / 15:01:59 call eth_maxPriorityFeePerGas / 15:01:59 call eth_estimateGas / 15:01:59 call eth_sendRawTransaction nonce=555 hash=0x21d996c1e3 / 15:02:00 send answer 200 {"jsonrpc":"2.0","id":9,"result":"0x21d996c1e37987a28dbf2dcfc6721057aeb21ff73a30f2a4a577e82a7bef4426"} / 15:02:00 tx forwarded, only this first answer dropped / 15:02:00 call eth_sendRawTransaction nonce=555 hash=0x21d996c1e3 / 15:02:00 send answer 200 {"jsonrpc":"2.0","id":9,"error":{"code":-32000,"message":"already known"}}
+after-once: network back, console Refresh: copies of this tip=1 (data-source=live)
+after-once: user presses Send again: class="status" role=status text=""; result shown=true
+after-once: after the second Send: copies=2
+PASS kill after-once: tip never lost silently (told it failed, or delivered): result shown=false, copies after network back=1
+FAIL kill after-once: no duplicate after the user's retry: copies=2
+page problems (errors+warnings): 2: source pageerror: SecurityError: Failed to read the 'localStorage' property from 'Window': Access is denied for this document.
+proxy: forwarded arkiv_query=16 units=1600 real429=0; methods {"arkiv_getBlockTiming":11,"arkiv_query":16,"eth_getBalance":4,"eth_fillTransaction":6,"eth_getTransactionCount":6,"eth_getBlockByNumber":10,"eth_maxPriorityFeePerGas":6,"eth_estimateGas":6,"eth_sendRawTransaction":7,"eth_getTransactionReceipt":12,"eth_blockNumber":13,"eth_getTransactionByHash":4,"eth_call":4}
+proxy log tail: 15:02:35 call eth_blockNumber / 15:02:35 call eth_getTransactionReceipt / 15:02:36 call arkiv_query / 15:02:36 call arkiv_getBlockTiming / 15:02:44 call arkiv_getBlockTiming / 15:02:45 call arkiv_query
+FAILS: kill after-hang: no duplicate after the user's retry; kill after-once: no duplicate after the user's retry

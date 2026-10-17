@@ -1,0 +1,17 @@
+browser chromium Chrome/154.0.8037.92; inbox inbox-axr66h; console chip "Live: listening for new tips on a WebSocket. This page does not poll."
+start: 500s injected so far 0 (must be 0 in this run); status A: class="status" role=status text="No tips yet."
+F3a WebSocket refused (503 on upgrade) + live socket cut: 0.0s live-status="Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now." | 0.0s status="No tips yet."; refused upgrades so far=5
+F3b tip: tip 0x039a5b142a5909cb6ed19f641079c55977d334f42f620181f644444e09101f2c tx 0xc0c439efdc5d6900974b3b2f1eff272ad9937b285bc484b9dc7673ef5c2c1694
+F3b console with WebSocket blocked, 45 s after the tip: visible=false; chip "Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now."; status: class="status" role=status text="No tips yet."
+F3b after Refresh: visible=true (data-source=sweep); status: class="status" role=status text="1 tip on Arkiv."; chip "Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now."
+F3c tip: tip 0xb0cdca417c4c464f36e702d8246988676f2f3429b0fd62be8cf71235190ad57a tx 0x0353b451aff33c959eba765551c7b5604637101ba1a95095171d8d5afad3051a
+F3c WebSocket unblocked: chip Live again after 3.666 s; tip sent during the gap appears by itself=true (data-source=sweep); 0.0s live-status="Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now." | 0.0s status="1 tip on Arkiv." | 3.7s live-status="Live: listening for new tips on a WebSocket. This page does not poll."; wsOpened=2
+PASS F3 console names the broken live feed while the WebSocket is blocked (chip says Reconnecting)
+500s injected in total in this run: 0
+F3d WebSocket upgrade hangs (no answer): 0.0s live-status="Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now." | 0.0s status="1 tip on Arkiv."; hung upgrades=1
+F3d tip: tip 0xf44757f3694b2a49be6c9e3424409fdb2fb55b8f0b28f6ed7b8867192b331b30 tx 0x82e1d52bc4be44806bc453fc0da8ab4826c8af17738cb46213c2a520f6741626
+F3d hang ended: chip Live after null s; tip appears by itself=false; 0.0s live-status="Reconnecting: the live connection dropped and is being retried. Tips already on Arkiv are safe; Refresh reads the inbox now." | 0.0s status="1 tip on Arkiv."; wsOpened=2
+page problems (errors+warnings): 7: newsroom console.error: WebSocket connection to 'ws://127.0.0.1:36493/' failed: Error during WebSocket handshake: Unexpected response code: 503
+proxy: forwarded arkiv_query=6 units=600 real429=0; methods {"arkiv_getBlockTiming":5,"arkiv_query":6,"eth_getBalance":4,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":2,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":2,"eth_getTransactionReceipt":4,"eth_blockNumber":3,"eth_getTransactionByHash":2}
+proxy log tail: 14:53:16 send answer 200 {"jsonrpc":"2.0","id":21,"result":"0xcadb7d14ea1315b33a9a046f521645a758420c835f6d0c3fb9e15367b74f5cc9"} / 14:53:25 ws client connected / 14:53:28 dropping 1 socket(s) / 14:55:29 ws client connected / 14:55:33 dropping 1 socket(s) / 14:55:34 ws upgrade left hanging
+no failed checks

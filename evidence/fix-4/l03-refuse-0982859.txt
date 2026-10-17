@@ -1,0 +1,3 @@
+mode refuse: upgrades the server saw in 35 s: 30; WebSocket objects created: 30
+created at (time@arkiv.ts line): 0.2s@? 0.2s@? 0.4s@? 0.7s@? 1.2s@? 1.2s@? 1.3s@? 1.4s@? 1.7s@? 2.3s@? 3.2s@? 3.2s@? 3.4s@? 3.7s@? 4.3s@? 7.2s@? 7.2s@? 7.4s@? 7.7s@? 8.3s@? 15.2s@? 15.2s@? 15.4s@? 15.7s@? 16.3s@? 31.2s@? 31.3s@? 31.4s@? 31.7s@? 32.3s@?
+states: 0.2s reconnecting | 1.2s reconnecting | 3.2s reconnecting | 7.2s reconnecting | 15.2s reconnecting | 31.2s reconnecting

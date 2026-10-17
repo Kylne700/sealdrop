@@ -1,0 +1,7 @@
+upgrade 1 at 0.2 s
+page: WebSocket connection to 'ws://127.0.0.1:39321/' failed: WebSocket opening handshake timed out at 240.2 s
+page: ws1 error at 240.2 s
+page: ws1 close at 240.2 s
+upgrade 2 at 240.2 s
+done at 240.4 s: upgrades=2
+exit 0

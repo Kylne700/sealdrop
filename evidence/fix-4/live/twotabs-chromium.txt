@@ -1,0 +1,16 @@
+setup (mkdue 3 days): inbox inbox-jb28d8 creator 0x7399f823dF66D65B93a1DccCaEEFd48B57DbFFce entity 0xbb13a977ac9c7eeb1b807f69a1256280753e38892e54de65200bb5d49e87d01f
+inbox on chain before: {"found":true,"expiresAt":"829588","currentBlock":"699991","daysLeft":3}
+tab1 sequence: 0.0s status="(none)" | 0.1s live-status="Live updates start once the inbox exists." | 0.6s status="Reading your inbox from Arkiv..." | 6.5s status="The inbox lease is running low, extending it for another 7 days..." | 13.7s status="No tips yet." | 13.7s live-status="Connecting to the live feed..." | 14.9s live-status="Live: listening for new tips on a WebSocket. This page does not poll."
+tab2 sequence: 0.1s status="(none)" | 0.1s live-status="Live updates start once the inbox exists." | 0.6s status="Reading your inbox from Arkiv..." | 6.9s status="The inbox lease is running low, extending it for another 7 days..." | 8.6s live-status="Connecting to the live feed..." | 9.7s status="The inbox lease could not be checked or renewed. The result of this transaction is unknown: it may have gone through, so trying again could do it twic" | 11.3s live-status="Live: listening for new tips on a WebSocket. This page does not poll."
+signed transactions the two tabs sent while opening: 2
+status tab1: class="status" role=status text="No tips yet."
+status tab2: class="status error" role=alert text="The inbox lease could not be checked or renewed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. "Renew now" under Lease tries again."
+inbox on chain after: {"found":true,"expiresAt":"1002397","currentBlock":"700030","daysLeft":7} (days left 3 -> 7)
+tip sent for both tabs: tip 0x38c51471409a0d479aa952b38eaa59e30b08649ee9108a1d32078770709aae47 tx 0x244148417c8a1dba29bbbe95
+tip shows in tab1=true (data-source=live, 0.006 s) and tab2=true (data-source=live, 0.007 s)
+PASS two tabs: both tabs show the live tip
+PASS two tabs: the lease was extended at most once (days left after <= 3 + 7 + 0.5): days left 3 -> 7
+page problems (errors+warnings): 0: 
+proxy: forwarded arkiv_query=9 units=900 real429=0; methods {"arkiv_getBlockTiming":4,"arkiv_query":9,"eth_getBalance":2,"eth_blockNumber":4,"eth_fillTransaction":2,"eth_getTransactionCount":2,"eth_getBlockByNumber":3,"eth_maxPriorityFeePerGas":2,"eth_estimateGas":2,"eth_sendRawTransaction":2,"eth_getTransactionReceipt":3,"eth_getTransactionByHash":1}
+proxy log tail: 15:09:17 send answer 200 {"jsonrpc":"2.0","id":10,"result":"0xa4c69eb2b8ea658c2253f1a77137ed390405e7b9a783b9181536bd0e5c0d4f39"} / 15:09:18 send answer 200 {"jsonrpc":"2.0","id":10,"error":{"code":-32000,"message":"already known"}} / 15:09:18 ws client connected / 15:09:23 ws client connected
+no failed checks

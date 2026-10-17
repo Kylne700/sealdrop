@@ -1,0 +1,9 @@
+
+ RUN  v5.0.5 sealdrop
+
+
+ Test Files  17 passed (17)
+      Tests  89 passed (89)
+   Start at  17:42:02
+   Duration  5.58s (tests 69%, import 27%, transform 3%, worker 1%)
+

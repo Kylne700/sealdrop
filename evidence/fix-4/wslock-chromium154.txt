@@ -1,0 +1,4 @@
+chromium Chrome/154.0.8037.92
+after ws1 (hangs): 1
+after ws2, ws1 still connecting: 1 ws2.readyState 0
+after ws1.close(): 2

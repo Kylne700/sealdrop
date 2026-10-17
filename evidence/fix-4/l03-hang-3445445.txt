@@ -1,0 +1,4 @@
+mode hang: upgrades the server saw in 40 s: 3; WebSocket objects created: 3
+created at (time@arkiv.ts line): 0.2s@? 16.2s@? 33.2s@?
+states: 15.2s reconnecting | 31.2s reconnecting
+exit 0
