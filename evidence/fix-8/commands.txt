@@ -1,0 +1,22 @@
+Fix stage 8 (QA W's Lows and QA R4's two Lows): how the files in this folder were made. <repo> is the sealdrop checkout; /tmp/fq-F8 is a scratch directory.
+The browsers are Playwright 1.64.1 Chromium and WebKit (the build QA W used), headless, DISPLAY unset; the page is the mock build of R3's screens harness
+(window.__MOCK, no network, no key material). Profiles: desktop = 1280x720 mouse, narrow = 390x844 mouse, phone = Playwright's "iPhone 15" (393x852, touch,
+so (pointer: coarse) matches in both engines). Each profile runs light and dark.
+
+1. W-2 to W-6 before (1665acf, fix stage 7) and after (98ac5e2): a clone of each, node_modules shared, then
+     bash <R3 screens harness>/build-mock-r2.sh /tmp/fq-F8/<base|after> <R3 screens harness>/mock-arkiv-r2.ts /tmp/fq-F8/dist-<base|after>
+     node measure.mjs   /tmp/fq-F8/<base|after> /tmp/fq-F8/dist-<base|after> <before|after>      -> facts-<label>.jsonl + screenshots
+     node summarize.mjs facts-<label>.jsonl "<label>"                                             -> summary-<label>.txt
+     node w6-sweep.mjs  /tmp/fq-F8/<base|after> /tmp/fq-F8/dist-<base|after> <label>              -> w6-sweep-<label>.txt
+   98ac5e2 is the last commit that touches CSS, the copy button or the hints; the next commit (15a5597, R4-L1 and R4-L2) changes only the row-note wording
+   and the sweep (src/pages/newsroom.ts, src/codec.ts), so these measures were not repeated on it.
+2. node layout-diff.mjs facts-before.jsonl facts-after.jsonl                                       -> layout-diff.txt
+   node label-widths.mjs /tmp/fq-F8/after /tmp/fq-F8/dist-after                                     -> label-widths-after.txt (room left under the first label; accessible name)
+3. R4-L2 (R4's probe, not edited): node <repo>/evidence/final-qa/R4/data/probes/rownote-gone.mjs <clone> <dist> <out dir>
+     before: clone 1665acf + its mock build   -> rownote-gone-before.txt (G1 FAIL, G2 PASS)
+     after:  clone 15a5597 + its mock build   -> rownote-gone-after.txt  (G1 PASS, G2 PASS)
+   R4-L1: node <repo>/evidence/fix-7/row-note.mjs <clone 15a5597> <its mock build> <out dir>       -> row-note-after.txt (34 PASS, fails=0)
+4. R3's mock pass on the HEAD of this stage (axe, overflow, clipped text, contrast, console errors; 1280 and 390, light and dark):
+     AXE_JS=<axe.min.js> FOCUS_OUT=/tmp/fq-F8/screens-final/focus-out.txt bash <R3 screens harness>/screens-r2.sh /tmp/fq-F8/after /tmp/fq-F8/screens-final   -> screens-summary.txt, screens-focus-out.txt
+5. Live smoke after the last app change: flock /tmp/sealdrop-live.lock npm run smoke   (evidence/smoke.txt and the three screenshots in evidence/screens/).
+6. phone-console.mjs: the phone-profile crops of the link row and a tip card (img/phone-console-after.png). img/onboarding-after-1280-and-390.png: the bottom of shot 03-newsroom-onboarding (desktop light, mobile dark) from the pass in step 4. img/: montages made with ImageMagick from the shots above.

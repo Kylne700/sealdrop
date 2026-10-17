@@ -1,0 +1,49 @@
+== before 1665acf: 60 records (12 engine/profile/theme combinations), 0 errors
+-- W-2: children of every details inside its box
+FAIL  108 details checked in 60 pages (details.queries-panel, details.settings, details.world-panel, details.stores)
+      details.settings: input#rpc sticks out 15px   [36 pages]
+-- W-3: font size of inputs (touch: phone profile; mouse profiles must be unchanged, listed in layout-diff)
+FAIL  phone profile: 32 fields, 8 below 16px
+      chromium/phone/light onboarding input#import: 15px
+      chromium/phone/light console input#inbox-link[inbox-link]: 13px
+      chromium/phone/dark onboarding input#import: 15px
+      chromium/phone/dark console input#inbox-link[inbox-link]: 13px
+      webkit/phone/light onboarding input#import: 15px
+      webkit/phone/light console input#inbox-link[inbox-link]: 13px
+      webkit/phone/dark onboarding input#import: 15px
+      webkit/phone/dark console input#inbox-link[inbox-link]: 13px
+      readonly/file sizes: phone file 15px, readonly 13px | desktop file 15px, readonly 13px | narrow file 15px, readonly 13px
+-- W-4: standalone link heights on touch (phone profile)
+FAIL  Send a made-up tip to the : 4 seen, height 23.3-23.3px, 0 overlap another target
+FAIL  read the source code: 4 seen, height 23.3-23.3px, 0 overlap another target
+FAIL  a.hex-v: 68 seen, height 23.5-43px, 0 overlap another target
+FAIL  faucet: 4 seen, height 22-22px, 0 overlap another target
+FAIL  entity on Data Explorer: 12 seen, height 19.5-19.5px, 0 overlap another target
+      other links (nav, brand, buttons, in-sentence), min height by text: Skip to content=34 | Sealdrop=44 | Open a newsroom=44 | Demo Desk=44 | Source=44 | Start: open a news=48 | the repository=22
+-- W-5: sizes of the link input and the copy button across the label changes (+-1 px)
+FAIL  chromium/desktop/light: input 466.1x48 button 171.9x48 | max change input 130.6px button 130.6px | hex copy 0px | labels: normal="Copy inbox link"@171.9 copied="Copied ✓"@121.9 back="Copy inbox link"@171.9 blocked="Select and copy manually"@252.5 back2="Copy inbox link"@171.9
+FAIL  chromium/desktop/dark: input 466.1x48 button 171.9x48 | max change input 130.6px button 130.6px | hex copy 0px | labels: normal="Copy inbox link"@171.9 copied="Copied ✓"@121.9 back="Copy inbox link"@171.9 blocked="Select and copy manually"@252.5 back2="Copy inbox link"@171.9
+PASS  chromium/narrow/light: input 308x44 button 308x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@308 copied="Copied ✓"@308 back="Copy inbox link"@308 blocked="Select and copy manually"@308 back2="Copy inbox link"@308
+PASS  chromium/narrow/dark: input 308x44 button 308x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@308 copied="Copied ✓"@308 back="Copy inbox link"@308 blocked="Select and copy manually"@308 back2="Copy inbox link"@308
+PASS  chromium/phone/light: input 311x44 button 311x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@311 copied="Copied ✓"@311 back="Copy inbox link"@311 blocked="Select and copy manually"@311 back2="Copy inbox link"@311
+PASS  chromium/phone/dark: input 311x44 button 311x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@311 copied="Copied ✓"@311 back="Copy inbox link"@311 blocked="Select and copy manually"@311 back2="Copy inbox link"@311
+FAIL  webkit/desktop/light: input 465.1x48 button 172.9x48 | max change input 130.2px button 130.2px | hex copy 0px | labels: normal="Copy inbox link"@172.9 copied="Copied ✓"@123.3 back="Copy inbox link"@172.9 blocked="Select and copy manually"@253.5 back2="Copy inbox link"@172.9
+FAIL  webkit/desktop/dark: input 465.1x48 button 172.9x48 | max change input 130.2px button 130.2px | hex copy 0px | labels: normal="Copy inbox link"@172.9 copied="Copied ✓"@123.3 back="Copy inbox link"@172.9 blocked="Select and copy manually"@253.5 back2="Copy inbox link"@172.9
+PASS  webkit/narrow/light: input 308x44 button 308x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@308 copied="Copied ✓"@308 back="Copy inbox link"@308 blocked="Select and copy manually"@308 back2="Copy inbox link"@308
+PASS  webkit/narrow/dark: input 308x44 button 308x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@308 copied="Copied ✓"@308 back="Copy inbox link"@308 blocked="Select and copy manually"@308 back2="Copy inbox link"@308
+PASS  webkit/phone/light: input 311x44 button 311x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@311 copied="Copied ✓"@311 back="Copy inbox link"@311 blocked="Select and copy manually"@311 back2="Copy inbox link"@311
+PASS  webkit/phone/dark: input 311x44 button 311x48 | max change input 0px button 0px | hex copy 0px | labels: normal="Copy inbox link"@311 copied="Copied ✓"@311 back="Copy inbox link"@311 blocked="Select and copy manually"@311 back2="Copy inbox link"@311
+-- W-6: file input "#import" width vs its engine default width
+PASS  chromium/desktop/light: 654px (default 318px), cards [[288,204,344,238],[648,204,344,238],[288,457,704,204]]
+PASS  chromium/desktop/dark: 654px (default 318px), cards [[288,204,344,238],[648,204,344,238],[288,457,704,204]]
+INFO  chromium/narrow/light: 308px (default 318px), cards [[16,306,358,213],[16,535,358,213],[16,764,358,204]]
+INFO  chromium/narrow/dark: 308px (default 318px), cards [[16,306,358,213],[16,535,358,213],[16,764,358,204]]
+INFO  chromium/phone/light: 311px (default 318px), cards [[16,306,361,213],[16,535,361,213],[16,764,361,204]]
+INFO  chromium/phone/dark: 311px (default 318px), cards [[16,306,361,213],[16,535,361,213],[16,764,361,204]]
+PASS  webkit/desktop/light: 654px (default 319px), cards [[288,204,344,238],[648,204,344,238],[288,457,704,205]]
+PASS  webkit/desktop/dark: 654px (default 319px), cards [[288,204,344,238],[648,204,344,238],[288,457,704,205]]
+INFO  webkit/narrow/light: 308px (default 319px), cards [[16,306,358,213],[16,535,358,213],[16,764,358,205]]
+INFO  webkit/narrow/dark: 308px (default 319px), cards [[16,306,358,213],[16,535,358,213],[16,764,358,205]]
+INFO  webkit/phone/light: 311px (default 318.7px), cards [[16,306,361,213],[16,535,361,213],[16,764,361,204]]
+INFO  webkit/phone/dark: 311px (default 318.7px), cards [[16,306,361,213],[16,535,361,213],[16,764,361,204]]
+== before 1665acf: 11 FAIL line(s)

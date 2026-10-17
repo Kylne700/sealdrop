@@ -1,0 +1,44 @@
+
+== desktop + narrow profiles (mouse)
+4416 element boxes compared (60 pages), tolerance 1 px
+horizontal changes (x or width): 
+   input#rpc  x 305 -> 305, width 702 -> 670  [console]  x4
+   input#rpc  x 305 -> 305, width 702 -> 670  [send]  x4
+   input#rpc  x 305 -> 305, width 702 -> 670  [sent]  x4
+   input#rpc  x 33 -> 33, width 356 -> 324  [console]  x4
+   input#rpc  x 33 -> 33, width 356 -> 324  [send]  x4
+   input#rpc  x 33 -> 33, width 356 -> 324  [sent]  x4
+elements in one build only: 
+   after only: span  x8
+vertical changes: 788 boxes on 16 of 60 pages; the innermost boxes whose height changed (the texts that wrapped differently):
+   p.hint  height 67.5 -> 90  [onboarding]  x4
+   li  height 129.6 -> 154.4  [home]  x4
+   p.hint  height 135 -> 157.5  [onboarding]  x4
+   p.hint  height 67.5 -> 112.5  [console]  x4
+mouse profiles: horizontal changes limited to input#rpc; new elements limited to the copy button span
+
+== phone profile (touch)
+2200 element boxes compared (60 pages), tolerance 1 px
+horizontal changes (x or width): 
+   input#rpc  x 33 -> 33, width 359 -> 327  [console]  x4
+   input#rpc  x 33 -> 33, width 359 -> 327  [send]  x4
+   input#rpc  x 33 -> 33, width 359 -> 327  [sent]  x4
+elements in one build only: 
+   after only: span  x4
+vertical changes: 904 boxes on 20 of 60 pages; the innermost boxes whose height changed (the texts that wrapped differently):
+   li  height 129.6 -> 154.4  [home]  x4
+   a[open-desk]  height 23.3 -> 44  [home]  x4
+   a  height 23.3 -> 44  [home]  x4
+   p.hint  height 135 -> 157.5  [onboarding]  x4
+   span.hex-head  height 15 -> 19.5  [console]  x28
+   span.hex-tail  height 15 -> 19.5  [console]  x28
+   a  height 22 -> 44  [console]  x4
+   p.hint  height 67.5 -> 112.5  [console]  x4
+   a  height 19.5 -> 44  [console]  x12
+   span.hex-head  height 15 -> 19.5  [send]  x8
+   span.hex-tail  height 15 -> 19.5  [send]  x8
+   span.hex-head  height 15 -> 19.5  [sent]  x24
+   span.hex-tail  height 15 -> 19.5  [sent]  x24
+   div  height 127.3 -> 128.3  [console]  x2
+
+verdict: PASS (mouse layouts changed only where intended; read the vertical lines above against the changed texts)

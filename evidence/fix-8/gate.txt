@@ -1,0 +1,18 @@
+Fix stage 8: the gate on app HEAD 15a5597 (the evidence commit after it changes no source), run 2026-10-17T22:24Z
+command: node scripts/secret-scan.mjs && npm ci && npm test && npm run typecheck && npm run build && npm run check:bundle      exit code: 0
+
+secret scan: clean (4 secrets checked against tracked and staged files)
+added 83 packages, and audited 84 packages in 2s
+found 0 vulnerabilities
+ Test Files  21 passed (21)
+      Tests  156 passed (156)
+✓ built
+PASS  dist/ has 6 files
+PASS  demo-sender key is in the bundle (public testnet-only demo affordance, by design)
+PASS  FUNDER_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_BOX_SECRET is NOT in the bundle
+PASS  no .env file in dist/
+bundle check: all rules pass
+typecheck (tsc --noEmit): no output, exit 0
+build output: dist/assets/index-JIHvsKvR.js 429.12 kB (same bytes as the build of the previous gate run on this HEAD)

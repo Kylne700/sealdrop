@@ -1,0 +1,35 @@
+PASS  1280px before any action: no failure text is visible in the row  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-1209,"statusAbove":1015,"sideways":0}
+PASS  1280px Keep failed: the status shows the error  :: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  1280px Keep failed: the failure shows inside that row  :: {"row":true,"exists":true,"visible":true,"text":"Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.","attrs":"class,dat
+PASS  1280px the row text names the action and carries the status text  :: Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  1280px the row text is plain text (no role, no aria-live, no live ancestor)  :: class,data-testid
+PASS  1280px the row text is next to the buttons (gap 8px; the status is 1012px above the Keep button)
+PASS  1280px no sideways overflow  :: note 0, page 0
+PASS  1280px the other row shows nothing  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-1593,"statusAbove":1361,"sideways":0}
+PASS  1280px Keep on the other row worked  :: Kept: this tip now expires 30 days from now.
+PASS  1280px ... and the first row still says its Keep failed
+PASS  1280px Keep again: the row text is gone  :: status="Kept: this tip now expires 30 days from now." visibleNotes=0
+PASS  1280px Burn failed: the row says so and shows the hash  :: Burn may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether i
+PASS  1280px the 66-character hash wraps (no sideways overflow)  :: note 0, page 0
+PASS  1280px Keep on that row after a failed Burn: the row text is gone
+PASS  1280px Keep worked: no failure text anywhere  :: Kept: this tip now expires 30 days from now.
+PASS  1280px the hidden notes take no room  :: [0,0]
+PASS  1280px Burn worked: no failure text anywhere  :: Burned.
+PASS  390px before any action: no failure text is visible in the row  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-1813,"statusAbove":1519,"sideways":0}
+PASS  390px Keep failed: the status shows the error  :: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  390px Keep failed: the failure shows inside that row  :: {"row":true,"exists":true,"visible":true,"text":"Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.","attrs":"class,dat
+PASS  390px the row text names the action and carries the status text  :: Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  390px the row text is plain text (no role, no aria-live, no live ancestor)  :: class,data-testid
+PASS  390px the row text is next to the buttons (gap 8px; the status is 1535px above the Keep button)
+PASS  390px no sideways overflow  :: note 0, page 0
+PASS  390px the other row shows nothing  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-2467,"statusAbove":2089,"sideways":0}
+PASS  390px Keep on the other row worked  :: Kept: this tip now expires 30 days from now.
+PASS  390px ... and the first row still says its Keep failed
+PASS  390px Keep again: the row text is gone  :: status="Kept: this tip now expires 30 days from now." visibleNotes=0
+PASS  390px Burn failed: the row says so and shows the hash  :: Burn may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether i
+PASS  390px the 66-character hash wraps (no sideways overflow)  :: note 0, page 0
+PASS  390px Keep on that row after a failed Burn: the row text is gone
+PASS  390px Keep worked: no failure text anywhere  :: Kept: this tip now expires 30 days from now.
+PASS  390px the hidden notes take no room  :: [0,0]
+PASS  390px Burn worked: no failure text anywhere  :: Burned.
+fails=0

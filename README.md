@@ -50,9 +50,9 @@ Or follow **Send a made-up tip to the Demo Desk** on the home page: a flagship i
 of this repository or the build. Open the entity link on the Data Explorer to see what anyone can see: ciphertext and
 three attributes.
 
-Measured on 2026-10-17 by a headless Chromium run against the built site and the live testnet ([evidence/smoke.txt](evidence/smoke.txt)):
-creating the newsroom takes under a second (no network), creating the inbox 14.8 s (two transactions and the first look-up),
-and the decrypted tip appeared in the newsroom tab 2.1 s after Send was clicked. The whole path took 19.3 s.
+Measured on 2026-10-17 (22:18 UTC) by a headless Chromium run against the built site and the live testnet ([evidence/smoke.txt](evidence/smoke.txt)):
+creating the newsroom takes under a second (no network), creating the inbox 15.0 s (two transactions and the first look-up),
+and the decrypted tip appeared in the newsroom tab 3.7 s after Send was clicked. The whole path took 20.7 s.
 
 ## What is on Arkiv, and what is not
 
