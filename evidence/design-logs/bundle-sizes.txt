@@ -8,3 +8,14 @@ ccip.js          2835       2835        0       1328       1327
 native.js         306        306        0        192        192
 
 TOTAL gzip -9: before 130479 B, after 136222 B, growth 5743 B (4.4 %); limit 10,000 B
+
+Accessibility polish (this stage): before = build of 0a986e8 (design stage), after = the polish tree. Same .env.local, same vite, gzip -9 per file.
+
+file       raw_before  raw_after raw_diff  gz_before   gz_after
+index.js       417077     417337      260     129071     129149
+index.css       16888      17250      362       4492       4538
+index.html       2252       2304       52       1140       1160
+ccip.js          2835       2835        0       1327       1326
+native.js         306        306        0        192        192
+
+TOTAL gzip -9: before 136222 B, after 136365 B, growth 143 B (0.1 %); limit 1,000 B

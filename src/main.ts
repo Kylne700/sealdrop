@@ -11,6 +11,16 @@ import { renderSend } from './pages/send'
 const root = document.getElementById('app')!
 document.getElementById('source')?.setAttribute('href', REPO_URL)
 
+/** Focus for a non-interactive element: tabindex=-1 only while it holds focus, so it never becomes a Tab stop or a click target. */
+function focusFromScript(el: HTMLElement) {
+  el.tabIndex = -1
+  el.addEventListener('blur', () => el.removeAttribute('tabindex'), { once: true })
+  el.focus()
+}
+// The skip link must not follow its href: #app would change the hash and render the "no such page" notice.
+document.querySelector('.skip')?.addEventListener('click', (e) => { e.preventDefault(); focusFromScript(root) })
+
+let loaded = false // the first render is the page load, where the browser decides where focus is
 function route() {
   runCleanups()
   root.replaceChildren()
@@ -27,6 +37,12 @@ function route() {
     const notice = hash.startsWith('#/send') ? 'That inbox link is not valid. A Sealdrop link looks like https://.../#/send/0x<40 hex characters>/<inbox-id>. Ask the newsroom for the link again, or paste it below.'
       : /^#?\/?$/.test(hash) ? undefined : 'There is no such page. Here is the start page.'
     renderHome(root, notice)
+  }
+  // After a route change, start at the top of the new page: focus its h1 (#/demo only redirects and renders none, so it keeps "first load" for the page it lands on).
+  const heading = root.querySelector('h1')
+  if (heading) {
+    if (loaded) focusFromScript(heading)
+    loaded = true
   }
 }
 window.addEventListener('hashchange', route)

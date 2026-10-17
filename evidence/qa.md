@@ -114,7 +114,7 @@ for `sealdrop`, `vitest` 5.0.5, `puppeteer-core` 25.14.0 and `@puppeteer/browser
   the WebSocket (`data-source=live`), wallet mode with a second live tip, a look-alike link, the Demo Desk found and read with
   `ops desk-read`, and 0 console or page errors in the three tabs. Judge path total 20.4 s. The same checks served under
   `/sealdrop/` (a `BASE_PATH=/sealdrop/` build, how GitHub Pages serves a project page): 13 of 13, 19.2 s
-  ([smoke-subpath.txt](smoke-subpath.txt)). Both runs: `src/`, `scripts/` and `test/` as in `c797c65`. The design stage re-ran both on its final code and overwrote smoke.txt and smoke-subpath.txt with those runs (2026-10-16, 23:53 and 23:54 UTC: 13 of 13 each, judge path 20.1 s and 19.5 s); the figures above are the QA runs.
+  ([smoke-subpath.txt](smoke-subpath.txt)). Both runs: `src/`, `scripts/` and `test/` as in `c797c65`. The design stage re-ran both on its final code and overwrote smoke.txt and smoke-subpath.txt with those runs (2026-10-16, 23:53 and 23:54 UTC: 13 of 13 each, judge path 20.1 s and 19.5 s); the figures above are the QA runs. The accessibility polish stage (2026-10-17) re-ran both after adding the skip-link, focus and title checks: 23 of 23 each, judge path 20.2 s (the subpath file says 20.9 s: it was recorded before the timers left the new checks out and includes about 1 s of them).
 * Firefox 153.4.0, the judge path against `dist/` with the production CSP and the public RPC ([qa-logs/ff-judge.out](qa-logs/ff-judge.out)):
   home has one primary button; throwaway newsroom funded and inbox created in 15.9 s; tip sealed and sent in 5.6 s; the
   newsroom tab showed it decrypted, with no refresh, through the WebSocket (`data-source=live`); Demo Desk found and a tip

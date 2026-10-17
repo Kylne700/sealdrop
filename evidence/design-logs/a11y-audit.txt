@@ -1,23 +1,23 @@
-72 screenshots, 3.38 MB in /tmp/sd/s7
+72 screenshots, 3.38 MB in scratch/shots-a11y
 console/page problems: 0
-01-home: lang=en title="Sealdrop: an anonymous tip line with no server" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=10/10 noRing=0
-02-home-notice: lang=en title="Sealdrop: an anonymous tip line with no server" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=10/10 noRing=0
-03-newsroom-onboarding: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=6/7 noRing=0
-04-newsroom-setup: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=3 unlabeled=0 unnamed=0 tabStops=15/17 noRing=0
-05-newsroom-empty: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=2 unlabeled=0 unnamed=0 tabStops=21/23 noRing=0
-06-newsroom-tips: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=2 unlabeled=0 unnamed=0 tabStops=39/41 noRing=0
-07-newsroom-reconnecting: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=2 unlabeled=0 unnamed=0 tabStops=29/31 noRing=0
-08-newsroom-limited: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=12/14 noRing=0
-09-send-loading: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=0 unlabeled=0 unnamed=0 tabStops=4/4 noRing=0
-10-send-compose: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=17/23 noRing=0
-11-send-typed: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=17/23 noRing=0
-12-send-sending: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=3/23 noRing=0
-13-send-sent: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=9/25 noRing=0
-14-send-warnings: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=17/23 noRing=0
-15-send-notfound: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=0 unlabeled=0 unnamed=0 tabStops=5/5 noRing=0
-16-send-limited: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=5/7 noRing=0
-17-send-world: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=6/27 noRing=0
-18-send-toolong: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=17/23 noRing=0
-contrast scan light: 764 text elements in 18 states, lowest 6.12 (02-home-notice: p.status "That inbox link is not v"), below AA: 0
-contrast scan dark: 764 text elements in 18 states, lowest 6.70 (10-send-compose: span.hint "Everyone in demo mode sh"), below AA: 0
+01-home: lang=en title="Sealdrop: an anonymous tip line with no server" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=11/11 noRing=0
+02-home-notice: lang=en title="Sealdrop: an anonymous tip line with no server" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=11/11 noRing=0
+03-newsroom-onboarding: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=7/8 noRing=0
+04-newsroom-setup: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=3 unlabeled=0 unnamed=0 tabStops=16/18 noRing=0
+05-newsroom-empty: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=2 unlabeled=0 unnamed=0 tabStops=22/24 noRing=0
+06-newsroom-tips: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=2 unlabeled=0 unnamed=0 tabStops=40/42 noRing=0
+07-newsroom-reconnecting: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=2 unlabeled=0 unnamed=0 tabStops=30/32 noRing=0
+08-newsroom-limited: lang=en title="Newsroom console: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=13/15 noRing=0
+09-send-loading: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=0 unlabeled=0 unnamed=0 tabStops=5/5 noRing=0
+10-send-compose: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=18/24 noRing=0
+11-send-typed: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=18/24 noRing=0
+12-send-sending: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=3/24 noRing=0
+13-send-sent: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=9/26 noRing=0
+14-send-warnings: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=18/24 noRing=0
+15-send-notfound: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=0 unlabeled=0 unnamed=0 tabStops=6/6 noRing=0
+16-send-limited: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=1 unlabeled=0 unnamed=0 tabStops=6/8 noRing=0
+17-send-world: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=6/28 noRing=0
+18-send-toolong: lang=en title="Send a tip: Sealdrop" h1=1 main=1 fields=8 unlabeled=0 unnamed=0 tabStops=18/24 noRing=0
+contrast scan light: 782 text elements in 18 states, lowest 6.12 (02-home-notice: p.status "That inbox link is not v"), below AA: 0
+contrast scan dark: 782 text elements in 18 states, lowest 6.70 (10-send-compose: span.hint "Everyone in demo mode sh"), below AA: 0
 exit 0

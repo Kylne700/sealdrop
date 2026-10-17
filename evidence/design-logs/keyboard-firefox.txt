@@ -1,17 +1,29 @@
-PASS K1 home: "Start: open a newsroom" reached with Tab: 5 Tab(s): a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:Start: open a newsroom
+PASS A1 first load: the page does not grab focus (it stays where the browser puts it) and the title names the page: body, title="Sealdrop: an anonymous tip line with no server"
+PASS K1 home: "Start: open a newsroom" reached with Tab: 6 Tab(s): a:Skip to content > a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:Start: open a newsroom
 PASS K1 home: every stop on the way shows a focus ring and is on screen
+PASS A2 Tab stop 1 of the walk is the skip link ("Skip to content"), on screen, with a ring: a:Skip to content
 PASS K2 Enter on Start opens the newsroom page
-INFO focus right after the page change: body (the old link is gone)
+INFO focus right after the page change: h1:Open a newsroom
+PASS A4 Enter on a link: focus lands on the new page's h1 and the title names the page: h1:Open a newsroom, title="Newsroom console: Sealdrop"
+PASS A4 the h1 shows a ring after a keyboard move, exactly when the browser says :focus-visible: :focus-visible=true, ring=true
 PASS K2 newsroom page: "Create a throwaway newsroom" reached with Tab: 1 Tab(s): button:Create a throwaway newsroom
 PASS K2 the first Tab after the page change lands inside the page content, not the header: button:Create a throwaway newsroom
 PASS K2 every stop shows a ring
-PASS K3 "Create the inbox" reached with Tab: 8 Tab(s): a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy newsroom address > a:faucet > button:Export key file > button:Forget this newsroom > input:Name > textarea:Description > button:Create the inbox
+PASS K3 "Create the inbox" reached with Tab: 8 Tab(s): a:0x061B590236Ede15Ffb26f322e2a92bDbF6 > button:Copy newsroom address > a:faucet > button:Export key file > button:Forget this newsroom > input:Name > textarea:Description > button:Create the inbox
 PASS K3 every stop shows a ring
-PASS K3 the inbox link is shown: http://127.0.0.1:43603/#/send/0x23C7.../inbox-kws4ff
+PASS K3 the inbox link is shown: http://127.0.0.1:35683/#/send/0x061B.../inbox-5qfg97
 PASS K3 "Copy inbox link" reachable by keyboard: 2 Tab(s)
-PASS K4 send page: the message box is reached with Tab: 11 Tab(s): a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy creator address > a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy owner address > a:0x113613cf933b2c68cb5d4e3b176e7de07e > button:Copy inbox entity key > textarea:Your message
+PASS A7 the Settings field (RPC URL) is reachable by keyboard: input:Custom RPC URL
+PASS A7 a tip arrives over the WebSocket while typing: the tip appears and focus, text and caret stay in the field: focus is on rpc
+PASS A7 the connection chip flips to Reconnecting and back to Live without moving focus: focus is on rpc
+PASS A7 a lease renewal re-renders the inbox panel without moving focus: focus is on rpc
+PASS A7 the footer meter ticks without moving focus: focus is on rpc
+PASS A7 typing carries on where it was
+PASS A1 first load of the send page: focus stays with the browser and the title says "Send a tip": body, title="Send a tip: Sealdrop"
+PASS K4 send page: the message box is reached with Tab: 12 Tab(s): a:Skip to content > a:Sealdrop > a:Open a newsroom > a:Demo Desk > a:Source > a:0x061B590236Ede15Ffb26f322e2a92bDbF6 > button:Copy creator address > a:0x061B590236Ede15Ffb26f322e2a92bDbF6 > button:Copy owner address > a:0x113613cf933b2c68cb5d4e3b176e7de07e > button:Copy inbox entity key > textarea:Your message
 PASS K4 every stop shows a ring
 PASS K4 typing shows the byte count
+PASS A8 focus and text stay in the message box while the page updates
 PASS K4 the lifetime group is the next stop (default 14 days): input:14 days
 PASS K4 ArrowRight moves the lifetime to 30 days: checked=30
 PASS K4 ArrowLeft x2 moves it to 7 days: checked=7
@@ -24,10 +36,25 @@ PASS K5 the next Tab is "Send another": button:Send another
 PASS K5 it shows a ring
 PASS K8 the receipt links and copy buttons show a ring and "What Arkiv stores" is reachable: a:0x272865842a4bdb32ff6099437158c19764 > button:Copy tip entity key > a:0xa1fefbf611d5e916c382ec238696fdb05a > button:Copy transaction hash > summary:What Arkiv stores
 PASS K8 Enter opens "What Arkiv stores"
-PASS K8 the stops inside it, up to "What can anyone see", show a ring: a:0xa05d5Bd99440d95526120062364518ddfe > button:Copy creator address > a:0x23C772D1a69BB1F6D6e42553E160b61700 > button:Copy owner address > summary:What can anyone see on Arkiv for thi
+PASS K8 the stops inside it, up to "What can anyone see", show a ring: a:0xa05d5Bd99440d95526120062364518ddfe > button:Copy creator address > a:0x061B590236Ede15Ffb26f322e2a92bDbF6 > button:Copy owner address > summary:What can anyone see on Arkiv for thi
 PASS K8 Enter opens "What can anyone see"
 PASS K8 the stops inside the open panel, up to "Queries this page runs", show a ring: a:Everything this owner holds, in the  > summary:Queries this page runs
 PASS K5 "Send another" returns to the message box with focus in it: textarea:Your message
+PASS A2 the skip link is hidden until focused (above the viewport, but not display:none or visibility:hidden): bottom=-26px
+PASS A2 focused, the skip link is fully on screen with a ring
+PASS A3 Enter on the skip link puts focus on <main>
+PASS A3 ... without changing the location: same URL, no hashchange, no new history entry: hashchange events=0
+PASS A3 ... and without rendering the page again (same h1 node)
+PASS A3 the next Tab lands in the page content, not back in the header, with a ring: a:Start: open a newsroom
+PASS A3 <main> keeps no tabindex once focus has left it (never a Tab stop or click target)
+PASS A3 a script click on the skip link does the same: focus on <main>, location untouched
+PASS A5 mouse click on a link: focus lands on the new h1 and the title names the page: h1:Newsroom console, title="Newsroom console: Sealdrop"
+PASS A5 after a mouse click the h1 shows no ring (the browser says :focus-visible is off): :focus-visible=false, ring=false
+PASS A5 Back: focus lands on the home h1 and the title is the home title: h1:An anonymous tip line with no server to seiz, title="Sealdrop: an anonymous tip line with no server"
+PASS A5 Forward: focus lands on the newsroom h1 again: h1:Newsroom console, title="Newsroom console: Sealdrop"
+PASS A5 the ring and :focus-visible agree after Back/Forward too: :focus-visible=false, ring=false
+PASS A6 #/demo (a redirect) from inside the app: focus lands on the send page's h1, the title says "Send a tip": h1:Send a tip, title="Send a tip: Sealdrop"
+PASS A6 loading #/demo directly is still a first load: the redirect does not grab focus: hash=#/send/0x6a3..., body, title="Send a tip: Sealdrop"
 PASS K6 no console errors or page errors (production CSP active)
 
 ALL PASS

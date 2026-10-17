@@ -39,9 +39,12 @@ body { margin: 0; background: var(--paper); color: var(--ink); -webkit-text-size
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 a:hover { color: var(--accent-hover); text-decoration-thickness: 2px; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-[tabindex='-1']:focus-visible { outline: none; } /* a heading that gets focus from script (not in the Tab order) */
+[tabindex='-1']:not(h1):focus-visible { outline: none; } /* main and the success heading take focus from script and are not Tab stops; the page h1 gets the ring above, but only when the browser says :focus-visible */
 ::selection { background: var(--accent-soft); color: var(--ink); }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; z-index: 1; top: var(--s-2); left: var(--s-3); padding: var(--s-2) var(--s-3); border-radius: var(--r-2); background: var(--accent); color: var(--accent-fg); font: 600 var(--fs-1) / 1.2 var(--font-sans); text-decoration: none; transform: translateY(-200%); }
+.skip:focus { transform: none; } /* hidden above the page until it has focus; no transition, so the first Tab shows it at once */
+.skip:hover { background: var(--accent-hover); color: var(--accent-fg); }
 
 /* ---- layout ---------------------------------------------------------------------------------------------- */
 .top, main, footer { max-width: var(--w); margin: 0 auto; padding-inline: var(--s-3); }

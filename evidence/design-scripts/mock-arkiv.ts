@@ -68,6 +68,8 @@ export const tipsSince = async () => ({ tips: [] as TipView[], query: 'type = "t
 export const getTip = async (_r: Reader, key: Hex) => allTips().find((x) => x.v.key === key)?.v ?? null
 
 export function watchHandovers(_r: Reader, _n: Address, h: { onHandover: (k: Hex) => void; onState?: (s: 'live' | 'reconnecting') => void }) {
+  // keyboard.mjs fires live events on demand, as if they had just arrived over the WebSocket while the user types: __push.tip(i) delivers entry i of __MOCK.tips, __push.state(s) flips the connection chip.
+  ;(window as unknown as { __push?: unknown }).__push = { tip: (i: number) => h.onHandover(fake(100 + i)), state: (s: 'live' | 'reconnecting') => h.onState?.(s) }
   const timer = setTimeout(() => {
     const live = cfg().live
     if (live !== 'connecting') h.onState?.(live)

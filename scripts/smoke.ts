@@ -44,8 +44,17 @@ const watch = (page: Page, name: string) => {
 }
 const newPage = async (name: string) => { const page = await (await browser.createBrowserContext()).newPage(); watch(page, name); return page }
 const textOf = (page: Page, sel: string) => page.$eval(sel, (el) => el.textContent ?? '')
+const pause = (ms = 400) => new Promise((r) => setTimeout(r, ms))
+/** Where keyboard focus is, for the accessibility checks (none of them sends a query). */
+const focusOf = (page: Page) => page.evaluate(() => {
+  const el = document.activeElement as HTMLElement
+  const h1s = document.querySelectorAll('h1')
+  return { body: el === document.body, main: el === document.getElementById('app'), onH1: h1s.length === 1 && el === h1s[0], tag: el.tagName.toLowerCase(), id: el.id, text: (el.textContent ?? '').trim().slice(0, 40), hash: location.hash, title: document.title }
+})
+const where = (f: Awaited<ReturnType<typeof focusOf>>) => `focus on ${f.body ? 'body' : f.main ? 'main' : `${f.tag}${f.id ? '#' + f.id : ''}`}, hash ${f.hash}, title "${f.title}"`
 const sendResultVisible = (page: Page) => page.waitForFunction(() => { const r = document.querySelector('[data-testid=send-result]') as HTMLElement | null; return Boolean(r && !r.hidden) })
 
+let asideMs = 0 // time the accessibility checks take; taken off the judge-path timings so those still measure only the judge's path
 let step = 'start'
 try {
   log(`Sealdrop smoke run ${new Date().toISOString()}  Chromium ${await browser.version()}  served from ${REMOTE ? base : 'dist/'}`)
@@ -73,9 +82,29 @@ try {
   const t0 = Date.now()
   const A = await newPage('newsroom')
   await A.goto(base + '#/newsroom')
+  const tA = Date.now()
+  // accessibility, on the page that has no identity yet (these pages query nothing): a first load leaves focus alone, the skip link is Tab stop 1 and lands in <main>
+  // without touching the hash, and every route change puts focus on the new h1 with a title that names the page.
+  let fo = await focusOf(A)
+  check(fo.body && /^Newsroom console/.test(fo.title), 'first load of #/newsroom: the page does not grab focus and the title names the page', where(fo))
+  await A.keyboard.press('Tab')
+  const skip = await A.evaluate(() => { const el = document.activeElement as HTMLElement; return { name: el.textContent, top: el.getBoundingClientRect().top } })
+  check(skip.name === 'Skip to content' && skip.top >= 0, 'the skip link is Tab stop 1 and is on screen once it has focus', `${skip.name}, top ${Math.round(skip.top)} px`)
+  await A.keyboard.press('Enter')
+  fo = await focusOf(A)
+  check(fo.main && fo.hash === '#/newsroom', 'Enter on the skip link puts focus on <main> and leaves the location alone', where(fo))
+  await A.evaluate(() => { location.hash = '#/' })
+  await A.waitForFunction(() => location.hash === '#/'); await pause()
+  fo = await focusOf(A)
+  check(fo.onH1 && /^An anonymous tip line/.test(fo.text) && /^Sealdrop: an anonymous tip line/.test(fo.title), 'route change to the start page: focus is on its h1 and the title names the page', where(fo))
+  await A.evaluate(() => history.back())
+  await A.waitForFunction(() => location.hash === '#/newsroom'); await pause()
+  fo = await focusOf(A)
+  check(fo.onH1 && fo.text === 'Open a newsroom' && /^Newsroom console/.test(fo.title), 'Back: focus is on the newsroom h1 and the title names the page', where(fo))
+  asideMs += Date.now() - tA
   await A.click('[data-testid=create-newsroom]')
   await A.waitForSelector('[data-testid=create-inbox]')
-  log(`  throwaway newsroom created in the browser after ${secs(Date.now() - t0)} (no network yet)`)
+  log(`  throwaway newsroom created in the browser after ${secs(Date.now() - t0 - asideMs)} (no network yet)`)
 
   step = 'fund the throwaway key and create the inbox'
   const tCreate = Date.now()
@@ -95,6 +124,14 @@ try {
   await B.goto(inboxLink)
   await B.waitForSelector('[data-testid=inbox]')
   check((await B.$eval('[data-testid=inbox]', (el) => el.textContent ?? '')).includes(address), 'the send page shows the newsroom as $creator (found by creator, not by a writable field)')
+  const tB = Date.now()
+  fo = await focusOf(B)
+  check(fo.body && /^Send a tip/.test(fo.title), 'first load of the send page: the page does not grab focus and the title says "Send a tip"', where(fo))
+  // a tip that arrives while the newsroom types in Settings must leave focus and text where they are (checked as soon as the tip shows below)
+  const typedRpc = 'https://rpc.example.test/synthetic-key'
+  await A.click('details.settings > summary')
+  await A.type('#rpc', typedRpc)
+  asideMs += Date.now() - tB
   const text1 = `SYNTHETIC TEST TIP (smoke run ${new Date().toISOString()}): a made-up message sent by the headless smoke test.`
   await B.type('[data-testid=message]', text1)
   const tSend = Date.now()
@@ -104,15 +141,23 @@ try {
   await A.waitForSelector('[data-testid=tip]')
   const tLive = Date.now()
   const row = await A.$eval('[data-testid=tip]', (li) => ({ source: li.getAttribute('data-source'), text: li.querySelector('[data-testid=tip-text]')?.textContent ?? '' }))
+  const typing = () => A.evaluate(() => { const el = document.activeElement as HTMLInputElement; return { id: el.id, value: el.value } })
+  let kept = await typing()
+  check(kept.id === 'rpc' && kept.value === typedRpc, 'a live tip arrives while the newsroom types in Settings: focus and text stay in the field', `focus on ${kept.id || 'something else'}`)
   await sendResultVisible(B)
   const tSent = Date.now()
+  await pause(200)
+  fo = await focusOf(B)
+  check(fo.tag === 'h2' && /^Sealed and sent/.test(fo.text), 'after sending, focus is on the success heading (not lost, not moved to the page h1)', where(fo))
   check(row.text === text1, 'the tip decrypts in the newsroom tab to the exact text that was sent')
   check(row.source === 'live', 'it arrived through the WebSocket subscription (data-source=live), not through a sweep')
   log(`  tip visible in the newsroom ${secs(tLive - tSend)} after Send was clicked; the sender's own page confirmed after ${secs(tSent - tSend)}`)
-  log(`  JUDGE PATH TOTAL: ${secs(tLive - t0)} from opening the newsroom page to the decrypted live tip`)
+  log(`  JUDGE PATH TOTAL: ${secs(tLive - t0 - asideMs)} from opening the newsroom page to the decrypted live tip`)
   const entity = await B.$eval('[data-testid=send-result] dd a', (a) => a.getAttribute('href') ?? '')
   const txs = await B.$$eval('[data-testid=send-result] dd a', (as) => as.map((a) => a.getAttribute('href') ?? ''))
   log(`  tip entity ${entity}\n  tx ${txs[1] ?? '?'}`)
+  await A.click('details.settings > summary') // Settings closed again, so the screenshot shows the console the way a user first sees it
+  await pause() // the chevron turns for 200 ms
   await A.screenshot({ path: join(SHOTS, 'newsroom-live-tip.png'), fullPage: true })
   await B.screenshot({ path: join(SHOTS, 'source-sent.png'), fullPage: true })
 
@@ -129,12 +174,16 @@ try {
   await W.click('[data-testid=mode-wallet]')
   const text2 = `SYNTHETIC TEST TIP (smoke run, wallet mode ${new Date().toISOString()}): sent through an injected wallet.`
   await W.type('[data-testid=message]', text2)
+  await A.click('details.settings > summary') // open Settings again (the typed text is still in the field) and put the cursor back in it before the second tip arrives
+  await A.focus('#rpc')
   await W.click('[data-testid=send]')
   await sendResultVisible(W)
   check((await textOf(W, '[data-testid=send-result]')).includes(walletAccount.address), 'wallet mode: the result shows the wallet address as $creator')
   await A.waitForFunction((t) => [...document.querySelectorAll('[data-testid=tip-text]')].some((p) => p.textContent === t), {}, text2)
   const walletRow = await A.$$eval('[data-testid=tip]', (lis, t) => lis.filter((li) => li.querySelector('[data-testid=tip-text]')?.textContent === t).map((li) => ({ source: li.getAttribute('data-source'), who: li.textContent ?? '' }))[0], text2)
   check(walletRow?.source === 'live', 'wallet mode: the second tip also arrived live')
+  kept = await typing()
+  check(kept.id === 'rpc' && kept.value === typedRpc, 'the second live tip leaves focus and text in the Settings field as well', `focus on ${kept.id || 'something else'}`)
 
   // ---- 4. forged link ----------------------------------------------------------------------------------------------
   step = 'a link with the right inbox id but another creator finds nothing'
@@ -149,6 +198,8 @@ try {
   await D.goto(base + '#/demo')
   await D.waitForSelector('[data-testid=inbox]')
   check((await textOf(D, '[data-testid=inbox]')).includes('Demo Desk'), 'the Demo Desk inbox is found on Arkiv by its creator and inbox id')
+  fo = await focusOf(D)
+  check(fo.body && fo.hash.startsWith('#/send/') && /^Send a tip/.test(fo.title), 'first load of #/demo: the redirect does not grab focus, the title says "Send a tip"', where(fo))
   const text3 = `SYNTHETIC TEST TIP (smoke run, Demo Desk ${new Date().toISOString()}): a made-up message for the demo inbox.`
   await D.type('[data-testid=message]', text3)
   await D.click('[data-testid=send]')
