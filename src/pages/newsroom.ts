@@ -91,6 +91,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   const box = boxKeyPairFromSecret(fromB64(identity.boxSecretKey))
   const me = identity.address.toLowerCase()
   const status = statusLine()
+  const tipNote = h('p', { class: 'sr-only', 'aria-live': 'polite', 'data-testid': 'tip-note' }) // tells screen readers about a live tip while an error stays in the status
   const queries = queriesPanel()
   const tips = new Map<string, { tip: TipView; source: 'live' | 'sweep' }>()
   let timing: Timing | undefined
@@ -325,6 +326,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
           if (!tip) return
           addTips([tip], 'live')
           if (!status.el.classList.contains('error') || status.el.textContent === stale) status.info('A new tip just arrived.')
+          else tipNote.textContent = `A new tip just arrived. ${tips.size} tip${tips.size === 1 ? '' : 's'} listed.` // the count makes each note new, so it is read again
         } catch (e) {
           // Never dropped silently (L-01): the catch-up reads it once the RPC answers again.
           catchUpLater(e)
@@ -508,6 +510,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   root.append(
     h('h1', null, 'Newsroom console'),
     status.el,
+    tipNote,
     h('section', { class: 'me' },
       h('dl', null,
         h('dt', null, 'Address'), h('dd', null, hex(identity.address, { href: addressUrl(identity.address), label: 'newsroom address' }), h('span', { class: 'hint' }, identity.kind === 'wallet' ? ' (your wallet)' : ' (throwaway, generated in this browser)')),

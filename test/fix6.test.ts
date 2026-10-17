@@ -121,3 +121,13 @@ describe('fix stage 6: page code (source checks; the browser runs and screens ar
     expect(css).toMatch(/\.status \{[^}]*overflow-wrap: anywhere;/)
   })
 })
+
+describe('lead after fix stage 6: a live tip is still announced while an error stays in the status', () => {
+  it('the tip note is a polite live region next to the status, hidden on screen, and gets a new text per tip', () => {
+    const page = read('../src/pages/newsroom.ts')
+    expect(page).toMatch(/const tipNote = h\('p', \{ class: 'sr-only', 'aria-live': 'polite', 'data-testid': 'tip-note' \}\)/)
+    expect(page).toMatch(/status\.info\('A new tip just arrived\.'\)\n\s*else tipNote\.textContent = `A new tip just arrived\. \$\{tips\.size\} tip/)
+    expect(page).toMatch(/status\.el,\n\s*tipNote,/)
+    expect(read('../src/style.css')).toMatch(/\.sr-only \{[^}]*position: absolute;[^}]*clip-path: inset\(50%\);/)
+  })
+})

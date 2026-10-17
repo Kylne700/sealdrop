@@ -282,6 +282,7 @@ Words and screens changed by fix stage 6 (findings R2-D1, S1, S2, S4, S7, S8 and
 | No-JavaScript notice (R2-S9b) | after the footer | between the page and the footer; same words |
 | Buttons whose label wraps (R2-S7; 03, 70, 71) | the lines touched the top and bottom edge | the label still wraps (3 lines for "Create a throwaway newsroom" at 1280 px), now with 0.5 rem padding above and below; single-line buttons keep their 44 px height |
 | A hash or address in a status line at 390 px (R2-S2; 20, 22, 34, 75, 78) | ran past the right edge (5 to 228 px) | wraps |
+| Live tip while an error shows in the console status (lead, after R2-S4) | not announced to screen readers (fix stage 6 kept the error) | the error stays; a hidden polite note says "A new tip just arrived. N tip(s) listed." (screen readers only) |
 
 ## Results
 
