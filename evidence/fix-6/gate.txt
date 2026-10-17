@@ -1,5 +1,5 @@
-gate start 18:57:19 UTC
-69a9518
+gate start 19:06:06 UTC
+faf30c9
 secret scan: clean (4 secrets checked against tracked and staged files)
 
 added 83 packages, and audited 84 packages in 2s
@@ -22,8 +22,8 @@ npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to revi
 
  Test Files  19 passed (19)
       Tests  116 passed (116)
-   Start at  21:57:21
-   Duration  5.75s (tests 56%, import 33%, transform 10%, worker 1%)
+   Start at  22:06:08
+   Duration  5.62s (tests 63%, import 28%, transform 9%, worker 1%)
 
 
 > sealdrop@0.1.0 typecheck
@@ -45,7 +45,7 @@ dist/assets/native-BKj27wfc.js    0.30 kB │ gzip:   0.17 kB
 dist/assets/ccip-DC0daY3-.js      2.83 kB │ gzip:   1.30 kB
 dist/assets/index-DgjEH53h.js   428.06 kB │ gzip: 134.77 kB
 
-✓ built in 172ms
+✓ built in 140ms
 
 > sealdrop@0.1.0 check:bundle
 > node scripts/check-bundle.mjs
@@ -58,8 +58,8 @@ PASS  DEMO_DESK_BOX_SECRET is NOT in the bundle
 PASS  no .env file in dist/
 bundle check: all rules pass
 gate exit 0
-gate end 18:57:28 UTC
+gate end 19:06:15 UTC
 
-after staging live/, anchors.txt and this file:
+after staging the new screens, harness.txt and this file:
 secret scan: clean (4 secrets checked against tracked and staged files)
 secret scan exit 0
