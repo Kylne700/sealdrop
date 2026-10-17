@@ -19,3 +19,14 @@ ccip.js          2835       2835        0       1327       1326
 native.js         306        306        0        192        192
 
 TOTAL gzip -9: before 136222 B, after 136365 B, growth 143 B (0.1 %); limit 1,000 B
+
+Focus after re-renders (this stage): before = build of 3b99951 (accessibility polish), after = the tree with keepFocus. Same .env.local, same vite, gzip -9 per file.
+
+file       raw_before  raw_after raw_diff  gz_before   gz_after
+index.js       417337     418344     1007     129149     129579
+index.css       17250      17250        0       4538       4538
+index.html       2304       2304        0       1160       1160
+ccip.js          2835       2835        0       1326       1328
+native.js         306        306        0        192        192
+
+TOTAL gzip -9: before 136365 B, after 136797 B, growth 432 B (0.3 %)

@@ -13,7 +13,7 @@ import {
   downloadIdentity, forgetIdentity, getLastSeen, loadIdentity, newLocalIdentity, newWalletIdentity, parseIdentity,
   saveIdentity, setLastSeen, type Identity,
 } from '../store'
-import { bar, chip, copyButton, h, hex, kib, link, mark, onLeave, queriesPanel, runCleanups, statusLine } from '../ui/dom'
+import { bar, chip, copyButton, h, hex, keepFocus, kib, link, mark, onLeave, queriesPanel, runCleanups, statusLine } from '../ui/dom'
 import { rpcSettings } from '../ui/settings'
 
 /** About 16 writes. Below this a throwaway newsroom is topped up from the shared demo sender. */
@@ -23,7 +23,7 @@ const wallet = () => (window as unknown as { ethereum?: EIP1193Provider }).ether
 export function renderNewsroom(root: HTMLElement) {
   document.title = 'Newsroom console: Sealdrop'
   const identity = loadIdentity()
-  const again = () => { runCleanups(); root.replaceChildren(); renderNewsroom(root) }
+  const again = () => { const restore = keepFocus(root, () => root.querySelector('h1')); runCleanups(); root.replaceChildren(); renderNewsroom(root); restore() }
   if (identity) void renderConsole(root, identity, again)
   else renderOnboarding(root, again)
 }
@@ -104,6 +104,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   const refreshBtn = h('button', { type: 'button', class: 'secondary', 'data-testid': 'refresh' }, 'Refresh (full sweep)')
   const tipList = h('ul', { class: 'tips', 'data-testid': 'tips' })
   const emptyEl = h('div', { class: 'empty', 'data-testid': 'no-tips' }, mark(), h('strong', null, 'Waiting for tips.'), h('p', null, 'Share your inbox link. To try it yourself, open it in another tab and send one.'))
+  const tipsHeading = h('h2', null, 'Tips')
+  const tipsSection = h('section', { class: 'tips-section' }, h('div', { class: 'tips-head' }, tipsHeading, refreshBtn), liveStatus, emptyEl, tipList)
 
   // ---- signing --------------------------------------------------------------------------------------------
   let local: Signer | undefined
@@ -181,8 +183,10 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
 
   function renderTips() {
     const rows = [...tips.values()].sort((a, b) => Number(b.tip.createdAt - a.tip.createdAt))
+    const restore = keepFocus(tipsSection, () => tipsHeading) // a rebuilt row would drop the focus on its button or link
     tipList.replaceChildren(...rows.map((r) => tipRow(r.tip, r.source)))
     emptyEl.hidden = rows.length > 0
+    restore()
   }
 
   function addTips(list: TipView[], source: 'live' | 'sweep') {
@@ -217,6 +221,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
 
   // ---- reading the inbox --------------------------------------------------------------------------------
   async function fullSweep(live: InboxView) {
+    const restore = keepFocus(tipsSection) // a disabled button drops focus
     refreshBtn.disabled = true
     try {
       const t = await getTiming(reader)
@@ -230,6 +235,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       status.error(explainError(e))
     } finally {
       refreshBtn.disabled = false
+      restore()
     }
   }
 
@@ -316,6 +322,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     )
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault()
+      const restore = keepFocus(body, () => body.querySelector('h2')) // the form is replaced by the inbox panel; a disabled button drops focus
       submit.disabled = true
       try {
         await ensureFunds()
@@ -325,6 +332,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       } catch (e) {
         status.error(explainError(e))
         submit.disabled = false
+      } finally {
+        restore()
       }
     })
     body.replaceChildren(form)
@@ -336,6 +345,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     const field = h('input', { id: 'inbox-link', type: 'text', readonly: true, value: url, 'data-testid': 'inbox-link' })
     const renew = h('button', { type: 'button', class: 'secondary', 'data-testid': 'renew' }, 'Renew now')
     renew.addEventListener('click', async () => {
+      const restore = keepFocus(body) // a disabled button drops focus, and showInbox() builds a new "Renew now"
       renew.disabled = true
       try {
         status.info('Extending the lease...')
@@ -346,6 +356,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       } catch (e) {
         status.error(explainError(e))
         renew.disabled = false
+      } finally {
+        restore()
       }
     })
     const left = timing ? blockToUnix(live.expiresAt, timing) - Date.now() / 1000 : 0
@@ -410,7 +422,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       ),
     ),
     body,
-    h('section', { class: 'tips-section' }, h('div', { class: 'tips-head' }, h('h2', null, 'Tips'), refreshBtn), liveStatus, emptyEl, tipList),
+    tipsSection,
     queries.el,
     settings,
   )

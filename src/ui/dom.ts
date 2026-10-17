@@ -127,3 +127,47 @@ export const queriesPanel = (title = 'Queries this page runs') => {
     },
   }
 }
+
+// ---- keeping the user's place across a re-render -------------------------------------------------------------
+/** Focus for a non-interactive element: tabindex=-1 only while it holds focus, so it never becomes a Tab stop or a click target. */
+export function focusFromScript(el: HTMLElement) {
+  el.tabIndex = -1
+  const leave = () => {
+    if (!document.hasFocus()) return // the window lost focus (a confirm() closing, another tab), not the element: the browser gives the element focus back
+    el.removeAttribute('tabindex')
+    el.removeEventListener('blur', leave)
+  }
+  el.addEventListener('blur', leave)
+  el.focus()
+}
+
+const CONTROLS = 'a[href],button,input,select,textarea,summary'
+/** What a control is called from one render to the next: its tag, id and accessible name. */
+const named = (el: Element) => `${el.localName}|${el.id}|${el.getAttribute('aria-label') ?? el.textContent}`
+const matching = (scope: Element, name: string) => [...scope.querySelectorAll<HTMLElement>(CONTROLS)].filter((c) => named(c) === name)
+
+/**
+ * A control that is replaced or disabled while it has focus drops focus to the page start. Call this before such a change and the returned
+ * function after it. If focus was inside `region` and fell, it goes back to the same control (same [data-key] row, same name); when that is gone,
+ * to the same control of the next row, then the previous row, then `fallback()`. Focus anywhere else, or anywhere real afterwards, is left alone.
+ */
+export function keepFocus(region: Element, fallback?: () => HTMLElement | null | undefined) {
+  const from = document.activeElement
+  if (!from || from === region || !region.contains(from)) return () => {}
+  const row = from.closest<HTMLElement>('[data-key]')
+  const name = named(from)
+  const nth = matching(row ?? region, name).indexOf(from as HTMLElement)
+  const keys = row ? [row, row.nextElementSibling, row.previousElementSibling].flatMap((r) => (r instanceof HTMLElement && r.dataset.key ? [r.dataset.key] : [])) : []
+  return () => {
+    const now = document.activeElement
+    if (!region.isConnected || (now && now !== document.body)) return
+    const rows = [...region.querySelectorAll<HTMLElement>('[data-key]')]
+    for (const scope of row ? keys.map((k) => rows.find((r) => r.dataset.key === k)) : [region]) {
+      const to = scope && matching(scope, name)[nth]
+      to?.focus({ preventScroll: true })
+      if (to && document.activeElement === to) return
+    }
+    const last = fallback?.()
+    if (last) focusFromScript(last)
+  }
+}

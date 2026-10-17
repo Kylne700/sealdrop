@@ -6,7 +6,7 @@ import { MAX_MESSAGE_BYTES, bucketFor, fitsInTip, sealText, textBytes } from '..
 import { explainError, findInbox, getTiming, injectedSigner, isOutOfFunds, localSigner, sendTip, sweepTips, type InboxView, type Signer } from '../arkiv'
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
-import { bar, chip, h, hex, kib, link, queriesPanel, setFill, short, statusLine } from '../ui/dom'
+import { bar, chip, h, hex, keepFocus, kib, link, queriesPanel, setFill, short, statusLine } from '../ui/dom'
 import { rpcSettings } from '../ui/settings'
 
 const wallet = () => (window as unknown as { ethereum?: EIP1193Provider }).ethereum
@@ -114,6 +114,7 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
     if (!fitsInTip(text)) return progress.error(`The message is too long (limit ${MAX_MESSAGE_BYTES} bytes).`)
     const mode = demoRadio.checked ? 'demo' : 'wallet'
     const days = Number(form.querySelector<HTMLInputElement>(`input[name=${daysName}]:checked`)?.value ?? DEFAULT_TIP_DAYS) as (typeof TIP_LIFETIME_CHOICES)[number]
+    const restore = keepFocus(form) // a disabled button drops focus; after an error it goes back to "Seal and send"
     sendBtn.disabled = true
     try {
       progress.busy('Sealing the message in your browser...')
@@ -166,6 +167,8 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
         ? 'The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: hub.arkiv.network/faucet).'
         : explainError(e))
       sendBtn.disabled = false
+    } finally {
+      restore()
     }
   })
 

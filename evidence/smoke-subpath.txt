@@ -1,24 +1,24 @@
-Sealdrop smoke run 2026-10-17T00:52:08.664Z  Chromium Chrome/154.0.8037.92  served from http://127.0.0.1:44769/sealdrop/
+Sealdrop smoke run 2026-10-17T04:36:30.786Z  Chromium Chrome/154.0.8037.92  served from http://127.0.0.1:40637/sealdrop/
 PASS  faked 429 on every query: the send page says the free budget is used up and offers Settings, after 0.7 s  (The free query budget of the public Arkiv RPC is used up. Wait a little, or ente)
 PASS  first load of #/newsroom: the page does not grab focus and the title names the page  (focus on body, hash #/newsroom, title "Newsroom console: Sealdrop")
 PASS  the skip link is Tab stop 1 and is on screen once it has focus  (Skip to content, top 8 px)
 PASS  Enter on the skip link puts focus on <main> and leaves the location alone  (focus on main, hash #/newsroom, title "Newsroom console: Sealdrop")
 PASS  route change to the start page: focus is on its h1 and the title names the page  (focus on h1, hash #/, title "Sealdrop: an anonymous tip line with no server")
 PASS  Back: focus is on the newsroom h1 and the title names the page  (focus on h1, hash #/newsroom, title "Newsroom console: Sealdrop")
-  throwaway newsroom created in the browser after 1.6 s (no network yet)
-  inbox created in 14.8 s: <site>/#/send/0x0ed2e9D9840f79c3Ed6239178ddeFA7A7094b809/inbox-pcaujm
+  throwaway newsroom created in the browser after 0.8 s (no network yet)
+  inbox created in 14.8 s: <site>/#/send/0x731A2A0CCfB7f7C30BD14c2b3d263747e2600E15/inbox-4et882
 PASS  the inbox link points at #/send/<creator>/<inbox id>
 PASS  the key file can be exported
 PASS  the send page shows the newsroom as $creator (found by creator, not by a writable field)
-PASS  first load of the send page: the page does not grab focus and the title says "Send a tip"  (focus on body, hash #/send/0x0ed2e9D9840f79c3Ed6239178ddeFA7A7094b809/inbox-pcaujm, title "Send a tip: Sealdrop")
+PASS  first load of the send page: the page does not grab focus and the title says "Send a tip"  (focus on body, hash #/send/0x731A2A0CCfB7f7C30BD14c2b3d263747e2600E15/inbox-4et882, title "Send a tip: Sealdrop")
 PASS  a live tip arrives while the newsroom types in Settings: focus and text stay in the field  (focus on rpc)
-PASS  after sending, focus is on the success heading (not lost, not moved to the page h1)  (focus on h2, hash #/send/0x0ed2e9D9840f79c3Ed6239178ddeFA7A7094b809/inbox-pcaujm, title "Send a tip: Sealdrop")
+PASS  after sending, focus is on the success heading (not lost, not moved to the page h1)  (focus on h2, hash #/send/0x731A2A0CCfB7f7C30BD14c2b3d263747e2600E15/inbox-4et882, title "Send a tip: Sealdrop")
 PASS  the tip decrypts in the newsroom tab to the exact text that was sent
 PASS  it arrived through the WebSocket subscription (data-source=live), not through a sweep
-  tip visible in the newsroom 3.2 s after Send was clicked; the sender's own page confirmed after 5.8 s
-  JUDGE PATH TOTAL: 20.9 s from opening the newsroom page to the decrypted live tip
-  tip entity https://data.arkiv.network/entity/0x9672380af2101f94f0cce15a37074f4aeb8fcb68138bb93214010ba5f040dc28
-  tx https://tiramisu.explorer.arkiv.network/tx/0x9399807c948e5386b4cc1796d8e003a66f6ccb6fd51ec8aafe7cfe4bfc6afe14
+  tip visible in the newsroom 2.8 s after Send was clicked; the sender's own page confirmed after 5.6 s
+  JUDGE PATH TOTAL: 19.8 s from opening the newsroom page to the decrypted live tip
+  tip entity https://data.arkiv.network/entity/0x2ee8e54975459f52c67ff3ec4c94cfbbae5f3e5b25e045c9d411d270cf39e8cb
+  tx https://tiramisu.explorer.arkiv.network/tx/0xe9e7b9db3e39851d821249ffe11bd30e8eeeff6d68041d58ac9a75cc4723b5e9
 PASS  wallet mode is offered when an EIP-1193 wallet is injected
 PASS  wallet mode: the result shows the wallet address as $creator
 PASS  wallet mode: the second tip also arrived live
@@ -26,7 +26,7 @@ PASS  the second live tip leaves focus and text in the Settings field as well  (
 PASS  a look-alike link (same inbox id, different creator) shows "no live inbox"
 PASS  the Demo Desk inbox is found on Arkiv by its creator and inbox id
 PASS  first load of #/demo: the redirect does not grab focus, the title says "Send a tip"  (focus on body, hash #/send/0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6/demo-desk, title "Send a tip: Sealdrop")
-  Demo Desk tip entity https://data.arkiv.network/entity/0x58251c0fa82deef5b1973ab62cfef35d1f952a08502b1087a8d0f476b6852ca5
+  Demo Desk tip entity https://data.arkiv.network/entity/0x1cd552b36d992ea83d80c52c5228c384520a3da0dba4c14dea45bd5ff7c594b9
 PASS  the desk operator (key not in the build) decrypts the Demo Desk tip with `ops desk-read`
   newsroom tab: Public RPC: this tab has made 6 queries (600 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).
   source tab: Public RPC: this tab has made 2 queries (200 cost units). The anonymous allowance is about 10000 units per window; live tips arrive over a WebSocket instead of polling (one entity read each).

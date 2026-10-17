@@ -12,7 +12,7 @@ import type { InboxView, Reader, Signer, TipView } from 'real-arkiv'
 export { budget, RateLimitedError, explainError, isOutOfFunds, retryHook, withRetry } from 'real-arkiv'
 
 type MockTip = { text: string; ageMin: number; days: number; mine?: boolean; demo?: boolean; bad?: boolean; live?: boolean }
-type Mock = { inbox?: 'ok' | 'none' | 'setup' | 'risky' | 'hang' | 'limited'; tips?: MockTip[]; live?: 'live' | 'reconnecting' | 'connecting'; sendMs?: number; sendFail?: string; budget?: [number, number] }
+type Mock = { inbox?: 'ok' | 'none' | 'setup' | 'risky' | 'hang' | 'limited'; tips?: MockTip[]; live?: 'live' | 'reconnecting' | 'connecting'; sendMs?: number; sendFail?: string; sweepMs?: number; renewFail?: string; budget?: [number, number] }
 const cfg = () => ({ inbox: 'ok', tips: [] as MockTip[], live: 'live', sendMs: 700, ...((window as unknown as { __MOCK?: Mock }).__MOCK ?? {}) }) as Required<Pick<Mock, 'inbox' | 'tips' | 'live' | 'sendMs'>> & Mock
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -62,6 +62,7 @@ function toView(t: MockTip, i: number): TipView {
 }
 const allTips = () => cfg().tips.map((t, i) => ({ t, v: toView(t, i) }))
 export async function sweepTips() {
+  if (cfg().sweepMs) await wait(cfg().sweepMs!) // keyboard.mjs: a sweep that takes a while, as on the network
   return { tips: allTips().filter((x) => !x.t.live).map((x) => x.v), query: 'type = "tip" && app = "sealdrop-v1" && inbox = "0x3a3e..." && $owner = 0x...', truncated: false, pages: 1 }
 }
 export const tipsSince = async () => ({ tips: [] as TipView[], query: 'type = "tip" && app = "sealdrop-v1" && $createdAtBlock >= 999998' })
@@ -87,7 +88,7 @@ export async function sendTip(_r: Reader, _s: Signer, _i: InboxView, _sealed: Ui
   return { entityKey: fake(200), txHash: fake(201), expiresAt: HEAD + daysToBlocks(days) }
 }
 export const createInbox = async () => { await wait(300); created = true }
-export const renewInbox = async () => { await wait(300) }
+export const renewInbox = async () => { await wait(300); if (cfg().renewFail) throw new Error(cfg().renewFail) }
 export const burnTip = async () => { await wait(300) }
 export const pinTip = async () => { await wait(300) }
 export const fundAccount = async () => { await wait(300) }

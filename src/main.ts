@@ -3,7 +3,7 @@ import { parseSendHash } from './codec'
 import { ANON_BUDGET_UNITS, DEMO_DESK, REPO_URL } from './config'
 import { DESK_ADDRESS } from './env'
 import { budget } from './arkiv'
-import { h, runCleanups } from './ui/dom'
+import { focusFromScript, h, runCleanups } from './ui/dom'
 import { renderHome } from './pages/home'
 import { renderNewsroom } from './pages/newsroom'
 import { renderSend } from './pages/send'
@@ -11,12 +11,6 @@ import { renderSend } from './pages/send'
 const root = document.getElementById('app')!
 document.getElementById('source')?.setAttribute('href', REPO_URL)
 
-/** Focus for a non-interactive element: tabindex=-1 only while it holds focus, so it never becomes a Tab stop or a click target. */
-function focusFromScript(el: HTMLElement) {
-  el.tabIndex = -1
-  el.addEventListener('blur', () => el.removeAttribute('tabindex'), { once: true })
-  el.focus()
-}
 // The skip link must not follow its href: #app would change the hash and render the "no such page" notice.
 document.querySelector('.skip')?.addEventListener('click', (e) => { e.preventDefault(); focusFromScript(root) })
 
