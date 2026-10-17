@@ -40,7 +40,7 @@ export function statusLine(testid = 'status', note?: HTMLElement) {
  * button.copy::after (style.css) holds an invisible copy of the first label in the same grid cell, so the button keeps that width and the row does not re-flow.
  * "Copied ✓" and COPY_BLOCKED must therefore be no wider than the first label.
  */
-export const COPY_BLOCKED = 'Copy manually'
+export const COPY_BLOCKED = 'Copy by hand'
 export function copyButton(getText: () => string, label = 'Copy', cls = 'secondary') {
   const text = h('span', null, label)
   const b = h('button', { type: 'button', class: `${cls} copy`, 'data-label': label }, text)
