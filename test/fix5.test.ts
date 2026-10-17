@@ -80,14 +80,16 @@ describe('fix stage 5: the console (source checks; the browser runs are in evide
     expect(text).toMatch(/Reload to see the expiry under Lease/) // the Lease line is stale after this error; a reload reads it again
     expect(text).not.toMatch(/twice|tries again|could not/)
     expect(page).toMatch(/status\.error\(mayHaveBeenSent\(leaseError\) \? RENEWAL_UNKNOWN : `The inbox lease could not be checked or renewed\. \$\{explainError\(leaseError\)\} "Renew now" under Lease tries again\.`\)/)
-    expect(page).toMatch(/status\.error\(mayHaveBeenSent\(e\) \? RENEWAL_UNKNOWN : explainError\(e\)\)\n\s*renew\.disabled = false/)
+    expect(page).toMatch(/status\.error\(mayHaveBeenSent\(e\) \? RENEWAL_UNKNOWN : explainError\(e\)\)\n\s*showInbox\(live, true\)/) // fix 6 (R2-S9d): a new, enabled "Renew now"
   })
   it('item 2: the link-only view does not show "Waiting for tips."', () => {
     expect(page).toMatch(/function showLinkOnly\(\) \{\n\s*emptyEl\.hidden = true/)
   })
-  it('item 3: the catch-up backs off 20 s doubling to 5 min, resets on success, and keeps the 429 wait', () => {
-    expect(page).toMatch(/retry \?\?= setTimeout\(\(\) => \{ retry = undefined; void catchUp\(\) \}, limited \? \(Math\.max\(60, limited\.retryAfterSeconds\) \+ 5\) \* 1000 : Math\.min\(300_000, 20_000 \* 2 \*\* failures\+\+\)\)/)
-    expect(page).toMatch(/setLastSeen\(live\.key, t\.head\)\n\s*failures = 0/)
-    expect(page.match(/failures\+\+/g)?.length).toBe(1)
+  // Fix 6 (R2-F5-1) took the doubling out again: the catch-up's first call (arkiv_getBlockTiming) has no Arkiv-Cost (evidence/fix-6/probe-cost.txt),
+  // so a retry in an outage spends no query budget, and the doubling only kept a recovered RPC's tip hidden for up to 5 min.
+  it('item 3 (as of fix 6): the catch-up retries every 20 s, its first call is the free block timing, and the 429 wait stays', () => {
+    expect(page).toMatch(/retry \?\?= setTimeout\(\(\) => \{ retry = undefined; void catchUp\(\) \}, limited \? \(Math\.max\(60, limited\.retryAfterSeconds\) \+ 5\) \* 1000 : 20_000\)/)
+    expect(page).toMatch(/const catchUp = async \(\) => \{\n\s*try \{\n\s*const t = await getTiming\(reader\)\n/)
+    expect(page).not.toMatch(/failures/)
   })
 })

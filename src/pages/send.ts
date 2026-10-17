@@ -1,9 +1,9 @@
 // #/send/<creator>/<inboxId>/<fp>: what a source sees. Resolve the inbox by its on-chain creator, check its key against the link, seal, send.
 import { bytesToHex, type EIP1193Provider } from 'viem'
-import { DEFAULT_TIP_DAYS, DEMO_SENDER_ADDRESS, INBOX_LIFETIME_DAYS, TIP_LIFETIME_CHOICES, addressUrl, entityUrl, ownerUrl, txUrl } from '../config'
+import { DEFAULT_TIP_DAYS, DEMO_SENDER_ADDRESS, FAUCET_URL, INBOX_LIFETIME_DAYS, TIP_LIFETIME_CHOICES, addressUrl, entityUrl, ownerUrl, txUrl } from '../config'
 import { blockToUnix, formatDuration, formatUtc, inboxPublicKey, secondsLeft, type InboxRef } from '../codec'
 import { MAX_MESSAGE_BYTES, bucketFor, fitsInTip, sealText, textBytes } from '../crypto'
-import { explainError, findInbox, getTiming, injectedSigner, isOutOfFunds, localSigner, sendTip, sweepTips, type InboxView, type Signer } from '../arkiv'
+import { PlainError, explainError, findInbox, getTiming, injectedSigner, isOutOfFunds, localSigner, sendTip, sweepTips, type InboxView, type Signer } from '../arkiv'
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
 import { bar, chip, h, hex, keepFocus, kib, link, queriesPanel, setFill, short, statusLine } from '../ui/dom'
@@ -135,11 +135,11 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
       const sealed = sealText(text, inboxPublicKey(live.payload))
       let signer: Signer
       if (mode === 'demo') {
-        if (!DEMO_SENDER_KEY) throw new Error('This build has no demo key; send with your wallet.')
+        if (!DEMO_SENDER_KEY) throw new PlainError('This build has no demo key; send with your wallet.')
         signer = localSigner(DEMO_SENDER_KEY, rpcUrl())
       } else {
         const provider = wallet()
-        if (!provider) throw new Error(`No browser wallet found. Install a wallet extension such as MetaMask${DEMO_SENDER_KEY ? ', or choose the shared demo key' : ''}.`)
+        if (!provider) throw new PlainError(`No browser wallet found. Install a wallet extension such as MetaMask${DEMO_SENDER_KEY ? ', or choose the shared demo key' : ''}.`)
         progress.busy('Waiting for your wallet...')
         signer = await injectedSigner(provider, { before: () => progress.busy(CONFIRM), after: () => progress.busy(WRITING) })
       }
@@ -178,8 +178,8 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
       done.addEventListener('blur', () => done.removeAttribute('tabindex'), { once: true })
     } catch (e) {
       progress.error(mode === 'demo' && isOutOfFunds(e)
-        ? 'The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: hub.arkiv.network/faucet).'
-        : explainError(e))
+        ? `The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: ${FAUCET_URL}).`
+        : explainError(e, 'reload this page and open "What can anyone see on Arkiv for this inbox?"'))
       sendBtn.disabled = false
     } finally {
       window.removeEventListener('beforeunload', stay)

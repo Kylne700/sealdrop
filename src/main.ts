@@ -54,7 +54,7 @@ if (budgetEl && customHost) budgetEl.textContent = `Custom RPC: ${customHost}. C
 setInterval(() => {
   if (budgetEl && budget.queries > 0) {
     budgetEl.textContent = customHost
-      ? `Custom RPC: ${customHost}. Change it under Settings. This tab has made ${budget.queries} ${budget.queries === 1 ? 'query' : 'queries'} (${budget.spent} cost units).`
-      : `Public RPC: this tab has made ${budget.queries} ${budget.queries === 1 ? 'query' : 'queries'} (${budget.spent} cost units). The anonymous allowance is about ${ANON_BUDGET_UNITS} units per window; live tips arrive over a WebSocket instead of polling (one entity read each).`
+      ? `Custom RPC: ${customHost}. Change it under Settings. This tab has made ${budget.queries} ${budget.queries === 1 ? 'query' : 'queries'} (${budget.spent} cost ${budget.spent === 1 ? 'unit' : 'units'}).`
+      : `Public RPC: this tab has made ${budget.queries} ${budget.queries === 1 ? 'query' : 'queries'} (${budget.spent} cost ${budget.spent === 1 ? 'unit' : 'units'}). The anonymous allowance is about ${ANON_BUDGET_UNITS} units per window; live tips arrive over a WebSocket instead of polling (one entity read each).`
   }
 }, 1000)

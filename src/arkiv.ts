@@ -4,10 +4,10 @@ import { createPublicClient, createWalletClient, ExpirationTime, type PublicArki
 import { tiramisu } from '@arkiv-network/sdk/chains'
 import { key as keyAttr, u64 } from '@arkiv-network/sdk/attr'
 import { and, eq, lt } from '@arkiv-network/sdk/query'
-import { custom, http, parseEther, webSocket, type Address, type EIP1193Provider, type Hex } from 'viem'
+import { custom, http, keccak256, parseEther, webSocket, type Address, type EIP1193Provider, type Hex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { socketClientCache } from 'viem/utils'
-import { APP, CHAIN_ID, FUND_AMOUNT_GLM, INBOX_LIFETIME_DAYS, PAGE_SIZE, RENEW_BELOW_DAYS, RPC_HTTP, RPC_WS, TIP_LIFETIME_CHOICES } from './config'
+import { APP, CHAIN_ID, FAUCET_URL, FUND_AMOUNT_GLM, INBOX_LIFETIME_DAYS, PAGE_SIZE, RENEW_BELOW_DAYS, RPC_HTTP, RPC_WS, TIP_LIFETIME_CHOICES } from './config'
 import { INBOX_CONTENT_TYPE, TIP_CONTENT_TYPE, daysToBlocks, decodeInbox, encodeInbox, inboxAttributes, inboxPublicKey, keyFingerprint, tipAttributes, type InboxPayload, type InboxRef, type Timing } from './codec'
 
 // ---- clients ----------------------------------------------------------------------------------------
@@ -28,11 +28,34 @@ export class RateLimitedError extends Error {
  * This fetch fails at once instead, so the UI can say what happened.
  */
 const failFast: typeof fetch = async (input, init) => {
+  const res = await counted(input, init)
+  if (res.status === 429) throw new RateLimitedError(Number(res.headers.get('retry-after')) || 0)
+  return (await ownBroadcast(input, init, res)) ?? res
+}
+const counted: typeof fetch = async (input, init) => {
   const res = await fetch(input, init)
   const cost = Number(res.headers.get('arkiv-cost'))
   if (cost > 0) { budget.spent += cost; budget.queries++ }
-  if (res.status === 429) throw new RateLimitedError(Number(res.headers.get('retry-after')) || 0)
   return res
+}
+/**
+ * A browser re-sends a POST whose connection was reset before any answer byte (Chromium and Firefox both do), so a signed transaction can
+ * reach the node twice. The node answers the copy "already known" or, once the first one is mined, "nonce too low". If the node holds this
+ * very transaction, the first copy got through: answer with its hash, as the node did the first time. Anything else (another sender took the
+ * nonce, a batch, an answer that is not JSON, a lookup that fails or is refused) keeps the original answer, so the write is signed again as before.
+ * The lookup is not failFast: a 429 to it must not turn a transaction that may be mined into "budget used up".
+ */
+async function ownBroadcast(input: Parameters<typeof fetch>[0], init: Parameters<typeof fetch>[1], res: Response): Promise<Response | undefined> {
+  try {
+    if (typeof init?.body !== 'string' || !init.body.includes('eth_sendRawTransaction')) return
+    const req = JSON.parse(init.body) as { id: number; method: string; params: [Hex] }
+    const answer = (await res.clone().json()) as { error?: { message?: string } }
+    if (req.method !== 'eth_sendRawTransaction' || !/already known|nonce too low/i.test(answer.error?.message ?? '')) return
+    const hash = keccak256(req.params[0])
+    const look = await counted(input, { ...init, body: JSON.stringify({ jsonrpc: '2.0', id: req.id, method: 'eth_getTransactionByHash', params: [hash] }) })
+    const found = look.ok ? ((await look.json()) as { result?: { hash?: string } | null }).result : undefined
+    if (found?.hash?.toLowerCase() === hash) return new Response(JSON.stringify({ jsonrpc: '2.0', id: req.id, result: hash }), { headers: { 'content-type': 'application/json' } })
+  } catch { /* the original answer stands */ }
 }
 const httpTransport = (url: string) => http(url, { fetchFn: failFast, timeout: 20_000, retryCount: 1 }) // reads only: viem sends each broadcast with retryCount 0, so a lost answer is not re-sent (test/fix5.test.ts)
 
@@ -81,7 +104,7 @@ export function notifyOnSend(provider: EIP1193Provider, hooks: { before: () => v
 export async function injectedSigner(provider: EIP1193Provider, hooks?: { before: () => void; after: () => void }): Promise<Signer> {
   const accounts = (await provider.request({ method: 'eth_requestAccounts' })) as Address[]
   const address = accounts[0]
-  if (!address) throw new Error('The wallet returned no account. Unlock the wallet and allow this page to connect, then try again.')
+  if (!address) throw new PlainError('The wallet returned no account. Unlock the wallet and allow this page to connect, then try again.')
   const chainId = async () => ((await provider.request({ method: 'eth_chainId' })) as string).toLowerCase()
   if ((await chainId()) !== CHAIN_HEX) {
     try {
@@ -94,7 +117,7 @@ export async function injectedSigner(provider: EIP1193Provider, hooks?: { before
       })
     }
     // Some wallets add the network without switching to it.
-    if ((await chainId()) !== CHAIN_HEX) throw new Error(`Your wallet is on a different network. Switch it to Arkiv Tiramisu (chain id ${CHAIN_ID}) and try again.`)
+    if ((await chainId()) !== CHAIN_HEX) throw new PlainError(`Your wallet is on a different network. Switch it to Arkiv Tiramisu (chain id ${CHAIN_ID}) and try again.`)
   }
   return { address, client: createWalletClient({ chain: tiramisu, transport: custom(hooks ? notifyOnSend(provider, hooks) : provider), account: address }), kind: 'injected' }
 }
@@ -150,7 +173,7 @@ export function mayHaveBeenSent(e: unknown): boolean {
   for (let cur: unknown = e, i = 0; cur && i < 8; i++, cur = (cur as { cause?: unknown }).cause) {
     const c = cur as { txHash?: unknown; name?: string; message?: string; body?: { method?: string } }
     if (c.txHash || c.name === 'WaitForTransactionReceiptTimeoutError') return true
-    // The node already holds this very transaction: the browser resent a request whose answer was lost.
+    // The node already holds this very transaction: the browser resent a request whose answer was lost, and ownBroadcast could not confirm it.
     if (/already known/i.test(c.message ?? '')) return true
     // Only a lost connection or no answer in time: an RPC error answer ("nonce too low") means the node rejected it,
     // and so does a 429 to the send, which failFast throws and viem wraps like a lost connection.
@@ -161,13 +184,13 @@ export function mayHaveBeenSent(e: unknown): boolean {
   return false
 }
 
-/** One line a person can act on. */
-export function explainError(e: unknown): string {
+/** One line a person can act on. `check` says how to see on this page whether a write with an unknown outcome went through. */
+export function explainError(e: unknown, check = 'reload the page'): string {
   if (e instanceof PlainError) return e.message
   if (mayHaveBeenSent(e)) {
     const hash = (e as { txHash?: string }).txHash
     // Not "the answer was lost": the SDK also lands here when a receipt came back but did not match the batch.
-    return `The result of this transaction is unknown: it may have gone through, so trying again could do it twice.${hash ? ` Look up its hash ${hash} on the Arkiv Data Explorer to see whether it did.` : ''}`
+    return `The result of this transaction is unknown: it may have gone through, so trying again could do it twice.${hash ? ` Look up its hash ${hash} on the Arkiv Data Explorer to see whether it did.` : ` Wait a minute, then ${check} to see whether it did.`}`
   }
   const limited = rateLimit(e)
   if (limited) {
@@ -181,7 +204,7 @@ export function explainError(e: unknown): string {
   const err = e as { code?: number; shortMessage?: string; message?: string; cause?: { code?: number; message?: string } }
   const text = errorText(e)
   if (err?.code === 4001 || err?.cause?.code === 4001 || /user rejected|denied/i.test(text)) return 'The request was rejected in the wallet.'
-  if (isOutOfFunds(e)) return 'This wallet has no testnet GLM left. Get some at the Arkiv faucet (hub.arkiv.network/faucet).'
+  if (isOutOfFunds(e)) return `This wallet has no testnet GLM left. Get some at the Arkiv faucet (${FAUCET_URL}).`
   const first = (err?.shortMessage ?? err?.message ?? String(e)).split('\n')[0] ?? 'Unknown error'
   const cut = first.length > 240 ? first.slice(0, 240) + '...' : first
   return `${cut.replace(/\.?$/, '.')} Try again; if it keeps failing, reload the page or set your own RPC under Settings.`
@@ -333,7 +356,7 @@ export function sendTip(reader: Reader, signer: Signer, inbox: InboxView, sealed
     // No answer (a 5xx, a spent budget, indexer lag) proves nothing: the tip may be on chain, so this must not be retried.
     if (entityKey && !stored) throw Object.assign(new Error('The tip was written, but it could not be read back.', { cause: readError }), { txHash: result.txHash })
     if (!stored?.payload || stored.payload.length !== sealed.length || !stored.payload.every((b, i) => b === sealed[i])) {
-      throw new Error('This tip was replaced by another transaction from the same sender key, so it was not sent. Send it again.')
+      throw new PlainError('This tip was replaced by another transaction from the same sender key, so it was not sent. Send it again.')
     }
     return { entityKey, txHash: result.txHash, expiresAt: stored.expiresAt }
   })

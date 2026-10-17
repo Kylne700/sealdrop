@@ -5,7 +5,7 @@ import { INBOX_LIMITS, blockToUnix, formatDuration, formatSendHash, formatUtc, k
 import { SEAL_OVERHEAD, boxKeyPairFromSecret, fromB64, openText, sealedDigest } from '../crypto'
 import {
   balanceOf, burnTip, createInbox, explainError, findInbox, fundAccount, getTip, getTiming, inboxesDueForRenewal, injectedSigner, isOutOfFunds,
-  localSigner, mayHaveBeenSent, pinTip, rateLimit, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
+  localSigner, mayHaveBeenSent, PlainError, pinTip, rateLimit, renewInbox, sweepTips, tipsSince, watchHandovers, type InboxView, type Signer, type TipView,
 } from '../arkiv'
 import { getReader, rpcUrl } from '../app'
 import { DEMO_SENDER_KEY } from '../env'
@@ -48,7 +48,7 @@ function renderOnboarding(root: HTMLElement, again: () => void) {
   const useWallet = async () => {
     try {
       const provider = wallet()
-      if (!provider) throw new Error('No browser wallet found. Install a wallet extension such as MetaMask, or create a throwaway newsroom instead.')
+      if (!provider) throw new PlainError('No browser wallet found. Install a wallet extension such as MetaMask, or create a throwaway newsroom instead.')
       status.info('Waiting for your wallet...')
       const signer = await injectedSigner(provider)
       saveIdentity(newWalletIdentity(signer.address))
@@ -117,13 +117,13 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   let local: Signer | undefined
   async function getSigner(): Promise<Signer> {
     if (identity.kind === 'local') {
-      if (!identity.evmPrivateKey) throw new Error('This newsroom has no wallet key, so it cannot sign. Import its key file again, or create a new newsroom.')
+      if (!identity.evmPrivateKey) throw new PlainError('This newsroom has no wallet key, so it cannot sign. Import its key file again, or create a new newsroom.')
       return (local ??= localSigner(identity.evmPrivateKey, rpcUrl()))
     }
     const provider = wallet()
-    if (!provider) throw new Error('No browser wallet found. Open this page in a browser with your wallet.')
+    if (!provider) throw new PlainError('No browser wallet found. Open this page in a browser with your wallet.')
     const signer = await injectedSigner(provider)
-    if (signer.address.toLowerCase() !== me) throw new Error(`Switch your wallet to ${identity.address}: this newsroom was created with that account.`)
+    if (signer.address.toLowerCase() !== me) throw new PlainError(`Switch your wallet to ${identity.address}: this newsroom was created with that account.`)
     return signer
   }
 
@@ -142,13 +142,13 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   async function ensureFunds() {
     const wei = await refreshBalance()
     if (wei !== null && wei >= MIN_BALANCE) return
-    if (identity.kind !== 'local') throw new Error(`This wallet has too little testnet GLM. Get some at ${FAUCET_URL} and try again.`)
-    if (!DEMO_SENDER_KEY) throw new Error(`This build has no demo sender key. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
+    if (identity.kind !== 'local') throw new PlainError(`This wallet has too little testnet GLM. Get some at ${FAUCET_URL} and try again.`)
+    if (!DEMO_SENDER_KEY) throw new PlainError(`This build has no demo sender key. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
     status.info('Funding this throwaway address with a few cents of testnet GLM from the shared demo sender...')
     try {
       await fundAccount(localSigner(DEMO_SENDER_KEY, rpcUrl()), identity.address)
     } catch (e) {
-      if (isOutOfFunds(e)) throw new Error(`The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
+      if (isOutOfFunds(e)) throw new PlainError(`The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
       throw e
     }
     await refreshBalance()
@@ -293,12 +293,14 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     if (listening) return
     listening = true
     let retry: ReturnType<typeof setTimeout> | undefined
-    let failures = 0 // catch-ups scheduled since the last one that worked: each costs queries, so a long outage is retried less and less often
     onLeave(() => clearTimeout(retry))
-    /** One pending catch-up at a time, however many reads fail: when the query budget renews, or after any other failure in 20 s, doubling to 5 min. */
+    /**
+     * One pending catch-up at a time, however many reads fail: when the query budget renews, or after any other failure in 20 s. Its first call
+     * (arkiv_getBlockTiming) has no Arkiv-Cost, so while the RPC is down a retry spends no query budget, and once it answers the tip shows within 20 s.
+     */
     const catchUpLater = (e: unknown) => {
       const limited = rateLimit(e)
-      retry ??= setTimeout(() => { retry = undefined; void catchUp() }, limited ? (Math.max(60, limited.retryAfterSeconds) + 5) * 1000 : Math.min(300_000, 20_000 * 2 ** failures++))
+      retry ??= setTimeout(() => { retry = undefined; void catchUp() }, limited ? (Math.max(60, limited.retryAfterSeconds) + 5) * 1000 : 20_000)
     }
     // Tips created since the last sweep, read in one query. Used after a long sleep and after a reconnect, because events are not replayed.
     const catchUp = async () => {
@@ -310,7 +312,6 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         timing = t
         addTips(r.tips, 'sweep')
         setLastSeen(live.key, t.head)
-        failures = 0
         if ([stale, 'No tips yet.'].includes(status.el.textContent ?? '')) status.info(tips.size ? `${tips.size} tip${tips.size === 1 ? '' : 's'} on Arkiv.` : 'No tips yet.')
       } catch (e) {
         catchUpLater(e)
@@ -323,14 +324,14 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
           const tip = await getTip(reader, entityKey, [live.key])
           if (!tip) return
           addTips([tip], 'live')
-          status.info('A new tip just arrived.')
+          if (!status.el.classList.contains('error') || status.el.textContent === stale) status.info('A new tip just arrived.')
         } catch (e) {
           // Never dropped silently (L-01): the catch-up reads it once the RPC answers again.
           catchUpLater(e)
           const limited = rateLimit(e)
           readFailed(limited
             ? `A new tip may have arrived, but the free query budget of the public Arkiv RPC is used up, so it cannot be read yet. It loads by itself when the budget renews (in about ${Math.max(1, Math.ceil(limited.retryAfterSeconds / 60))} min).`
-            : `A new tip may have arrived, but it cannot be read yet. ${explainError(e)} It loads by itself once the RPC answers again.`)
+            : 'A new tip may have arrived, but the RPC did not answer properly, so it cannot be read yet. It loads by itself once the RPC answers again.')
         }
       },
       onState: (state) => {
@@ -429,7 +430,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     ))
   }
 
-  function showInbox(live: InboxView) {
+  function showInbox(live: InboxView, renewFailed = false) {
     const renew = h('button', { type: 'button', class: 'secondary', 'data-testid': 'renew' }, 'Renew now')
     renew.addEventListener('click', async () => {
       const restore = keepFocus(body) // a disabled button drops focus, and showInbox() builds a new "Renew now"
@@ -442,7 +443,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
         status.info('Renewed.')
       } catch (e) {
         status.error(mayHaveBeenSent(e) ? RENEWAL_UNKNOWN : explainError(e))
-        renew.disabled = false
+        showInbox(live, true) // a new, enabled "Renew now", and no "opening this console renews it" beside the failure
       } finally {
         restore()
       }
@@ -457,7 +458,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
           h('dt', null, '$creator'), h('dd', null, hex(live.creator, { href: addressUrl(live.creator), label: 'creator address' })),
           h('dt', null, '$owner'), h('dd', null, hex(live.owner, { href: ownerUrl(live.owner), label: 'owner address' })),
           h('dt', null, 'Inbox entity'), h('dd', null, hex(live.key, { href: entityUrl(live.key), label: 'inbox entity key' })),
-          h('dt', null, 'Lease'), h('dd', null, `alive for ${formatDuration(left)}${timing ? ` (until ${formatUtc(blockToUnix(live.expiresAt, timing))})` : ''}. It expires after ${INBOX_LIFETIME_DAYS} days; opening this console renews it.`, bar(left / (INBOX_LIFETIME_DAYS * 86400), 'wide'), h('div', { class: 'row' }, renew)),
+          h('dt', null, 'Lease'), h('dd', null, `alive for ${formatDuration(left)}${timing ? ` (until ${formatUtc(blockToUnix(live.expiresAt, timing))})` : ''}. It expires after ${INBOX_LIFETIME_DAYS} days${renewFailed ? '' : '; opening this console renews it'}.`, bar(left / (INBOX_LIFETIME_DAYS * 86400), 'wide'), h('div', { class: 'row' }, renew)),
         ),
       ),
     )
@@ -478,7 +479,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     const read = found.inbox
     let leaseError: unknown
     inbox = await leaseCheck(read).catch((e) => ((leaseError = e), read))
-    showInbox(inbox)
+    showInbox(inbox, leaseError !== undefined)
     listen(inbox)
     refreshBtn.onclick = () => fullSweep(inbox!)
     // After the sweep, whose "N tips on Arkiv." would hide it; a failed sweep says what to do itself.

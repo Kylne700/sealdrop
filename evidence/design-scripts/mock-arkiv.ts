@@ -9,7 +9,7 @@ import { daysToBlocks, keyFingerprint } from './codec'
 import { fromB64, sealText, toB64 } from './crypto'
 import { RateLimitedError, budget } from 'real-arkiv'
 import type { InboxView, Reader, Signer, TipView } from 'real-arkiv'
-export { budget, RateLimitedError, explainError, isOutOfFunds, rateLimit, retryHook, withRetry } from 'real-arkiv'
+export { budget, PlainError, RateLimitedError, explainError, isOutOfFunds, mayHaveBeenSent, rateLimit, retryHook, withRetry } from 'real-arkiv'
 
 type MockTip = { text: string; ageMin: number; days: number; mine?: boolean; demo?: boolean; bad?: boolean; live?: boolean }
 type Mock = { inbox?: 'ok' | 'none' | 'setup' | 'risky' | 'hang' | 'limited'; tips?: MockTip[]; live?: 'live' | 'reconnecting' | 'connecting'; sendMs?: number; sendFail?: string; sweepMs?: number; renewFail?: string; budget?: [number, number] }
