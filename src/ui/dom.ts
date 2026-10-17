@@ -18,16 +18,20 @@ export const link = (href: string, text: string) => h('a', { href, target: '_bla
 export const short = (hex: string) => (hex.length > 12 ? `${hex.slice(0, 6)}…${hex.slice(-4)}` : hex)
 export const kib = (bytes: number) => (bytes < 1024 ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KiB`)
 
-/** A status line for screen readers and the smoke test. kind 'error' uses role=alert. */
-export function statusLine(testid = 'status') {
+/**
+ * A status line for screen readers and the smoke test. kind 'error' uses role=alert.
+ * `note` is a hidden companion live region that only speaks while the status shows an error: any other text, or clear(), empties it.
+ */
+export function statusLine(testid = 'status', note?: HTMLElement) {
   const el = h('p', { class: 'status', role: 'status', 'aria-live': 'polite', 'data-testid': testid })
+  const endNote = () => { if (note) note.textContent = '' }
   return {
     el,
-    info(text: string) { el.className = 'status'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); el.textContent = text },
-    busy(text: string) { el.className = 'status busy'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); el.textContent = text },
+    info(text: string) { endNote(); el.className = 'status'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); el.textContent = text },
+    busy(text: string) { endNote(); el.className = 'status busy'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); el.textContent = text },
     // role=alert implies aria-live=assertive; an explicit polite would downgrade it
     error(text: string) { el.className = 'status error'; el.setAttribute('role', 'alert'); el.setAttribute('aria-live', 'assertive'); el.textContent = text },
-    clear() { el.className = 'status'; el.textContent = '' },
+    clear() { endNote(); el.className = 'status'; el.textContent = '' },
   }
 }
 

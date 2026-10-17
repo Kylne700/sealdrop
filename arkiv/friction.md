@@ -323,7 +323,7 @@ Both are code -32003 from `eth_estimateGas`. For the entity write the number aft
 non-zero balance reads like a gas problem as well. The top-level SDK message, "Execution error without revert data", reads like
 a contract revert and says nothing about funds; only the deepest `cause` has the words. Sealdrop therefore matches both texts
 (`isOutOfFunds` in [`src/arkiv.ts`](../src/arkiv.ts), tested with these captured shapes in `test/errors.test.ts`) and shows
-"This wallet has no testnet GLM left" for either.
+"This wallet has too little testnet GLM" for either (a low but non-zero balance fails the same way).
 
 **Reproduce.** `node arkiv/repro/f8-unfunded-write.mjs` (no funded key; it makes a throwaway one, mines nothing, makes no
 `arkiv_query`, so it costs no anonymous budget). Run on 2026-10-16.

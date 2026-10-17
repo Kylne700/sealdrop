@@ -90,8 +90,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   const reader = getReader()
   const box = boxKeyPairFromSecret(fromB64(identity.boxSecretKey))
   const me = identity.address.toLowerCase()
-  const status = statusLine()
   const tipNote = h('p', { class: 'sr-only', 'aria-live': 'polite', 'data-testid': 'tip-note' }) // tells screen readers about a live tip while an error stays in the status
+  const status = statusLine('status', tipNote) // and the status empties it as soon as it shows anything but an error (R3-L6)
   const queries = queriesPanel()
   const tips = new Map<string, { tip: TipView; source: 'live' | 'sweep' }>()
   let timing: Timing | undefined
@@ -143,13 +143,13 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
   async function ensureFunds() {
     const wei = await refreshBalance()
     if (wei !== null && wei >= MIN_BALANCE) return
-    if (identity.kind !== 'local') throw new PlainError(`This wallet has too little testnet GLM. Get some at ${FAUCET_URL} and try again.`)
-    if (!DEMO_SENDER_KEY) throw new PlainError(`This build has no demo sender key. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
+    if (identity.kind !== 'local') throw new PlainError(`This wallet has too little testnet GLM. Get some at the Arkiv faucet (${FAUCET_URL}), then try again.`)
+    if (!DEMO_SENDER_KEY) throw new PlainError(`This build has no demo sender key. Get testnet GLM for ${identity.address} at the Arkiv faucet (${FAUCET_URL}), then try again.`)
     status.info('Funding this throwaway address with a few cents of testnet GLM from the shared demo sender...')
     try {
       await fundAccount(localSigner(DEMO_SENDER_KEY, rpcUrl()), identity.address)
     } catch (e) {
-      if (isOutOfFunds(e)) throw new PlainError(`The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Send testnet GLM to ${identity.address} from the faucet at ${FAUCET_URL}, then try again.`)
+      if (isOutOfFunds(e)) throw new PlainError(`The shared demo sender has run out of testnet GLM, so it cannot fund this throwaway newsroom right now. Get testnet GLM for ${identity.address} at the Arkiv faucet (${FAUCET_URL}), then try again.`)
       throw e
     }
     await refreshBalance()
@@ -427,7 +427,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     emptyEl.hidden = true // no tips were read, so "Waiting for tips." would claim there are none; the next read that works sets it again
     body.replaceChildren(h('section', { class: 'inbox' },
       h('h2', null, 'Inbox not read yet'),
-      h('p', { class: 'desc' }, 'Arkiv could not be read, so the inbox, its lease and the tips are not shown yet. If the inbox exists, this is its link. Refresh tries again.'),
+      h('p', { class: 'desc' }, 'Arkiv could not be read, so the inbox, its lease and the tips are not shown yet. If the inbox exists, this is its link.'),
       linkBlock(identity.address),
     ))
   }
@@ -485,7 +485,7 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
     listen(inbox)
     refreshBtn.onclick = () => fullSweep(inbox!)
     // After the sweep, whose "N tips on Arkiv." would hide it; a failed sweep says what to do itself.
-    if ((await fullSweep(inbox)) && leaseError) status.error(mayHaveBeenSent(leaseError) ? RENEWAL_UNKNOWN : `The inbox lease could not be checked or renewed. ${explainError(leaseError)} "Renew now" under Lease tries again.`)
+    if ((await fullSweep(inbox)) && leaseError) status.error(mayHaveBeenSent(leaseError) ? RENEWAL_UNKNOWN : `The inbox lease could not be checked or renewed. ${explainError(leaseError)}`)
   }
 
   /** Every way into the console. When Arkiv cannot be read, the link, the reason and a working Refresh stay (L-08). */

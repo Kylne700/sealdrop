@@ -79,7 +79,7 @@ describe('fix stage 5: the console (source checks; the browser runs are in evide
     expect(text).toMatch(/second renewal does no harm/)
     expect(text).toMatch(/Reload to see the expiry under Lease/) // the Lease line is stale after this error; a reload reads it again
     expect(text).not.toMatch(/twice|tries again|could not/)
-    expect(page).toMatch(/status\.error\(mayHaveBeenSent\(leaseError\) \? RENEWAL_UNKNOWN : `The inbox lease could not be checked or renewed\. \$\{explainError\(leaseError\)\} "Renew now" under Lease tries again\.`\)/)
+    expect(page).toMatch(/status\.error\(mayHaveBeenSent\(leaseError\) \? RENEWAL_UNKNOWN : `The inbox lease could not be checked or renewed\. \$\{explainError\(leaseError\)\}`\)/) // fix 7 (R3-L1): one next step, the one explainError gives
     expect(page).toMatch(/status\.error\(mayHaveBeenSent\(e\) \? RENEWAL_UNKNOWN : explainError\(e\)\)\n\s*showInbox\(live, true\)/) // fix 6 (R2-S9d): a new, enabled "Renew now"
   })
   it('item 2: the link-only view does not show "Waiting for tips."', () => {

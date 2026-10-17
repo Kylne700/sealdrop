@@ -104,7 +104,7 @@ describe('fix stage 6: page code (source checks; the browser runs and screens ar
   it('R2-S9c: the faucet is written one way', () => {
     for (const p of ['../src/arkiv.ts', '../src/pages/send.ts', '../src/pages/newsroom.ts']) expect(read(p)).not.toMatch(/hub\.arkiv\.network\/faucet/)
     expect(read('../src/arkiv.ts')).toMatch(/Get some at the Arkiv faucet \(\$\{FAUCET_URL\}\)/)
-    expect(read('../src/pages/send.ts')).toMatch(/\(testnet faucet: \$\{FAUCET_URL\}\)/)
+    expect(read('../src/pages/send.ts')).toMatch(/get testnet GLM at the Arkiv faucet \(\$\{FAUCET_URL\}\)/) // fix 7 (R3-I4): the same form as arkiv.ts
   })
   it('R2-S9d: the Lease card does not promise a renewal next to a failed one', () => {
     expect(page).toMatch(/It expires after \$\{INBOX_LIFETIME_DAYS\} days\$\{renewFailed \? '' : '; opening this console renews it'\}\./)

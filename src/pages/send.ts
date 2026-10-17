@@ -178,7 +178,7 @@ export async function renderSend(root: HTMLElement, ref: InboxRef) {
       done.addEventListener('blur', () => done.removeAttribute('tabindex'), { once: true })
     } catch (e) {
       progress.error(mode === 'demo' && isOutOfFunds(e)
-        ? `The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet (testnet faucet: ${FAUCET_URL}).`
+        ? `The shared demo key has run out of testnet GLM, so demo mode cannot send right now. Try again later, or send with your own wallet and get testnet GLM at the Arkiv faucet (${FAUCET_URL}).`
         : explainError(e, 'reload this page and open "What can anyone see on Arkiv for this inbox?"'))
       sendBtn.disabled = false
     } finally {

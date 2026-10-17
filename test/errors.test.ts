@@ -11,7 +11,7 @@ describe('out of GLM', () => {
   it('is recognised for a plain transfer and for an Arkiv entity write', () => {
     expect(isOutOfFunds(plainTransfer)).toBe(true)
     expect(isOutOfFunds(entityWrite)).toBe(true)
-    expect(explainError(entityWrite)).toMatch(/no testnet GLM left/)
+    expect(explainError(entityWrite)).toMatch(/too little testnet GLM/)
   })
   it('is not claimed for other failures', () => {
     expect(isOutOfFunds(err('execution reverted'))).toBe(false)

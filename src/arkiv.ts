@@ -204,7 +204,7 @@ export function explainError(e: unknown, check = 'reload the page'): string {
   const err = e as { code?: number; shortMessage?: string; message?: string; cause?: { code?: number; message?: string } }
   const text = errorText(e)
   if (err?.code === 4001 || err?.cause?.code === 4001 || /user rejected|denied/i.test(text)) return 'The request was rejected in the wallet.'
-  if (isOutOfFunds(e)) return `This wallet has no testnet GLM left. Get some at the Arkiv faucet (${FAUCET_URL}).`
+  if (isOutOfFunds(e)) return `This wallet has too little testnet GLM. Get some at the Arkiv faucet (${FAUCET_URL}).`
   const first = (err?.shortMessage ?? err?.message ?? String(e)).split('\n')[0] ?? 'Unknown error'
   const cut = first.length > 240 ? first.slice(0, 240) + '...' : first
   return `${cut.replace(/\.?$/, '.')} Try again; if it keeps failing, reload the page or set your own RPC under Settings.`
