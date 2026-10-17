@@ -18,8 +18,8 @@ import { rpcSettings } from '../ui/settings'
 
 /** About 16 writes. Below this a throwaway newsroom is topped up from the shared demo sender. */
 const MIN_BALANCE = parseEther('0.002')
-/** A renewal sets the expiry to now + 7 days, so a second one does no harm. Not "check the expiry": after this error the Lease line still shows the one read before. */
-const RENEWAL_UNKNOWN = 'Whether the lease was renewed is unknown. "Renew now" under Lease renews it, and a second renewal does no harm.'
+/** A renewal sets the expiry to now + 7 days, so a second one does no harm. After this error the Lease line still shows the expiry read before; a reload reads it again (Refresh does not). */
+const RENEWAL_UNKNOWN = 'Whether the lease was renewed is unknown. Reload to see the expiry under Lease. If needed, "Renew now" renews it again, and a second renewal does no harm.'
 const wallet =() => (window as unknown as { ethereum?: EIP1193Provider }).ethereum
 
 export function renderNewsroom(root: HTMLElement) {

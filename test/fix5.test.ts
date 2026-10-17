@@ -77,6 +77,7 @@ describe('fix stage 5: the console (source checks; the browser runs are in evide
     const text = /const RENEWAL_UNKNOWN = '([^']+)'/.exec(page)?.[1] ?? ''
     expect(text).toMatch(/unknown/)
     expect(text).toMatch(/second renewal does no harm/)
+    expect(text).toMatch(/Reload to see the expiry under Lease/) // the Lease line is stale after this error; a reload reads it again
     expect(text).not.toMatch(/twice|tries again|could not/)
     expect(page).toMatch(/status\.error\(mayHaveBeenSent\(leaseError\) \? RENEWAL_UNKNOWN : `The inbox lease could not be checked or renewed\. \$\{explainError\(leaseError\)\} "Renew now" under Lease tries again\.`\)/)
     expect(page).toMatch(/status\.error\(mayHaveBeenSent\(e\) \? RENEWAL_UNKNOWN : explainError\(e\)\)\n\s*renew\.disabled = false/)
