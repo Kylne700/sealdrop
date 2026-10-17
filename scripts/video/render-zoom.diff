@@ -1,0 +1,64 @@
+--- tools/filmcraft/render.py
++++ tools/filmcraft/render.py
+@@ -13,11 +13,16 @@
+       "captions": [{"text": "Hello", "t0": 0.5, "t1": 3}]},          # t0/t1 relative to the segment
+      {"video": "clip2.webm", "audio": "narr2.wav", "hold_to_audio": true,
+       "transition": {"type": "Cross Dissolve", "seconds": 0.5},      # centred on the cut, no length change
+-      "blur": [[100, 100, 400, 80, 0, null]]}]}                      # [x, y, w, h, t0, t1] (t1 null = segment end);
++      "blur": [[100, 100, 400, 80, 0, null]],                        # [x, y, w, h, t0, t1] (t1 null = segment end);
+                                                                      # a blur at the segment start/end is padded by half the adjacent dissolve
++      "zoom": [{"t0": 1, "t1": 4, "scale": 1.3, "cx": 0.62, "cy": 0.35, "ramp": 0.5}]}]}
++                                                                     # punch-in 1 -> scale -> 1 on the video: t0/t1 seconds into the segment, ramp seconds
++                                                                     # to ease in and out (smoothstep), cx/cy (0-1) = focus in the frame (window is kept inside the frame);
++                                                                     # a blur box may not overlap a zoom window (blur boxes are fixed in sequence pixels)
+ A segment lasts as long as its video (or its audio when hold_to_audio freezes the last frame until the
+ audio ends). Writes work/<out>.fcproj, work/<out>.result.json and prints the result JSON.
+ shortcut: fps must divide 254016000000 ticks (24, 25, 30, 50, 60), no trimming or speed changes, 1 audio track.
++shortcut: zoom needs a source of the sequence size and must end inside the video (by its last frame when hold_to_audio freezes it).
+ """
+ import json, os, subprocess, sys, time
+ 
+@@ -46,6 +51,24 @@
+     return f"{ms // 3600000:02}:{ms // 60000 % 60:02}:{ms // 1000 % 60:02},{ms % 1000:03}"
+ 
+ 
++def zoom_keys(zooms, nv, W, H, fr):
++    """Zoom windows -> Motion keyframes [(frame in segment, scale %, position [x, y], interpolation)]. 100 % at t0, `scale` after `ramp`, 100 % again at t1.
++    The window is clamped to the frame (no black border). Motion's anchor stays at the source centre, so position = where that centre lands.
++    easeOut on a ramp's first key + easeIn on its last = smoothstep on scale AND position (same curve, so the focus point stays exact)."""
++    keys, end = [], -1
++    for z in zooms:
++        s, r = z["scale"], z.get("ramp", 0.5)
++        a, b, c, d = fr(z["t0"]), fr(z["t0"] + r), fr(z["t1"] - r), fr(z["t1"])
++        if not (s > 1 and end < a < b < c < d <= nv):  # strict: every keyframe has one ease role
++            die(f"zoom {z}: needs scale > 1, ramp >= 1 frame, 2 * ramp < t1 - t0, windows in order with a gap, all inside the video ({nv} frames)")
++        end = d
++        ox = min(max(z.get("cx", 0.5) * W - W / (2 * s), 0), W - W / s)  # window origin in the source, kept inside the frame
++        oy = min(max(z.get("cy", 0.5) * H - H / (2 * s), 0), H - H / s)
++        ctr, zin = (100, [W / 2, H / 2]), (100 * s, [s * (W / 2 - ox), s * (H / 2 - oy)])
++        keys += [(a, *ctr, "easeOut"), (b, *zin, "easeIn"), (c, *zin, "easeOut"), (d, *ctr, "easeIn")]
++    return keys
++
++
+ def main(plan_path):
+     plan = json.load(open(plan_path))
+     W, H, FPS = plan.get("width", 1280), plan.get("height", 720), plan.get("fps", 30)
+@@ -92,6 +115,18 @@
+             if da > n and not s.get("hold_to_audio"):
+                 die(f"segment video {s['video']} is shorter than its audio: set hold_to_audio")
+             c = place(item[s["video"]], "V1", cur, audio=False)
++            if s.get("zoom"):  # Motion keyframes (scale in %, position in sequence pixels), `time` = timeline ticks; with a hold the video's last frame is split off
++                pv = cli("probe", sb(s["video"]), opts=())["video"]
++                if (pv["width"], pv["height"]) != (W, H):
++                    die(f"{s['video']}: zoom needs a source of the sequence size {W}x{H}, not {pv['width']}x{pv['height']}")
++                zk = zoom_keys(s["zoom"], n - (da > n), W, H, fr)
++                for x, y, w, h, t0, t1 in s.get("blur", []):  # privacy: the blur layer is fixed in sequence pixels, it does not follow the zoomed picture
++                    if any(fr(t0 or 0) < zk[j + 3][0] and zk[j][0] < (n if t1 is None else fr(t1)) for j in range(0, len(zk), 4)):
++                        die(f"{s['video']}: blur box {[x, y, w, h]} overlaps a zoom window; blur boxes do not follow the zoom")
++                for f, sc, pos, ease in zk:
++                    for param, v in (("scale", sc), ("position", pos)):
++                        ex("effects.setParam", clip=c, effect="motion", param=param, value=v, time=tick(cur + f), keyframe=True)
++                        ex("effects.setInterpolation", clip=c, effect="motion", param=param, mediaTime=tick(f), interpolation=ease)  # mediaTime = clip time
+             if da > n:  # freeze the last frame until the audio ends; audio goes in AFTER the ripple insert
+                 ex("clip.insertFrameHoldSegment", clip=c, time=tick(cur + n - 1), seconds=(da - n) / FPS)
+                 n = da

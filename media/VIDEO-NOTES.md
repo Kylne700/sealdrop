@@ -10,6 +10,8 @@ VOICE=<n> bash scripts/video/build.sh
 
 `<n>` is the voice number in `tools/tts-samples/KEY.md` (1 piper ljspeech-high, 2 piper cori-high, 3 Kokoro `af_heart` = the default, 4 `af_bella`, 5 `am_fenrir`, 6 `bf_emma`). The default lives in one place, `scripts/video/config.mjs` (`VOICE`). The command re-voices `media/narration.md`, redraws the slides, re-cuts the footage to the new timing, re-renders with FilmCraft inside its sandbox, finishes the audio and runs every check. A different voice changes only the narration; the same recorded take is cut again. It needs `../tools/` next to the repo (TTS voices, FilmCraft; `VIDEO_TOOLS=<dir>` overrides) and the local take `media/raw/takes/<TAKE>` (`TAKE` in `config.mjs` or the environment; takes are local only, about 0.9 GB of raw material in `media/raw/`). Edit a line of `media/narration.md` and run the same command to change the words.
 
+The three punch-in zooms need a FilmCraft `render.py` with the zoom patch, `scripts/video/render-zoom.diff` (run from the folder that holds `tools/`: `patch -p0 < sealdrop/scripts/video/render-zoom.diff`; the patch is already applied to `tools/filmcraft/render.py` here, the original is `tools/filmcraft/work/sealdrop/render.py.orig`). Without the patch the same command still builds the video, just without zooms (`plan.mjs` says so); `ZOOM=0 bash scripts/video/build.sh` does the same on purpose.
+
 A new recording: `node scripts/video/take.mjs mock [name]` rehearses against the mock build (no RPC); `node scripts/video/take.mjs live [name]` is the real take on Tiramisu (needs the shared demo sender to hold at least 0.02 GLM and stays under 40 `arkiv_query` per hour; a take costs about 0.0052 GLM and 8 `arkiv_query`).
 
 ## What is in the video (about 156 s, 24 beats, narration in `media/narration.md`)
@@ -22,7 +24,7 @@ A new recording: `node scripts/video/take.mjs mock [name]` rehearses against the
 | 4 How it uses Arkiv | 31 | slides |
 | 5 Honest limits + end card | 21 | slides, end card with the repo and the live address |
 
-Captions are burned in (FilmCraft); no music; narration is a synthetic voice (Kokoro). The video does not say so on screen: if the submission form asks about AI use, say it there.
+Three punch-in zooms (FilmCraft Motion): the creator-verified card (1.3x), the tip arriving live (1.3x) and the ciphertext hexdump in the explorer (1.5x, so the window starts between the page's two columns); each eases in and out over 0.5 s and is back to full frame before the beat ends. Captions are burned in (FilmCraft) and are not zoomed; no music; narration is a synthetic voice (Kokoro). The video does not say so on screen: if the submission form asks about AI use, say it there.
 
 ## Real objects shown (take `live2`, Tiramisu testnet, chain 7738577, 2026-10-17 about 03:11 to 03:15 UTC)
 
@@ -36,9 +38,11 @@ Captions are burned in (FilmCraft); no music; narration is a synthetic voice (Ko
 - Nothing in the video comes from the mock build; mock takes (`mock1` to `mock9`) were rehearsals only.
 - RPC cost of the two live takes: 8 `arkiv_query` each (64 requests, 3 transactions each), no 429. The shared demo sender held 2.81 GLM before the first take. The Demo Desk inbox was not touched or renewed.
 
-## Checks (`scripts/video/post.mjs`, all passed on the final build)
+## Checks (`scripts/video/post.mjs`, all 10 passed on the final build, zooms included)
 
-ffprobe 156.0 s (limit 170), 1280x720, H.264 30 fps yuv420p bt709, AAC 48 kHz stereo, 10.64 MB (limit 25); loudness -16.03 LUFS, true peak -1.52 dBTP, LRA 2.5 (loudnorm I=-16 TP=-1.5, measured pass then linear; the target peak was lowered to -1.71 after the AAC encode overshot); quietest beat -19.4 dB mean (`volumedetect` per beat; all above -40); no silence of 1.5 s or more (`silencedetect` -45 dB); privacy denylist: 28 counts, all 0 (mp4 metadata via `exiftool`, `strings`, narration, plan, captions, FilmCraft project, every script, every PNG; plus the page text of the newsroom, source and explorer pages before and after each recorded step); 4 screenshots 1280x720, `cover.png` 1200x630, `contact-sheet.png` (one frame every 3 s).
+ffprobe 156.0 s (limit 170), 1280x720, H.264 30 fps yuv420p bt709, AAC 48 kHz stereo, 12.52 MB (limit 25); loudness -16.03 LUFS, true peak -1.52 dBTP, LRA 2.5 (loudnorm I=-16 TP=-1.5, measured pass then linear; the target peak was lowered to -1.71 after the AAC encode overshot); quietest beat -19.4 dB mean (`volumedetect` per beat; all above -40); no silence of 1.5 s or more (`silencedetect` -45 dB); privacy denylist: 30 counts, all 0 (mp4 metadata via `exiftool`, `strings`, narration, plan, captions, FilmCraft project, every script, every PNG; plus the page text of the newsroom, source and explorer pages before and after each recorded step); 4 screenshots 1280x720, `cover.png` 1200x630, `contact-sheet.png` (one frame every 3 s; it and the zoomed frames were read by eye).
+
+The one-command switch was run on the final scripts: `VOICE=5 bash scripts/video/build.sh` (Kokoro `am_fenrir`) passed 10/10 with the zooms (157.7 s, 12.48 MB, -16.16 LUFS, -1.62 dBTP), then voice 3 was rebuilt and passed again (same size to the byte as the previous voice-3 build). The pointer moves and the zooms are timed to the footage, which does not change with the voice; the sentences do. The alignment of pointer and sentence was tuned for voice 3, so with another voice a move can land a fraction of a second off its sentence (not reviewed for voice 5). Voices 1 and 2 (piper) were not run.
 
 ## Disclosures
 
@@ -48,6 +52,7 @@ ffprobe 156.0 s (limit 170), 1280x720, H.264 30 fps yuv420p bt709, AAC 48 kHz st
 - **Two windows, one story.** The newsroom (A) and the source (B) are two separate headless pages recorded at the same time; the cut alternates between them. It is not a screen recording of one desktop.
 - **Local address in the link field.** The app was served by a local static server from the production build of the repo HEAD (`2983c90`), so the inbox link on screen starts with `http://127.0.0.1:<port>/sealdrop/`. The end card shows `github.com/Kylne700/sealdrop` and `kylne700.github.io/sealdrop`; the second is the planned Pages address (NOT VERIFIED that it is live when this was written).
 - **Tooling beyond FilmCraft.** FilmCraft (v0.8.0, run only through `tools/filmcraft/fc-sandbox.sh`) edits: one segment per beat, captions, 0.3 s cross-dissolves, hold-to-audio, H.264/AAC export. The FilmCraft plan has no trim or speed change (spike finding) and the brief asks for a `loudnorm` finish, so ffmpeg does: trimming and transcoding the recorded footage to the narration timing, turning slide PNGs into clips, the final `loudnorm` pass with the metadata strip, the stills and the contact sheet.
+- **FilmCraft patch.** Stock FilmCraft (v0.8.0) has no zoom. `scripts/video/render-zoom.diff` adds a `zoom` list per segment to `render.py` (Motion keyframes for scale and position, smoothstep easing, window kept inside the frame, refuses a blur box under a zoom); `check.py` on `work/plan-test.json` still passes (13 PASS, 0 FAIL). The 1280x720 footage is scaled up, so zoomed pictures are slightly softer than the rest.
 - **Narration.** 408 words (the brief aimed at 330 to 380); a synthetic voice, Kokoro `af_heart` (Apache-2.0 weights; the author states part of the training data is synthetic; see `tools/tts-samples/KEY.md`). Pronunciation was checked with Kokoro's phonemes; only `subpoena` is respelled (`suppena`) and the path `arkiv/friction.md` is spoken as words. `en_US-lessac-medium` is not used (licence).
 - **"Anonymous".** The app's home page says "An anonymous tip line with no server to seize" (visible in the video); the narration avoids the word on purpose, because the README limits say the RPC node and the WebSocket see the sender's IP address. The lead may want the page and the narration to agree.
 - **Slides** are rendered by `scripts/video/slides.mjs` from the app's own colours, fonts and mark; the cover is `media/cover.png`.
@@ -55,10 +60,10 @@ ffprobe 156.0 s (limit 170), 1280x720, H.264 30 fps yuv420p bt709, AAC 48 kHz st
 ## NOT VERIFIED
 
 - Nobody listened to the final mix and nobody watched it in a real player: checks are ffprobe, loudness and silence measurements, and frames read by eye (contact sheet and key frames).
-- Dissolve and pointer motion were judged from frames and event timings, not played back.
+- Dissolve, zoom and pointer motion were judged from frames and event timings, not played back.
 - Whether the live address on the end card works; where the video will be hosted and in which form the submission wants it.
 - The `piper` voices 1 and 2 need `tools/tts/.venv`; the six voices were checked for licence, not for fit to this script.
 
 ## Files
 
-`scripts/video/`: `take.mjs` (recording of the story), `recorder.mjs` (browser, screencast, cursor, privacy dumps), `narration.mjs` + `tts.mjs` (narration to timed WAVs), `slides.mjs`, `cut.mjs` (footage per beat), `plan.mjs` (FilmCraft plan), `post.mjs` (loudness, metadata, checks, stills, contact sheet), `config.mjs` (the one place for voice, take, timing), `build.sh` (the single command).
+`scripts/video/`: `take.mjs` (recording of the story), `recorder.mjs` (browser, screencast, cursor, privacy dumps), `narration.mjs` + `tts.mjs` (narration to timed WAVs), `slides.mjs`, `cut.mjs` (footage per beat), `plan.mjs` (FilmCraft plan), `post.mjs` (loudness, metadata, checks, stills, contact sheet), `config.mjs` (the one place for voice, take, timing), `build.sh` (the single command), `render-zoom.diff` (the FilmCraft zoom patch).
