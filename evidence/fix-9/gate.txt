@@ -1,4 +1,64 @@
-gate on 26957f6 plus the evidence of this stage (run before the evidence commit): node scripts/secret-scan.mjs && npm ci && npm test && npm run typecheck && npm run build && npm run check:bundle  -> exit 0
+Gate = node scripts/secret-scan.mjs && npm ci && npm test && npm run typecheck && npm run build && npm run check:bundle; it ran before each of the three commits of this stage, exit 0 each time (22 test files, 160 tests).
+
+===== 1. before 26957f6 (source and unit test; run on the tree being committed)
+secret scan: clean (4 secrets checked against tracked and staged files)
+
+added 83 packages in 2s
+
+30 packages are looking for funding
+  run `npm fund` for details
+npm warn allow-scripts 1 package has install scripts not yet covered by allowScripts:
+npm warn allow-scripts   esbuild@0.28.2 (postinstall: node install.js)
+npm warn allow-scripts
+npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+
+> sealdrop@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.5 <repo>
+
+
+ Test Files  22 passed (22)
+      Tests  160 passed (160)
+   Start at  03:09:43
+   Duration  5.64s (tests 60%, import 29%, transform 10%, worker 1%)
+
+
+> sealdrop@0.1.0 typecheck
+> tsc --noEmit
+
+
+> sealdrop@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 480 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   2.37 kB │ gzip:   1.19 kB
+dist/THIRD-PARTY-LICENSES.md      9.10 kB
+dist/assets/index-BOTaE0r7.css   18.27 kB │ gzip:   4.80 kB
+dist/assets/native-BKj27wfc.js    0.30 kB │ gzip:   0.17 kB
+dist/assets/ccip-JjepGCsn.js      2.83 kB │ gzip:   1.30 kB
+dist/assets/index-6oYafWmH.js   429.13 kB │ gzip: 135.12 kB
+
+✓ built in 131ms
+
+> sealdrop@0.1.0 check:bundle
+> node scripts/check-bundle.mjs
+
+PASS  dist/ has 6 files
+PASS  demo-sender key is in the bundle (public testnet-only demo affordance, by design)
+PASS  FUNDER_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_BOX_SECRET is NOT in the bundle
+PASS  no .env file in dist/
+bundle check: all rules pass
+gate exit=0
+
+===== 2. before f5cf41c (evidence and design.md)
 secret scan: clean (4 secrets checked against tracked and staged files)
 
 added 83 packages, and audited 84 packages in 2s
@@ -45,6 +105,65 @@ dist/assets/ccip-JjepGCsn.js      2.83 kB │ gzip:   1.30 kB
 dist/assets/index-6oYafWmH.js   429.13 kB │ gzip: 135.12 kB
 
 ✓ built in 132ms
+
+> sealdrop@0.1.0 check:bundle
+> node scripts/check-bundle.mjs
+
+PASS  dist/ has 6 files
+PASS  demo-sender key is in the bundle (public testnet-only demo affordance, by design)
+PASS  FUNDER_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_PRIVATE_KEY is NOT in the bundle
+PASS  DEMO_DESK_BOX_SECRET is NOT in the bundle
+PASS  no .env file in dist/
+bundle check: all rules pass
+
+===== 3. before the third commit (focus-out evidence, design.md wording, this file)
+secret scan: clean (4 secrets checked against tracked and staged files)
+
+added 83 packages, and audited 84 packages in 2s
+
+30 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+npm warn allow-scripts 1 package has install scripts not yet covered by allowScripts:
+npm warn allow-scripts   esbuild@0.28.2 (postinstall: node install.js)
+npm warn allow-scripts
+npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+
+> sealdrop@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.5 <repo>
+
+
+ Test Files  22 passed (22)
+      Tests  160 passed (160)
+   Start at  03:28:38
+   Duration  5.60s (tests 59%, import 30%, transform 11%, worker 1%)
+
+
+> sealdrop@0.1.0 typecheck
+> tsc --noEmit
+
+
+> sealdrop@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 480 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   2.37 kB │ gzip:   1.19 kB
+dist/THIRD-PARTY-LICENSES.md      9.10 kB
+dist/assets/index-BOTaE0r7.css   18.27 kB │ gzip:   4.80 kB
+dist/assets/native-BKj27wfc.js    0.30 kB │ gzip:   0.17 kB
+dist/assets/ccip-JjepGCsn.js      2.83 kB │ gzip:   1.30 kB
+dist/assets/index-6oYafWmH.js   429.13 kB │ gzip: 135.12 kB
+
+✓ built in 136ms
 
 > sealdrop@0.1.0 check:bundle
 > node scripts/check-bundle.mjs

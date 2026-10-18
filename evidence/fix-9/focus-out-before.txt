@@ -1,0 +1,2 @@
+43f-console-renew-focus button|testid=renew|Renew now|disabled=false
+44f-console-renew-5xx-focus button|testid=renew|Renew now|disabled=false

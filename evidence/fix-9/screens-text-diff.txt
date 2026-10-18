@@ -19,3 +19,4 @@ diff -r screens-base/text/17-send-world.txt screens-after/text/17-send-world.txt
 == status-lines.txt (every status line of every state): diff exit 0  (0 = identical)
 == summary.txt minus its first line (which names the output directory): diff exit 0  (0 = identical)
 == axe.json: identical
+== focus-out.txt (FOCUS_OUT: the control that has focus after Renew, states 43f and 44f; copies: focus-out-before.txt, focus-out-after.txt): identical
