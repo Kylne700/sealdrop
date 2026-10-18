@@ -44,9 +44,11 @@ export const COPY_BLOCKED = 'Copy by hand'
 export function copyButton(getText: () => string, label = 'Copy', cls = 'secondary') {
   const text = h('span', null, label)
   const b = h('button', { type: 'button', class: `${cls} copy`, 'data-label': label }, text)
+  let timer: ReturnType<typeof setTimeout> | undefined // R5-I2: the last click owns the full 1.8 s
   b.addEventListener('click', async () => {
     try { await navigator.clipboard.writeText(getText()); text.textContent = 'Copied ✓' } catch { text.textContent = COPY_BLOCKED }
-    setTimeout(() => (text.textContent = label), 1800)
+    clearTimeout(timer)
+    timer = setTimeout(() => (text.textContent = label), 1800)
   })
   return b
 }
@@ -102,12 +104,14 @@ export function hex(value: string, o: { href?: string; label?: string; full?: bo
   const v = o.href ? h('a', { class: 'hex-v', href: o.href, target: '_blank', rel: 'noopener noreferrer', title: value }, ...parts) : h('code', { class: 'hex-v', title: value }, ...parts)
   const done = h('span', { class: 'vh', role: 'status' })
   const copy = h('button', { type: 'button', class: 'icon-btn', title: 'Copy', 'aria-label': `Copy ${o.label ?? 'value'}` }, icon('copy'))
+  let timer: ReturnType<typeof setTimeout> | undefined // R5-I2: the last click owns the full 1.8 s
   copy.addEventListener('click', async () => {
     let ok = true
     try { await navigator.clipboard.writeText(value) } catch { ok = false }
     done.textContent = ok ? 'Copied' : 'Select and copy manually'
     copy.replaceChildren(icon(ok ? 'check' : 'copy'))
-    setTimeout(() => { done.textContent = ''; copy.replaceChildren(icon('copy')) }, 1800)
+    clearTimeout(timer)
+    timer = setTimeout(() => { done.textContent = ''; copy.replaceChildren(icon('copy')) }, 1800)
   })
   return h('span', { class: o.full ? 'hex full' : 'hex' }, v, copy, done)
 }

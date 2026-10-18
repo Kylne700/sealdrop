@@ -299,7 +299,8 @@ async function renderConsole(root: HTMLElement, identity: Identity, again: () =>
       for (const [key, { tip }] of tips) if (tip.expiresAt <= t.head) dropTip(key) // expired: Arkiv no longer has them (L-06)
       for (const key of burnedAway(burnUnknown, (k) => tips.get(k)?.tip.createdAt, swept, t.head)) dropTip(key) // R4-L2: that Burn went through
       setLastSeen(live.key, t.head)
-      status.info(swept.tips.length ? `${swept.tips.length} tip${swept.tips.length === 1 ? '' : 's'} on Arkiv${swept.truncated ? ' (showing the first pages only)' : ''}.` : 'No tips yet.')
+      const n = tips.size // the rows listed, not the sweep's answer: a live tip that landed during the sweep is listed too (R5-L1)
+      status.info(n ? `${n} tip${n === 1 ? '' : 's'} on Arkiv${swept.truncated ? ' (showing the first pages only)' : ''}.` : 'No tips yet.')
       return true
     } catch (e) {
       readFailed(explainError(e))
