@@ -8,7 +8,7 @@ extends it). There is no Sealdrop backend, no account, and no server that can re
 does not hide your network address: use Tor Browser.
 
 * Live app: https://kylne700.github.io/sealdrop/
-* Demo video (3 minutes or less): {{VIDEO_URL}}
+* Demo video (3 minutes or less): https://www.youtube.com/watch?v=A8mGX0T7vDY
 * Data contract (entity types, attributes, wire format, queries): [arkiv/schema.md](arkiv/schema.md)
 * Friction report (real, with versions and repro steps): [arkiv/friction.md](arkiv/friction.md)
 * Evidence (real output from the Tiramisu testnet, committed so it survives Entity Expiration): [evidence/](evidence/)
