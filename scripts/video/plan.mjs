@@ -16,7 +16,7 @@ const dissolve = { type: 'Cross Dissolve', seconds: DISSOLVE }
 // t0/t1 are seconds into the beat's footage, which is cut at fixed offsets from the pointer events, so they hold for every voice;
 // cx/cy = focus point (0-1), the window stays inside the frame. Without the patch (or with ZOOM=0) the video is built without zooms.
 const ZOOM = {
-  verify: [{ t0: 2.9, t1: 6.5, scale: 1.3, cx: 0.5, cy: 0.4, ramp: 0.5 }], // the creator-verified card (pointer reaches it at 3.9 s)
+  verify: [{ t0: 2.9, t1: 7.2, scale: 1.3, cx: 0.5, cy: 0.4, ramp: 0.5 }], // the creator-verified card: the pointer visits the key chip (3.6 s), the creator address (5.4), the owner chip (6.2) and the lease row (6.75)
   arrive: [{ t0: 0.8, t1: 6.6, scale: 1.3, cx: 0.5, cy: 0.45, ramp: 0.5 }], // the tip arriving live (it appears at 1.2 s)
   explorer: [{ t0: 2.5, t1: 3.8, scale: 1.5, cx: 0.67, cy: 0.556, ramp: 0.4 }], // the ciphertext hexdump (the page has scrolled at 2.6 s); at 1.5 the window starts between the page's two columns; full frame again when "a few attributes" is spoken (3.4 s)
 }

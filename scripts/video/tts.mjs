@@ -84,13 +84,71 @@ for (const b of beats) {
   await ff(['-i', b.joined, '-af', `volume=${gain.toFixed(2)}dB`, ...A, b.file])
 }
 
-// ---- caption cues: each sentence is cut at commas/colons; time is shared by character count
+// ---- caption cues: each sentence is cut at commas/colons (captionChunks). A cut that follows a pause in the speech is placed in that
+// pause (silencedetect on the sentence's own WAV: the voice rests 0.4 to 1 s at a colon or comma, so a share by character count alone
+// ran up to 0.8 s early). Between two such anchors the time is still shared by character count.
+const PAUSE_MIN = 0.2 // s, a rest shorter than this is a plosive or a breath, not a comma
+const SKIP = 0.7 // s, cost of a pause with no comma or a comma with no pause in the matching below
+async function pausesOf(wav, dur) {
+  const r = await run('ffmpeg', ['-hide_banner', '-nostdin', '-i', wav, '-af', `silencedetect=noise=-38dB:d=${PAUSE_MIN}`, '-f', 'null', '-'])
+  const out = []
+  for (const l of r.stderr.split('\n')) {
+    const a = l.match(/silence_start: ([\d.]+)/), b = l.match(/silence_end: ([\d.]+)/)
+    if (a) out.push({ a: Number(a[1]) })
+    else if (b && out.length) out.at(-1).b = Number(b[1])
+  }
+  return out.filter((p) => p.b !== undefined && p.a > 0.1 && p.b < dur - 0.1)
+}
+
+/** Caption cues of one sentence ([{text, t0, t1}], seconds from the sentence start). */
+function cuesOf(text, dur, pauses) {
+  // lengths are counted in what the voice says (a path spelled out takes longer than it prints), not in what the caption shows
+  const chunks = captionChunks(text), len = chunks.map((c) => spoken(c).length), n = len.reduce((k, x) => k + x, 0)
+  const ends = len.map((_, i) => len.slice(0, i + 1).reduce((k, x) => k + x, 0)) // offset where each chunk ends
+  const marks = chunks.flatMap((c, k) => [...c].flatMap((ch, i) => (',:;'.includes(ch) ? [(ends[k] - len[k]) + spoken(c.slice(0, i + 1)).length] : [])))
+  // which comma each pause belongs to: monotonic matching of the pause's place in speech time with the comma's place by character count
+  const speech = dur - pauses.reduce((k, p) => k + p.b - p.a, 0)
+  let rested = 0
+  const at = pauses.map((p) => { const u = p.a - rested; rested += p.b - p.a; return u })
+  const want = marks.map((c) => (speech * c) / n)
+  const best = Array.from({ length: pauses.length + 1 }, () => new Array(marks.length + 1).fill(0)), via = best.map((r) => r.map(() => ''))
+  for (let i = 0; i <= pauses.length; i++) for (let j = 0; j <= marks.length; j++) {
+    if (!i && !j) continue
+    const opt = []
+    if (i) opt.push([best[i - 1][j] + SKIP, 'p'])
+    if (j) opt.push([best[i][j - 1] + SKIP, 'm'])
+    if (i && j && Math.abs(at[i - 1] - want[j - 1]) < 2 * SKIP) opt.push([best[i - 1][j - 1] + Math.abs(at[i - 1] - want[j - 1]), 'x'])
+    ;[best[i][j], via[i][j]] = opt.reduce((a, b) => (b[0] < a[0] ? b : a))
+  }
+  const anchors = [{ c: 0, s: 0, e: 0 }] // c: character offset; e: when the cue before it ends, s: when the cue after it starts
+  const found = []
+  for (let i = pauses.length, j = marks.length; i || j;) {
+    const v = via[i][j]
+    if (v === 'x') { const p = pauses[--i], half = Math.min(0.25, (p.b - p.a) / 2); found.push({ c: marks[--j], e: p.a + half, s: p.b - half }) } else if (v === 'p') i--; else j--
+  }
+  anchors.push(...found.reverse(), { c: n, s: dur, e: dur })
+  const time = (c, side) => {
+    const hit = anchors.find((a) => a.c === c)
+    if (hit) return hit[side]
+    const k = anchors.findIndex((a) => a.c > c), a = anchors[k - 1], b = anchors[k]
+    return a.s + ((b.e - a.s) * (c - a.c)) / (b.c - a.c)
+  }
+  const cues = chunks.map((t, k) => ({ text: t, t0: k ? time(ends[k - 1], 's') : 0, t1: k < chunks.length - 1 ? time(ends[k], 'e') : dur }))
+  // a mismatch (a cue under half a second, or out of order) falls back to the plain share by character count
+  if (cues.some((c) => c.t1 - c.t0 < 0.5) && chunks.length > 1) {
+    let t = 0
+    return chunks.map((text, k) => { const t0 = t; t += (dur * len[k]) / n; return { text, t0, t1: t } })
+  }
+  return cues
+}
+
 for (const b of beats) {
-  b.cues = b.timing.flatMap((s) => {
-    const parts = captionChunks(s.text), total = parts.reduce((n, p) => n + p.length, 0)
-    let t = s.t0
-    return parts.map((text) => { const t0 = t; t += ((s.t1 - s.t0) * text.length) / total; return { text, t0: round3(t0), t1: round3(t) } })
-  })
+  const mine = jobs.filter((j) => j.beat === b)
+  b.cues = []
+  for (const [i, s] of b.timing.entries()) {
+    const dur = s.t1 - s.t0
+    for (const c of cuesOf(s.text, dur, await pausesOf(mine[i].wav, dur))) b.cues.push({ text: c.text, t0: round3(s.t0 + c.t0), t1: round3(s.t0 + c.t1) })
+  }
 }
 
 const out = { voice: VOICE, label: v.label, speed: v.speed ?? null, gain_db: round3(gain), measured: { i: j.input_i, tp: j.input_tp, lra: j.input_lra },

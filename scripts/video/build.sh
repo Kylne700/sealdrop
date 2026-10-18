@@ -16,5 +16,5 @@ node "$V/tts.mjs"      # narration -> one WAV per beat + media/raw/timing.json (
 node "$V/slides.mjs"   # slides for the story parts that are not screen footage
 node "$V/cut.mjs"      # footage trimmed to the narration timing
 node "$V/plan.mjs"     # edit plan for FilmCraft
-python3 -I "$TOOLS/filmcraft/render.py" "$TOOLS/filmcraft/work/sealdrop/plan.json"   # FilmCraft, inside its sandbox
+python3 -I "$TOOLS/filmcraft/render.py" "$TOOLS/filmcraft/work/sealdrop/plan.json" | tee media/raw/render.json   # FilmCraft, inside its sandbox; its result (real segment times) is kept for asr-compare and detect
 node "$V/post.mjs"     # loudness, metadata, checks, contact sheet, screenshots

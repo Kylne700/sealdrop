@@ -32,7 +32,7 @@ export const VOICES = {
 export const SAY = resolve(TOOLS, 'tts-kokoro/say.py')
 
 // The recorded take the footage is cut from (media/raw/takes/<TAKE>, kept locally, never committed). It does not depend on the voice.
-export const TAKE = process.env.TAKE ?? 'live2'
+export const TAKE = process.env.TAKE ?? 'live3'
 
 // Spelled differently for the speech engine than on screen. Add a pair only when the printed phonemes sound wrong.
 // Checked with Kokoro's tokenizer: Arkiv, Sealdrop, Tiramisu, WebSocket, ciphertext, SecureDrop are fine as written.

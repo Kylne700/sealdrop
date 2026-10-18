@@ -4,14 +4,21 @@
 //   E = the Arkiv Data Explorer showing the real tip entity
 // node scripts/video/take.mjs mock [name]   rehearsal on the mock build (media/raw/site-mock): no RPC
 // node scripts/video/take.mjs live [name]   the real take against Tiramisu (media/raw/site): about 10 RPC queries
+// SITE_URL=https://<owner>.github.io/<repo>/ node scripts/video/take.mjs live [name]
+//                                           the same live take on the deployed site: no local server is started, and the inbox link
+//                                           on screen is that public address. Without SITE_URL nothing changes. Live only: the mock
+//                                           rehearsal needs the local mock build.
 // Writes media/raw/takes/<name>/{A,B,E}/clip.mp4 + take.json (events on the shared wall clock) for cut.mjs.
+import { createHash } from 'node:crypto'
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { RAW, SEALDROP } from './config.mjs'
-import { Cam, Ledger, launch, now, queriesInLast, serveSite, sleep, step } from './recorder.mjs'
+import { Cam, Ledger, launch, now, queriesInLast, remoteSite, serveSite, sleep, step } from './recorder.mjs'
 
 const [mode = 'mock', takeName] = process.argv.slice(2)
 if (!['mock', 'live'].includes(mode)) throw new Error('usage: take.mjs mock|live [name]')
+const SITE_URL = process.env.SITE_URL ?? ''
+if (SITE_URL && mode !== 'live') throw new Error('SITE_URL is for live takes only: the mock rehearsal runs on the local mock build (unset SITE_URL)')
 const name = takeName ?? `${mode}-${new Date().toISOString().slice(11, 19).replaceAll(':', '')}`
 const DIR = resolve(RAW, 'takes', name)
 rmSync(DIR, { recursive: true, force: true })
@@ -20,6 +27,11 @@ const STILLS = resolve(DIR, 'stills')
 mkdirSync(STILLS, { recursive: true })
 
 const TIP_TEXT = 'SYNTHETIC TEST TIP: made-up message, nothing real.'
+// the console's own link: #/send/<creator>/<inbox id>/<key check>, the key check being 22 base64url characters
+const LINK = /#\/send\/0x[0-9a-fA-F]{40}\/[a-z0-9-]+\/[A-Za-z0-9_-]{22}$/
+// the mock serves every source page the same inbox key (32 bytes of 7), so a rehearsal opens the link with that key's check
+const MOCK_FP = createHash('sha256').update(Buffer.alloc(32, 7)).digest().subarray(0, 16).toString('base64url')
+const LOCAL_ADDRESS = /127\.0\.0\.1|localhost|\[::1\]/i // must never be on screen when the site is the deployed one
 const REHEARSAL_ENTITY = '0xc70a2ae78c9434a6625fc148f98e01111570b15afa0991217e4a4d71a00c66ad' // an existing demo tip, for the explorer rehearsal
 const cfg = readFileSync(resolve(SEALDROP, 'src/config.ts'), 'utf8')
 const RPC_HTTP = cfg.match(/RPC_HTTP = '([^']+)'/)[1]
@@ -44,7 +56,8 @@ if (mode === 'live') {
   if (wei < 20n * 10n ** 15n) throw new Error('the shared demo sender has under 0.02 GLM: a full take needs about 0.01')
 }
 
-const site = await serveSite(resolve(RAW, mode === 'mock' ? 'site-mock' : 'site'))
+const site = SITE_URL ? remoteSite(SITE_URL) : await serveSite(resolve(RAW, mode === 'mock' ? 'site-mock' : 'site'))
+console.log(`recording on ${site.url}${site.base}${SITE_URL ? ' (deployed site, no local server)' : ' (local preview)'}`)
 const { browser, close } = await launch()
 const HOME = `${site.url}${site.base}#/`
 const watchdog = setTimeout(() => { console.error('take exceeded 9 minutes: aborting'); process.exit(3) }, 9 * 60 * 1000)
@@ -62,6 +75,7 @@ const S = (label, fn, ms) => step(label, async () => { const r = await fn(); if 
 try {
   A = await Cam.create(browser, 'A', DIR, { origin: site.url, ledger })
   B = await Cam.create(browser, 'B', DIR, { origin: site.url, ledger })
+  if (SITE_URL) A.forbid = B.forbid = LOCAL_ADDRESS
   if (mode === 'mock') {
     const mock = (m) => ({ live: 'live', ...m })
     await A.page.evaluateOnNewDocument((m) => { window.__MOCK = m }, mock({ inbox: 'setup', sendMs: 2500, tips: [] }))
@@ -104,6 +118,7 @@ try {
   }, 100000)
   await A.page.mouse.move(A.x + 1, A.y)
   meta.inbox_key = (await hexTitles(A, '[data-testid=inbox] dl.facts .hex-v'))[2]
+  if (!/^0x[0-9a-f]{64}$/i.test(meta.inbox_key ?? '')) throw new Error(`the third value of the inbox card is not an entity key: ${meta.inbox_key}`)
   await A.privacy('inbox ready')
   await sleep(1500)
   await A.scrollToEl('[data-testid=inbox]', 0.05)
@@ -114,12 +129,20 @@ try {
     await A.waitText('.linkrow button', /Copied/, 5000)
     A.ev('copied')
     meta.link = await A.page.evaluate(() => navigator.clipboard.readText())
-    if (!/#\/send\/0x[0-9a-fA-F]{40}\//.test(meta.link)) throw new Error('the clipboard does not hold an inbox link')
+    if (!LINK.test(meta.link)) throw new Error('the clipboard does not hold an inbox link with a key check')
+    if (!meta.link.startsWith(`${site.url}${site.base}#/send/`)) throw new Error(`the copied link does not start with ${site.url}${site.base}`)
   }, 20000)
   await sleep(1000)
 
   // B opens the copied link as a source (recording starts on the loaded page)
-  await S('B: open the link', async () => { await B.goto(meta.link, '[data-testid=message]'); await B.privacy('source page'); await B.still(resolve(STILLS, 'source.png')); B.ev('b_loaded') }, 40000)
+  const openLink = mode === 'mock' ? meta.link.replace(/[^/]+$/, MOCK_FP) : meta.link
+  await S('B: open the link', async () => {
+    await B.goto(openLink, '[data-testid=message]')
+    // the chip must say the key matches the link (never the "No key check" warning), or the video would show the wrong page
+    const chip = await B.page.$eval('[data-testid=inbox] .inbox-head .chip', (e) => e.textContent.trim())
+    if (!/Key matches this link/.test(chip) || (await B.page.$('[data-testid=no-key-check]'))) throw new Error(`the source page shows "${chip}" instead of "Key matches this link"`)
+    await B.privacy('source page'); await B.still(resolve(STILLS, 'source.png')); B.ev('b_loaded')
+  }, 40000)
   await B.startRecording()
 
   // A moves to the tips list: the live arrival is filmed there
@@ -130,17 +153,20 @@ try {
     await A.privacy('tips view')
     await A.glide(1130, 430, 0.8) // park the pointer on blank page, away from the buttons the scroll moved under it
   })()
-  // B: the page verifies the inbox before anything is sent. The pointer visits the creator chip, the owner chip, the lease row.
+  // B: the page verifies the inbox before anything is sent. The pointer follows the sentence "its key against the link, then its creator,
+  // owner and lease": the key chip, the creator's address, the owner chip, the lease row. cut.mjs starts the beat 1.35 s into this clip,
+  // and the arrival times (4.95, 6.75, 7.55, 8.1 s) are the moments the voice says key, creator, owner and lease (1.35 s + 3.6, 5.4, 6.2, 6.75).
   const rect = (sel, within, nth = 0) => B.page.evaluate((s, w, n) => {
     const root = document.querySelector('[data-testid=inbox]')
     const el = w ? [...root.querySelectorAll(s)].filter((e) => new RegExp(w).test(e.textContent))[n] : root.querySelector(s)
     const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }
   }, sel, within, nth)
   await dwell(B, 'verify', 9.6, async () => {
-    await sleep(4400)
-    const c = await rect('.inbox-head .chip'); await B.glide(c.x, c.y, 0.7); B.ev('point_creator'); await sleep(450)
-    const o = await rect('dd .chip', 'Owner is the creator'); await B.glide(o.x, o.y, 0.7); B.ev('point_owner_chip'); await sleep(450)
-    const l = await rect('dd', 'Inbox is alive for|alive for|\\(until'); await B.glide(l.x, l.y - 6, 0.7); B.ev('point_lease_row')
+    await sleep(4150)
+    const k = await rect('.inbox-head .chip'); await B.glide(k.x, k.y, 0.8); B.ev('point_key'); await sleep(1200)
+    const c = await rect('dd .hex-v'); await B.glide(c.x, c.y, 0.6); B.ev('point_creator'); await sleep(200)
+    const o = await rect('dd .chip', 'Owner is the creator'); await B.glide(o.x, o.y, 0.6); B.ev('point_owner_chip')
+    const l = await rect('dd', 'Inbox is alive for|alive for|\\(until'); await B.glide(l.x, l.y - 6, 0.55); B.ev('point_lease_row')
   })
   await aTips
 
@@ -220,6 +246,7 @@ try {
   // ===== the explorer: a separate take, once the chain has had time to index the new entity =====================
   const entity = mode === 'live' ? meta.tip_key : REHEARSAL_ENTITY
   E = await Cam.create(browser, 'E', DIR, { ledger })
+  if (SITE_URL) E.forbid = LOCAL_ADDRESS
   if (mode === 'live') {
     console.log('waiting 40 s for the explorer to index the new entity')
     await sleep(40000)
@@ -248,7 +275,10 @@ try {
   meta.finished = new Date().toISOString()
   meta.seconds = Math.round(now() - T0)
   meta.ledger = { ...ledger.counts, limited: ledger.limited }
+  meta.site = `${site.url}${site.base}`
+  meta.local_address_hits = A.forbidHits + B.forbidHits + E.forbidHits // page-text dumps that named 127.0.0.1 or localhost (only counted with SITE_URL)
   writeFileSync(resolve(DIR, 'take.json'), JSON.stringify({ meta, events: [...A.events, ...B.events, ...E.events].sort((a, b) => a.t - b.t) }, null, 1))
+  if (meta.local_address_hits) throw new Error(`${meta.local_address_hits} page-text dump(s) name a local address: see take.json`)
   console.log(`take ${name} ok in ${meta.seconds} s; ledger ${JSON.stringify(meta.ledger)}`)
   console.log(JSON.stringify({ A: meta.cams.A.seconds, B: meta.cams.B.seconds, E: meta.cams.E.seconds, max_gap: [meta.cams.A.max_gap, meta.cams.B.max_gap, meta.cams.E.max_gap], errors: [A.errors, B.errors, E.errors] }))
 } catch (e) {

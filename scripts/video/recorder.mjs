@@ -30,6 +30,13 @@ export function serveSite(dir, base = '/sealdrop/') {
   return new Promise((ok) => server.listen(0, '127.0.0.1', () => ok({ url: `http://127.0.0.1:${server.address().port}`, base, close: () => server.close() })))
 }
 
+/** A deployed site instead of the local preview (SITE_URL): the same shape as serveSite's result, nothing to start or close. */
+export function remoteSite(href) {
+  const u = new URL(href)
+  if (u.protocol !== 'https:') throw new Error(`SITE_URL must be an https address, got ${u.protocol}`)
+  return { url: u.origin, base: u.pathname.endsWith('/') ? u.pathname : `${u.pathname}/`, close: () => {} }
+}
+
 // ---- the injected pointer (CSP-safe: CSSOM and Web Animations only, no <style>, no style attributes) --------------
 function cursorInit() {
   if (window.top !== window) return
@@ -121,7 +128,8 @@ export class Cam {
   }
 
   constructor(name, page, cdp, dir) {
-    Object.assign(this, { name, page, cdp, dir, frames: [], events: [], errors: [], x: 1120, y: 600, rng: mulberry32(7) })
+    // forbid: a RegExp the page text must never match (set when recording a deployed site: no local address may reach the screen)
+    Object.assign(this, { name, page, cdp, dir, frames: [], events: [], errors: [], x: 1120, y: 600, rng: mulberry32(7), forbid: null, forbidHits: 0 })
     mkdirSync(join(dir, 'frames'), { recursive: true })
   }
 
@@ -249,6 +257,7 @@ export class Cam {
     this.ev('privacy', { label, hits: n, chars: text.length })
     appendFileSync(resolve(RAW, 'privacy-log.txt'), `${new Date().toISOString()} ${this.name} ${label} hits=${n} chars=${text.length}\n`)
     if (n) throw new Error(`privacy check hit (${n}) on ${this.name}:${label}`)
+    if (this.forbid?.test(text)) { this.forbidHits++; this.ev('forbidden_text', { label }); console.error(`  [${this.name}] ${label}: the page text matches the forbidden pattern`) }
     return text
   }
 
