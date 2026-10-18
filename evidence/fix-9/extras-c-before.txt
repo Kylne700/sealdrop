@@ -1,0 +1,7 @@
+X2c while the sweep is in flight: status[status] "A new tip just arrived." rows=["live-arrival: made up."]
+PASS  X2c the live tip is listed while the sweep is in flight  :: ["live-arrival: made up."]
+X2c after the sweep: status[status] "No tips yet." rows=["live-arrival: made up."]
+PASS  X2c the live tip is still listed after the sweep (nothing dropped)  :: ["live-arrival: made up."]
+FAIL  X2c the status line does not say "No tips yet." while a tip is listed (R5-L1: expected FAIL on dd76bcd)  :: status "No tips yet.", 1 row(s)
+FAIL  X2c-status the status line counts the rows listed: "1 tip on Arkiv." (R5-L1: expected FAIL on dd76bcd)  :: status "No tips yet.", 1 row(s)
+2 CHECK(S) FAILED

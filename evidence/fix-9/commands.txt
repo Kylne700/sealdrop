@@ -1,0 +1,34 @@
+Fix stage 9 (QA R5's R5-L1 and R5-I2): how the files in this folder were made. <repo> is the sealdrop checkout; /tmp/fq-F9 is a scratch directory.
+Before = dd76bcd (fix stage 8 and the Settings spacing, live). After = 26957f6 (the fix commit of this stage; the evidence commit after it changes no source).
+Every browser job is headless Chromium (puppeteer-core with /usr/bin/chromium, or Playwright 1.64.1 Chromium for copybtn.mjs) on the mock Arkiv (window.__MOCK, no
+network, no key material), run with `env -u DISPLAY nice -n 10`, one browser at a time. No live RPC run at all. The extras and the row probes freeze the page's Date (2026-10-17 09:30 UTC);
+copybtn.mjs uses real time, because it measures the 1.8 s reset.
+
+Setup
+  git clone <repo> /tmp/fq-F9/base   (dd76bcd);  ln -s <repo>/.env.local /tmp/fq-F9/base/.env.local;  (cd /tmp/fq-F9/base && npm ci --prefer-offline --no-audit)
+  git clone <repo> /tmp/fq-F9/after  (26957f6);  .env.local linked the same way; node_modules linked to base's (package-lock.json is identical: cmp)
+  cp <repo>/evidence/final-qa/R3/scripts/screens/* /tmp/fq-F9/harness/ ; chmod +x build-mock-r2.sh screens-r2.sh there (the originals have no exec bit and screens-r2.sh calls the build script directly)
+  mock for R5-L1:   bash /tmp/fq-F9/harness/build-mock-r2.sh /tmp/fq-F9/<base|after> <repo>/evidence/final-qa/R5/scripts/mock-arkiv-r5.ts /tmp/fq-F9/dist-<base|after>-r5
+                    (R5's mock answers a sweep from the state at the moment the query arrives and then delays it, so a tip that lands during the delay is not in the answer)
+  mock for the rest: the R2 mock (mock-arkiv-r2.ts) built from each clone: before = /tmp/fq-F9/screens-base/dist (made by screens-r2.sh); after = /tmp/fq-F9/dist-after-r2
+                     (build-mock-r2.sh on the after clone; diff -rq shows it identical to the dist/ that the after screens run builds)
+
+1. Unit test (item 2, both helpers; item 1 has none: the status line is built inside the console page and no DOM library is installed)
+     cp <repo>/test/fix9.test.ts /tmp/fq-F9/base/test/ && (cd /tmp/fq-F9/base && npx vitest run test/fix9.test.ts)   -> unit-before.txt   (4 failed of 4)
+     (cd <repo> && npx vitest run test/fix9.test.ts)                                                                   -> unit-after.txt    (4 passed of 4)
+2. R5-L1 in the browser (R5's extras-r5.mjs and extras-r5c.mjs, copied here with the added status checks: X2a-status, X3a-status and X2c-status must FAIL on dd76bcd and PASS after;
+   X1c-status, X2b-status and X3b-status are controls after a drop that PASS on both; every other check is R5's own and unchanged)
+     env -u DISPLAY node extras-r5.mjs  /tmp/fq-F9/<base|after> /tmp/fq-F9/dist-<base|after>-r5 <out>   -> extras-<before|after>.txt
+     env -u DISPLAY node extras-r5c.mjs /tmp/fq-F9/<base|after> /tmp/fq-F9/dist-<base|after>-r5 <out>   -> extras-c-<before|after>.txt
+3. R5-I2 in the browser (copybtn.mjs: R5's file cut down to Chromium at 1280 and 390, plus the double-click cases; run from /tmp/fq-F9/pw, whose node_modules links to the Playwright install)
+     env -u DISPLAY node /tmp/fq-F9/pw/copybtn.mjs <R2-mock dist of the clone> <out> /tmp/fq-F9/<base|after>   -> copybtn-<before|after>.txt
+4. Regression on the HEAD of this stage (R2 mock build): node <script> /tmp/fq-F9/after /tmp/fq-F9/dist-after-r2 <out>
+     rownote-gone.mjs, rownote-extra.mjs (<repo>/evidence/final-qa/R4/data/probes/), row-note.mjs (<repo>/evidence/fix-7/), stale.mjs, tipnote.mjs (the R3 screens harness)   -> regression-after.txt
+5. R3's mock pass on both clones (axe, overflow, clipped text, contrast, console errors; 1280 and 390, light and dark), then a text diff of every state:
+     AXE_JS=<axe.min.js> FOCUS_OUT=/tmp/fq-F9/screens-<base|after>/focus-out.txt bash /tmp/fq-F9/harness/screens-r2.sh /tmp/fq-F9/<base|after> /tmp/fq-F9/screens-<base|after>
+     diff -r /tmp/fq-F9/screens-base/text /tmp/fq-F9/screens-after/text                                                   -> screens-text-diff.txt, screens-summary-<before|after>.txt
+     one state differs (17-send-world: the random bytes of two sealed payloads); noise check, the same state on dd76bcd a second time:
+       bash /tmp/fq-F9/harness/screens-r2.sh /tmp/fq-F9/base /tmp/fq-F9/screens-base-17 17                                  -> shown in screens-text-diff.txt
+6. Gate on 26957f6: node scripts/secret-scan.mjs && npm ci && npm test && npm run typecheck && npm run build && npm run check:bundle   -> gate.txt
+
+exit-codes.txt has the exit code and the times of every browser job (copybtn.mjs exits 4 when a check fails: the before run has 8 failed double-click cases, as intended; the others exit 0, the extras print their FAIL lines but exit 0).

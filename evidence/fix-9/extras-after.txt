@@ -1,0 +1,30 @@
+X1 after the unknown Burn: {"rows":2,"texts":[{"tip":"SYNTHETIC TEST TIP number 1: a made-up m","note":"","meta":"2026-10-17 09:10 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"},{"tip":"SYNTHETIC TEST TIP number 2: a made-up m","note":"Burn may not have completed. The result of this transaction is unknown","meta":"2026-10-17 08:50 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}]}
+PASS  X1a the unknown Burn left its text on the row  :: Burn may not have completed. The result of this transaction is unknown
+X1 Refresh: status[status] "2 tips on Arkiv."
+X1 after Refresh: {"rows":2,"texts":[{"tip":"SYNTHETIC TEST TIP number 1: a made-up m","note":"","meta":"2026-10-17 09:10 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"},{"tip":"SYNTHETIC TEST TIP number 2: a made-up m","note":"Burn may not have completed. The result of this transaction is unknown","meta":"2026-10-17 08:50 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}]}
+PASS  X1b after Refresh the row is still listed, with its tip text and its Burn text  :: {"tip":"SYNTHETIC TEST TIP number 2: a made-up m","note":"Burn may not have completed. The result of this transaction is unknown","meta":"2026-10-17 08:50 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}
+X1 Refresh after the burn went through: status[status] "1 tip on Arkiv."
+PASS  X1c once the tip is really gone from Arkiv the next complete sweep drops the row
+PASS  X1c-status after the drop the status line counts the rows listed (control: passes on dd76bcd too)  :: status "1 tip on Arkiv.", 1 row(s)
+X1d after the refused Burn: {"tip":"SYNTHETIC TEST TIP number 2: a made-up m","note":"Burn did not complete. The Arkiv RPC is having trouble (HTTP 500). Try","meta":"2026-10-17 08:50 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}
+PASS  X1d a refused Burn says "did not complete" (R4-L1)  :: Burn did not complete. The Arkiv RPC is having trouble (HTTP 500). Try
+PASS  X2a the live tip is listed while the sweep is still in flight  :: ["live-arrival: made up.","1: a made-up message.","2: a made-up message."]
+X2a after the sweep: status[status] "3 tips on Arkiv." rows=["live-arrival: made up.","1: a made-up message.","2: a made-up message."]
+PASS  X2a the live tip is still listed after the sweep (whose answer lacks it)  :: ["live-arrival: made up.","1: a made-up message.","2: a made-up message."]
+PASS  X2a-status the status line counts the rows listed: "3 tips on Arkiv." (R5-L1: expected FAIL on dd76bcd)  :: status "3 tips on Arkiv.", 3 row(s)
+X2b after the unknown Burn on the live tip, sweep still in flight: {"tip":"SYNTHETIC TEST TIP live-arrival: made up","note":"Burn may not have completed. The result of this transaction is unknown","meta":"2026-10-17 09:40 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}
+PASS  X2b the live tip row carries the unknown-Burn text  :: Burn may not have completed. The result of this transaction is unknown
+X2b after the sweep: status[status] "3 tips on Arkiv." rows=3
+PASS  X2b the live tip burned during the sweep is not dropped by that sweep  :: {"tip":"SYNTHETIC TEST TIP live-arrival: made up","note":"Burn may not have completed. The result of this transaction is unknown","meta":"2026-10-17 09:40 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}
+X2b control Refresh (burn went through, head has moved on): status[status] "2 tips on Arkiv."
+PASS  X2b control: the next complete sweep, with the head past the tip, drops it
+PASS  X2b-status after the drop the status line counts the rows listed (control: passes on dd76bcd too)  :: status "2 tips on Arkiv.", 2 row(s)
+X3a truncated sweep (1 of 3): status[status] "3 tips on Arkiv (showing the first pages only)."
+PASS  X3a a truncated sweep (1 of 3 tips) drops no row and says so  :: rows=3
+PASS  X3a-status the truncated sweep counts the rows listed: "3 tips on Arkiv (showing the first pages only)." (R5-L1: expected FAIL on dd76bcd)  :: status "3 tips on Arkiv (showing the first pages only).", 3 row(s)
+X3b truncated sweep after an unknown Burn that went through: status[status] "3 tips on Arkiv (showing the first pages only)."
+PASS  X3b a truncated sweep does not drop the unknown-Burn row, and keeps its text  :: {"tip":"SYNTHETIC TEST TIP number 3: a made-up m","note":"Burn may not have completed. The result of this transaction is unknown","meta":"2026-10-17 08:30 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}
+X3b next complete sweep: status[status] "2 tips on Arkiv."
+PASS  X3b the next complete sweep drops it
+PASS  X3b-status after the drop the status line counts the rows listed (control: passes on dd76bcd too)  :: status "2 tips on Arkiv.", 2 row(s)
+all checks passed

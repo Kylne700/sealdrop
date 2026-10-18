@@ -1,0 +1,14 @@
+extras-before exit 0  03:15:52 -> 03:16:01
+extras-c-before exit 0  03:16:01 -> 03:16:13
+extras-after exit 0  03:16:13 -> 03:16:22
+extras-c-after exit 0  03:16:22 -> 03:16:34
+copybtn-before exit 4  03:16:34 -> 03:17:51
+copybtn-after exit 0  03:17:51 -> 03:19:07
+STAGE1 DONE 03:19:07
+rownote-gone exit 0  03:19:09 -> 03:19:10
+rownote-extra exit 0  03:19:10 -> 03:19:23
+row-note exit 0  03:19:23 -> 03:19:29
+stale exit 0  03:19:29 -> 03:19:30
+tipnote exit 0  03:19:30 -> 03:19:49
+screens-after exit 0  03:19:49 -> 03:24:31
+STAGE2 DONE 03:24:31

@@ -1,0 +1,50 @@
+states: 76, screenshots: 304 (304 files, 16.0 MB) in /tmp/fq-F9/screens-base/shots
+axe: 0 violations in 0 of 300 state/viewport/theme combinations; rules: {}
+horizontal overflow (scrollWidth > clientWidth): 0 combinations
+status line a whole viewport above the first tip button (Keep/Burn), console only: 92 combinations
+  06-newsroom-tips desktop light: 1032px apart, viewport 800px
+  06-newsroom-tips mobile light: 1540px apart, viewport 844px
+  06-newsroom-tips desktop dark: 1032px apart, viewport 800px
+  06-newsroom-tips mobile dark: 1540px apart, viewport 844px
+  07-newsroom-reconnecting desktop light: 1079px apart, viewport 800px
+  07-newsroom-reconnecting mobile light: 1586px apart, viewport 844px
+  07-newsroom-reconnecting desktop dark: 1079px apart, viewport 800px
+  07-newsroom-reconnecting mobile dark: 1586px apart, viewport 844px
+  77-console-wallet-no-provider desktop light: 1020px apart, viewport 800px
+  77-console-wallet-no-provider mobile light: 1523px apart, viewport 844px
+  77-console-wallet-no-provider desktop dark: 1020px apart, viewport 800px
+  77-console-wallet-no-provider mobile dark: 1523px apart, viewport 844px
+  78-console-wallet-wrong-account desktop light: 1043px apart, viewport 800px
+  78-console-wallet-wrong-account mobile light: 1570px apart, viewport 844px
+  78-console-wallet-wrong-account desktop dark: 1043px apart, viewport 800px
+  78-console-wallet-wrong-account mobile dark: 1570px apart, viewport 844px
+  30-console-keep-expired desktop light: 1004px apart, viewport 800px
+  30-console-keep-expired mobile light: 1484px apart, viewport 844px
+  30-console-keep-expired desktop dark: 1004px apart, viewport 800px
+  30-console-keep-expired mobile dark: 1484px apart, viewport 844px
+  31-console-burn-expired desktop light: 1004px apart, viewport 800px
+  31-console-burn-expired mobile light: 1484px apart, viewport 844px
+  31-console-burn-expired desktop dark: 1004px apart, viewport 800px
+  31-console-burn-expired mobile dark: 1484px apart, viewport 844px
+  32-console-keep-gone desktop light: 1004px apart, viewport 800px
+  32-console-keep-gone mobile light: 1507px apart, viewport 844px
+  32-console-keep-gone desktop dark: 1004px apart, viewport 800px
+  32-console-keep-gone mobile dark: 1507px apart, viewport 844px
+  33-console-burn-gone desktop light: 1004px apart, viewport 800px
+  33-console-burn-gone mobile light: 1507px apart, viewport 844px
+  33-console-burn-gone desktop dark: 1004px apart, viewport 800px
+  33-console-burn-gone mobile dark: 1507px apart, viewport 844px
+  34-console-burn-unknown-hash desktop light: 1090px apart, viewport 800px
+  34-console-burn-unknown-hash mobile light: 1616px apart, viewport 844px
+  34-console-burn-unknown-hash desktop dark: 1090px apart, viewport 800px
+  34-console-burn-unknown-hash mobile dark: 1616px apart, viewport 844px
+  35-console-keep-unknown-nohash desktop light: 1043px apart, viewport 800px
+  35-console-keep-unknown-nohash mobile light: 1570px apart, viewport 844px
+  35-console-keep-unknown-nohash desktop dark: 1043px apart, viewport 800px
+  35-console-keep-unknown-nohash mobile dark: 1570px apart, viewport 844px
+clipped text (overflow hidden/clip, not inputs): 0
+text in scrolling containers (overflow auto/scroll, not inputs): 0
+contrast scan below AA: 0
+console/page errors: 0
+UNREACHED states (the marker text did not appear): 0
+FAILED steps: 0

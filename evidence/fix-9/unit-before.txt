@@ -1,0 +1,97 @@
+
+ RUN  v5.0.5 /tmp/fq-F9/base
+
+ ❯ test/fix9.test.ts (4 tests | 4 failed) 10ms
+   ❯ R5-I2: a second click on the copy button restarts the 1.8 s reset (2)
+     × "Copied ✓" stays until 1.8 s after the second click, then the label goes back 6ms
+     × the blocked-clipboard text stays until 1.8 s after the second click, then the label goes back 1ms
+   ❯ R5-I2: a second click on the hex copy button restarts the 1.8 s reset (2)
+     × "Copied" and the check icon stay until 1.8 s after the second click, then both go back 2ms
+     × the blocked-clipboard text and the copy icon stay until 1.8 s after the second click, then both go back 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/fix9.test.ts > R5-I2: a second click on the copy button restarts the 1.8 s reset > "Copied ✓" stays until 1.8 s after the second click, then the label goes back
+AssertionError: expected 'Copy inbox link' to be 'Copied ✓' // Object.is equality
+
+Expected: "Copied ✓"
+Received: "Copy inbox link"
+
+ ❯ test/fix9.test.ts:46:31
+     44|     await button.click()
+     45|     vi.advanceTimersByTime(1799)
+     46|     expect(label.textContent).toBe(shown)
+       |                               ^
+     47|     vi.advanceTimersByTime(1)
+     48|     expect(label.textContent).toBe(LABEL)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/fix9.test.ts > R5-I2: a second click on the copy button restarts the 1.8 s reset > the blocked-clipboard text stays until 1.8 s after the second click, then the label goes back
+AssertionError: expected 'Copy inbox link' to be 'Copy by hand' // Object.is equality
+
+Expected: "Copy by hand"
+Received: "Copy inbox link"
+
+ ❯ test/fix9.test.ts:46:31
+     44|     await button.click()
+     45|     vi.advanceTimersByTime(1799)
+     46|     expect(label.textContent).toBe(shown)
+       |                               ^
+     47|     vi.advanceTimersByTime(1)
+     48|     expect(label.textContent).toBe(LABEL)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  test/fix9.test.ts > R5-I2: a second click on the hex copy button restarts the 1.8 s reset > "Copied" and the check icon stay until 1.8 s after the second click, then both go back
+AssertionError: expected [ '', 'copy' ] to deeply equal [ 'Copied', 'check' ]
+
+- Expected
++ Received
+
+  [
+-   "Copied",
+-   "check",
++   "",
++   "copy",
+  ]
+
+ ❯ test/fix9.test.ts:69:41
+     67|     await copy.click()
+     68|     vi.advanceTimersByTime(1799)
+     69|     expect([done.textContent, shape()]).toEqual([said, icon])
+       |                                         ^
+     70|     vi.advanceTimersByTime(1)
+     71|     expect([done.textContent, shape()]).toEqual(['', 'copy'])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  test/fix9.test.ts > R5-I2: a second click on the hex copy button restarts the 1.8 s reset > the blocked-clipboard text and the copy icon stay until 1.8 s after the second click, then both go back
+AssertionError: expected [ '', 'copy' ] to deeply equal [ 'Select and copy manually', 'copy' ]
+
+- Expected
++ Received
+
+  [
+-   "Select and copy manually",
++   "",
+    "copy",
+  ]
+
+ ❯ test/fix9.test.ts:69:41
+     67|     await copy.click()
+     68|     vi.advanceTimersByTime(1799)
+     69|     expect([done.textContent, shape()]).toEqual([said, icon])
+       |                                         ^
+     70|     vi.advanceTimersByTime(1)
+     71|     expect([done.textContent, shape()]).toEqual(['', 'copy'])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  03:09:15
+   Duration  102ms (transform 50%, tests 27%, import 17%, worker 5%)
+
+base exit=1

@@ -1,0 +1,190 @@
+===== rownote-gone
+G1 after the unknown Burn: {"rows":2,"texts":[{"tip":"SYNTHETIC TEST TIP number 1: a made-up m","note":"","meta":"2026-10-17 09:10 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"},{"tip":"SYNTHETIC TEST TIP number 2: a made-up m","note":"Burn may not have completed. The result of this transaction is unknown","meta":"2026-10-17 08:50 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}]}
+G1 after Refresh: status[status] "1 tip on Arkiv."; {"rows":1,"texts":[{"tip":"SYNTHETIC TEST TIP number 1: a made-up m","note":"","meta":"2026-10-17 09:10 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}]}
+PASS  G1 the burned tip is no longer listed after Refresh  :: rows=1
+G2 after the unknown Keep: {"rows":2,"texts":[{"tip":"SYNTHETIC TEST TIP number 1: a made-up m","note":"Keep may not have completed. The result of this transaction is unknown","meta":"2026-10-17 09:10 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"},{"tip":"SYNTHETIC TEST TIP number 2: a made-up m","note":"","meta":"2026-10-17 08:50 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}]}
+G2 after Refresh: status[status] "2 tips on Arkiv."; {"rows":2,"texts":[{"tip":"SYNTHETIC TEST TIP number 1: a made-up m","note":"","meta":"2026-10-17 09:10 UTC1.1 KiB sealed (1 KiB bucket)Expires in 30 d 0 h owned by you"},{"tip":"SYNTHETIC TEST TIP number 2: a made-up m","note":"","meta":"2026-10-17 08:50 UTC1.1 KiB sealed (1 KiB bucket)Expires in 14 d 0 h owned by you"}]}
+PASS  G2 the kept row is redrawn (30 d) and its failure text is gone  :: {"tip":"SYNTHETIC TEST TIP number 1: a made-up m","note":"","meta":"2026-10-17 09:10 UTC1.1 KiB sealed (1 KiB bucket)Expires in 30 d 0 h owned by you"}
+all checks passed
+===== rownote-extra
+E1 http500 Keep status[status error]: The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings.
+E1 http500 Keep row0: visible=true text="Keep did not complete. The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+PASS  E1 row says "Keep did not complete."  :: Keep did not complete. The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings.
+PASS  E1 status error and the row carries its text
+PASS  E1 row note is not a live region and has no live ancestor  :: class,data-testid
+PASS  E1 the other row shows nothing
+E2 plain Burn status[status error]: Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the page or set your own RPC under Settings.
+E2 plain Burn row1: visible=true text="Burn did not complete. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the page or set your own RPC under Settings."
+PASS  E2 row says "Burn did not complete."  :: Burn did not complete. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the page or set your own RPC under Settings.
+PASS  E2 the next Burn on that row clears the old text at once (60 ms after the click)
+PASS  E2 the second failure shows it again  :: Burn did not complete. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the page or set your own RPC under Settings.
+PASS  E2 the success drops the row, status Burned., no failure text left  :: {"status":"Burned.","statusClass":"status","rows":1,"visibleNotes":0,"overflow":0}
+E3/4 Keep expired-entity status[status]: This tip is no longer on Arkiv: it expired, or it was burned already.
+PASS  E3/4 expired Keep: row dropped, "This tip is no longer on Arkiv...", status not an error, no row failure text  :: {"status":"This tip is no longer on Arkiv: it expired, or it was burned already.","statusClass":"status","rows":1,"visibleNotes":0,"overflow":0}
+E3/4 Burn expired-entity status[status]: This tip is no longer on Arkiv: it expired, or it was burned already.
+PASS  E3/4 expired Burn: row dropped, "This tip is no longer on Arkiv...", status not an error, no row failure text  :: {"status":"This tip is no longer on Arkiv: it expired, or it was burned already.","statusClass":"status","rows":1,"visibleNotes":0,"overflow":0}
+E5 Keep unknown status[status error]: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+E5 Keep unknown row0: visible=true text="Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did."
+E5 Burn unknown status[status error]: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether it did.
+E5 Burn unknown row1: visible=true text="Burn may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether it did."
+E6 after Refresh status[status]: 2 tips on Arkiv.
+E6 after Refresh row0: visible=true text="Keep did not complete. The Arkiv RPC is having trouble (HTTP 500). Try again in a minute, or use another RPC under Settings."
+E6 note kept after Refresh (informational): true | status is an error: false
+E7 keep-unknown 1280px light: height=74 gapBelowButtons=8 sideways=0 overflowPage=0
+E7 burn-http500 1280px light: height=50 gapBelowButtons=8 sideways=0 overflowPage=0
+E7 keep-unknown 1280px dark: height=74 gapBelowButtons=8 sideways=0 overflowPage=0
+E7 burn-http500 1280px dark: height=50 gapBelowButtons=8 sideways=0 overflowPage=0
+E7 keep-unknown 390px light: height=124 gapBelowButtons=8 sideways=0 overflowPage=0
+E7 burn-http500 390px light: height=99 gapBelowButtons=8 sideways=0 overflowPage=0
+E7 keep-unknown 390px dark: height=124 gapBelowButtons=8 sideways=0 overflowPage=0
+E7 burn-http500 390px dark: height=99 gapBelowButtons=8 sideways=0 overflowPage=0
+all checks passed
+===== row-note
+PASS  1280px before any action: no failure text is visible in the row  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-1209,"statusAbove":1015,"sideways":0}
+PASS  1280px Keep failed: the status shows the error  :: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  1280px Keep failed: the failure shows inside that row  :: {"row":true,"exists":true,"visible":true,"text":"Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.","attrs":"class,dat
+PASS  1280px the row text names the action and carries the status text  :: Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  1280px the row text is plain text (no role, no aria-live, no live ancestor)  :: class,data-testid
+PASS  1280px the row text is next to the buttons (gap 8px; the status is 1012px above the Keep button)
+PASS  1280px no sideways overflow  :: note 0, page 0
+PASS  1280px the other row shows nothing  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-1593,"statusAbove":1361,"sideways":0}
+PASS  1280px Keep on the other row worked  :: Kept: this tip now expires 30 days from now.
+PASS  1280px ... and the first row still says its Keep failed
+PASS  1280px Keep again: the row text is gone  :: status="Kept: this tip now expires 30 days from now." visibleNotes=0
+PASS  1280px Burn failed: the row says so and shows the hash  :: Burn may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether i
+PASS  1280px the 66-character hash wraps (no sideways overflow)  :: note 0, page 0
+PASS  1280px Keep on that row after a failed Burn: the row text is gone
+PASS  1280px Keep worked: no failure text anywhere  :: Kept: this tip now expires 30 days from now.
+PASS  1280px the hidden notes take no room  :: [0,0]
+PASS  1280px Burn worked: no failure text anywhere  :: Burned.
+PASS  390px before any action: no failure text is visible in the row  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-1815,"statusAbove":1521,"sideways":0}
+PASS  390px Keep failed: the status shows the error  :: The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  390px Keep failed: the failure shows inside that row  :: {"row":true,"exists":true,"visible":true,"text":"Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.","attrs":"class,dat
+PASS  390px the row text names the action and carries the status text  :: Keep may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Wait a minute, then reload the page to see whether it did.
+PASS  390px the row text is plain text (no role, no aria-live, no live ancestor)  :: class,data-testid
+PASS  390px the row text is next to the buttons (gap 8px; the status is 1535px above the Keep button)
+PASS  390px no sideways overflow  :: note 0, page 0
+PASS  390px the other row shows nothing  :: {"row":true,"exists":true,"visible":false,"text":"","attrs":"class,data-testid,hidden","liveAncestor":false,"height":0,"gapBelowButtons":-2467,"statusAbove":2089,"sideways":0}
+PASS  390px Keep on the other row worked  :: Kept: this tip now expires 30 days from now.
+PASS  390px ... and the first row still says its Keep failed
+PASS  390px Keep again: the row text is gone  :: status="Kept: this tip now expires 30 days from now." visibleNotes=0
+PASS  390px Burn failed: the row says so and shows the hash  :: Burn may not have completed. The result of this transaction is unknown: it may have gone through, so trying again could do it twice. Look up its hash 0xf11b30ac0c891a1339c1f08b166fc6e686bfb8463ab51e14e57983913cf743f9 on the Arkiv Data Explorer to see whether i
+PASS  390px the 66-character hash wraps (no sideways overflow)  :: note 0, page 0
+PASS  390px Keep on that row after a failed Burn: the row text is gone
+PASS  390px Keep worked: no failure text anywhere  :: Kept: this tip now expires 30 days from now.
+PASS  390px the hidden notes take no room  :: [0,0]
+PASS  390px Burn worked: no failure text anywhere  :: Burned.
+fails=0
+===== stale
+1. lease error + live tip: status="The inbox lease could not be checked or renewed. Transaction failed: Execution e" [status error] note="A new tip just arrived. 1 tip listed." rows=1
+PASS  start: error in the status and the note set
+2. after Refresh: status="1 tip on Arkiv." [status] note="" rows=1
+PASS  the error is gone from the status after Refresh  :: 1 tip on Arkiv.
+PASS  STALE NOTE after the error went: the hidden note is empty (FAIL = the old sentence is still there)  :: note="" status="1 tip on Arkiv." rows=1
+fails=0
+===== tipnote
+
+== S41 desktop(1280px): harness state 41: lease error in the status + 1 live tip
+   status="The inbox lease could not be checked or renewed. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the p" [status error] note="A new tip just arrived. 1 tip listed." rows=1 note-rect=1x1@287,187
+PASS  S41 desktop(1280px) (a) status keeps its lease error  :: The inbox lease could not be checked or renewed. Transaction failed: Execution error witho
+PASS  S41 desktop(1280px) (a) note says "A new tip just arrived. 1 tip listed." (rows shown: 1)  :: note="A new tip just arrived. 1 tip listed."
+PASS  S41 desktop(1280px) (a) singular "1 tip listed."  :: note="A new tip just arrived. 1 tip listed."
+PASS  S41 desktop(1280px) (c) <p class=sr-only aria-live=polite>  :: tag=P class=sr-only aria-live=polite role=null
+PASS  S41 desktop(1280px) (c) the note is the element right after the status line
+PASS  S41 desktop(1280px) (c) position absolute, 1px x 1px, clip-path inset(50%)  :: pos=absolute w=1px h=1px clip=inset(50%) overflow=hidden
+PASS  S41 desktop(1280px) (c) not display:none / visibility:hidden / aria-hidden (so a screen reader reads it)  :: display=block visibility=visible
+PASS  S41 desktop(1280px) (c) no horizontal scroll  :: scrollWidth=1280 clientWidth=1280
+PASS  S41 desktop(1280px) (d) control: two shots of the same state are identical  :: differing px=0
+PASS  S41 desktop(1280px) (d) shot with the note text == shot with textContent ''  :: differing px=0
+PASS  S41 desktop(1280px) (d) shot with the note == shot with the note display:none (it adds no pixel)  :: differing px=0
+PASS  S41 desktop(1280px) (d) a 600-char note text still shows nothing and does not scroll the page  :: differing px=0 scrollWidth=1280/1280
+PASS  S41 desktop(1280px) (d) negative control: a made-visible note IS seen by the comparison  :: differing px=361839
+PASS  S41 desktop(1280px) no console/page errors
+
+== S41 mobile(390px): harness state 41: lease error in the status + 1 live tip
+   status="The inbox lease could not be checked or renewed. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the p" [status error] note="A new tip just arrived. 1 tip listed." rows=1 note-rect=1x1@15,305
+PASS  S41 mobile(390px) (a) status keeps its lease error  :: The inbox lease could not be checked or renewed. Transaction failed: Execution error witho
+PASS  S41 mobile(390px) (a) note says "A new tip just arrived. 1 tip listed." (rows shown: 1)  :: note="A new tip just arrived. 1 tip listed."
+PASS  S41 mobile(390px) (a) singular "1 tip listed."  :: note="A new tip just arrived. 1 tip listed."
+PASS  S41 mobile(390px) (c) <p class=sr-only aria-live=polite>  :: tag=P class=sr-only aria-live=polite role=null
+PASS  S41 mobile(390px) (c) the note is the element right after the status line
+PASS  S41 mobile(390px) (c) position absolute, 1px x 1px, clip-path inset(50%)  :: pos=absolute w=1px h=1px clip=inset(50%) overflow=hidden
+PASS  S41 mobile(390px) (c) not display:none / visibility:hidden / aria-hidden (so a screen reader reads it)  :: display=block visibility=visible
+PASS  S41 mobile(390px) (c) no horizontal scroll  :: scrollWidth=390 clientWidth=390
+PASS  S41 mobile(390px) (d) control: two shots of the same state are identical  :: differing px=0
+PASS  S41 mobile(390px) (d) shot with the note text == shot with textContent ''  :: differing px=0
+PASS  S41 mobile(390px) (d) shot with the note == shot with the note display:none (it adds no pixel)  :: differing px=0
+PASS  S41 mobile(390px) (d) a 600-char note text still shows nothing and does not scroll the page  :: differing px=0 scrollWidth=390/390
+PASS  S41 mobile(390px) (d) negative control: a made-visible note IS seen by the comparison  :: differing px=264890
+PASS  S41 mobile(390px) no console/page errors
+
+== S41x3 desktop(1280px): state 41 with 3 live tips
+   status="The inbox lease could not be checked or renewed. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the p" [status error] note="A new tip just arrived. 3 tips listed." rows=3 note-rect=1x1@287,187
+PASS  S41x3 desktop(1280px) (a) status keeps its lease error  :: The inbox lease could not be checked or renewed. Transaction failed: Execution error witho
+PASS  S41x3 desktop(1280px) (a) note says "A new tip just arrived. 3 tips listed." (rows shown: 3)  :: note="A new tip just arrived. 3 tips listed."
+PASS  S41x3 desktop(1280px) (a) plural "3 tips listed."  :: note="A new tip just arrived. 3 tips listed."
+PASS  S41x3 desktop(1280px) (c) <p class=sr-only aria-live=polite>  :: tag=P class=sr-only aria-live=polite role=null
+PASS  S41x3 desktop(1280px) (c) the note is the element right after the status line
+PASS  S41x3 desktop(1280px) (c) position absolute, 1px x 1px, clip-path inset(50%)  :: pos=absolute w=1px h=1px clip=inset(50%) overflow=hidden
+PASS  S41x3 desktop(1280px) (c) not display:none / visibility:hidden / aria-hidden (so a screen reader reads it)  :: display=block visibility=visible
+PASS  S41x3 desktop(1280px) (c) no horizontal scroll  :: scrollWidth=1280 clientWidth=1280
+PASS  S41x3 desktop(1280px) (d) control: two shots of the same state are identical  :: differing px=0
+PASS  S41x3 desktop(1280px) (d) shot with the note text == shot with textContent ''  :: differing px=0
+PASS  S41x3 desktop(1280px) (d) shot with the note == shot with the note display:none (it adds no pixel)  :: differing px=0
+PASS  S41x3 desktop(1280px) (d) a 600-char note text still shows nothing and does not scroll the page  :: differing px=0 scrollWidth=1280/1280
+PASS  S41x3 desktop(1280px) (d) negative control: a made-visible note IS seen by the comparison  :: differing px=485895
+PASS  S41x3 desktop(1280px) no console/page errors
+
+== S41x3 mobile(390px): state 41 with 3 live tips
+   status="The inbox lease could not be checked or renewed. Transaction failed: Execution error without revert data. Try again; if it keeps failing, reload the p" [status error] note="A new tip just arrived. 3 tips listed." rows=3 note-rect=1x1@15,305
+PASS  S41x3 mobile(390px) (a) status keeps its lease error  :: The inbox lease could not be checked or renewed. Transaction failed: Execution error witho
+PASS  S41x3 mobile(390px) (a) note says "A new tip just arrived. 3 tips listed." (rows shown: 3)  :: note="A new tip just arrived. 3 tips listed."
+PASS  S41x3 mobile(390px) (a) plural "3 tips listed."  :: note="A new tip just arrived. 3 tips listed."
+PASS  S41x3 mobile(390px) (c) <p class=sr-only aria-live=polite>  :: tag=P class=sr-only aria-live=polite role=null
+PASS  S41x3 mobile(390px) (c) the note is the element right after the status line
+PASS  S41x3 mobile(390px) (c) position absolute, 1px x 1px, clip-path inset(50%)  :: pos=absolute w=1px h=1px clip=inset(50%) overflow=hidden
+PASS  S41x3 mobile(390px) (c) not display:none / visibility:hidden / aria-hidden (so a screen reader reads it)  :: display=block visibility=visible
+PASS  S41x3 mobile(390px) (c) no horizontal scroll  :: scrollWidth=390 clientWidth=390
+PASS  S41x3 mobile(390px) (d) control: two shots of the same state are identical  :: differing px=0
+PASS  S41x3 mobile(390px) (d) shot with the note text == shot with textContent ''  :: differing px=0
+PASS  S41x3 mobile(390px) (d) shot with the note == shot with the note display:none (it adds no pixel)  :: differing px=0
+PASS  S41x3 mobile(390px) (d) a 600-char note text still shows nothing and does not scroll the page  :: differing px=0 scrollWidth=390/390
+PASS  S41x3 mobile(390px) (d) negative control: a made-visible note IS seen by the comparison  :: differing px=362873
+PASS  S41x3 mobile(390px) no console/page errors
+
+== S06 desktop(1280px): harness state 06: live tip, no error
+   status="A new tip just arrived." [status] note="" rows=4 note-rect=1x1@287,148
+PASS  S06 desktop(1280px) (b) status says "A new tip just arrived."  :: status="A new tip just arrived." [status]
+PASS  S06 desktop(1280px) (b) note is empty  :: note=""
+PASS  S06 desktop(1280px) (c) <p class=sr-only aria-live=polite>  :: tag=P class=sr-only aria-live=polite role=null
+PASS  S06 desktop(1280px) (c) the note is the element right after the status line
+PASS  S06 desktop(1280px) (c) position absolute, 1px x 1px, clip-path inset(50%)  :: pos=absolute w=1px h=1px clip=inset(50%) overflow=hidden
+PASS  S06 desktop(1280px) (c) not display:none / visibility:hidden / aria-hidden (so a screen reader reads it)  :: display=block visibility=visible
+PASS  S06 desktop(1280px) (c) no horizontal scroll  :: scrollWidth=1280 clientWidth=1280
+PASS  S06 desktop(1280px) (d) control: two shots of the same state are identical  :: differing px=0
+SKIP  S06 desktop(1280px) (d) text-vs-empty: the note was empty here (text-vs-long600 below uses a text)
+PASS  S06 desktop(1280px) (d) shot with the note == shot with the note display:none (it adds no pixel)  :: differing px=0
+PASS  S06 desktop(1280px) (d) a 600-char note text still shows nothing and does not scroll the page  :: differing px=0 scrollWidth=1280/1280
+PASS  S06 desktop(1280px) (d) negative control: a made-visible note IS seen by the comparison  :: differing px=555953
+PASS  S06 desktop(1280px) no console/page errors
+
+== S06 mobile(390px): harness state 06: live tip, no error
+   status="A new tip just arrived." [status] note="" rows=4 note-rect=1x1@15,196
+PASS  S06 mobile(390px) (b) status says "A new tip just arrived."  :: status="A new tip just arrived." [status]
+PASS  S06 mobile(390px) (b) note is empty  :: note=""
+PASS  S06 mobile(390px) (c) <p class=sr-only aria-live=polite>  :: tag=P class=sr-only aria-live=polite role=null
+PASS  S06 mobile(390px) (c) the note is the element right after the status line
+PASS  S06 mobile(390px) (c) position absolute, 1px x 1px, clip-path inset(50%)  :: pos=absolute w=1px h=1px clip=inset(50%) overflow=hidden
+PASS  S06 mobile(390px) (c) not display:none / visibility:hidden / aria-hidden (so a screen reader reads it)  :: display=block visibility=visible
+PASS  S06 mobile(390px) (c) no horizontal scroll  :: scrollWidth=390 clientWidth=390
+PASS  S06 mobile(390px) (d) control: two shots of the same state are identical  :: differing px=0
+SKIP  S06 mobile(390px) (d) text-vs-empty: the note was empty here (text-vs-long600 below uses a text)
+PASS  S06 mobile(390px) (d) shot with the note == shot with the note display:none (it adds no pixel)  :: differing px=0
+PASS  S06 mobile(390px) (d) a 600-char note text still shows nothing and does not scroll the page  :: differing px=0 scrollWidth=390/390
+PASS  S06 mobile(390px) (d) negative control: a made-visible note IS seen by the comparison  :: differing px=419800
+PASS  S06 mobile(390px) no console/page errors
+
+== harness listener self-test
+PASS  the harness listeners catch a console.error and an uncaught exception  :: console.error: R3 listener self-test | pageerror: Uncaught Error: R3 uncaught self-test
+
+ALL PASS

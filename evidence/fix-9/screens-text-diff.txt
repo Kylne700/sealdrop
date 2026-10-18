@@ -1,0 +1,21 @@
+== diff -r screens-base/text screens-after/text   (dd76bcd against 26957f6; 76 states, one text file each; 75 are byte-identical)
+diff -r screens-base/text/17-send-world.txt screens-after/text/17-send-world.txt
+58,59c58,59
+< 0x29ad…3b27 . 1.1 KiB . $creator 0xa05d…797F . payload 0x0168ee03769d57494146... . type=tip, inbox=0x1136…8d7f
+< 0x238d…912a . 1.1 KiB . $creator 0xa05d…797F . payload 0x01a5e3c278e8aea20b15... . type=tip, inbox=0x1136…8d7f
+---
+> 0x29ad…3b27 . 1.1 KiB . $creator 0xa05d…797F . payload 0x0128bb8a4d9517bb28ad... . type=tip, inbox=0x1136…8d7f
+> 0x238d…912a . 1.1 KiB . $creator 0xa05d…797F . payload 0x013d0757e98cd99db463... . type=tip, inbox=0x1136…8d7f
+
+== why: lines 58-59 of 17-send-world list the sealed payload of two tips sent in that state. The payload is version(1) | ephemeral public key(32) | nonce(24) | box (src/crypto.ts), so
+   its first bytes are random on every run. Proof: the same state on dd76bcd run a second time (screens-base-17) differs from the first dd76bcd run in the same four lines:
+58,59c58,59
+< 0x29ad…3b27 . 1.1 KiB . $creator 0xa05d…797F . payload 0x0168ee03769d57494146... . type=tip, inbox=0x1136…8d7f
+< 0x238d…912a . 1.1 KiB . $creator 0xa05d…797F . payload 0x01a5e3c278e8aea20b15... . type=tip, inbox=0x1136…8d7f
+---
+> 0x29ad…3b27 . 1.1 KiB . $creator 0xa05d…797F . payload 0x018d2acb5e86d1bb37ba... . type=tip, inbox=0x1136…8d7f
+> 0x238d…912a . 1.1 KiB . $creator 0xa05d…797F . payload 0x0142786d7dd24a549c68... . type=tip, inbox=0x1136…8d7f
+
+== status-lines.txt (every status line of every state): diff exit 0  (0 = identical)
+== summary.txt minus its first line (which names the output directory): diff exit 0  (0 = identical)
+== axe.json: identical
