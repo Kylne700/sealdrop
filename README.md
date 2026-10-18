@@ -7,7 +7,7 @@ is ciphertext in Arkiv, the Web3 database, and every tip expires on the date its
 extends it). There is no Sealdrop backend, no account, and no server that can read the messages or holds the keys. It
 does not hide your network address: use Tor Browser.
 
-* Live app: {{LIVE_URL}}
+* Live app: https://kylne700.github.io/sealdrop/
 * Demo video (3 minutes or less): {{VIDEO_URL}}
 * Data contract (entity types, attributes, wire format, queries): [arkiv/schema.md](arkiv/schema.md)
 * Friction report (real, with versions and repro steps): [arkiv/friction.md](arkiv/friction.md)
@@ -300,7 +300,7 @@ not) is in [evidence/qa.md](evidence/qa.md).
 
 The Demo Desk inbox: entity [`0x65a2d0b9…25a1`](https://data.arkiv.network/entity/0x65a2d0b97fe693af3916c4a954564dda4d44a584ee4ec206454ac9c0148c25a1),
 created in tx [`0xc9ca55aa…9acc`](https://tiramisu.explorer.arkiv.network/tx/0xc9ca55aab9c19049296890a80dbb518b0874daaa9c7358826c4d57cdf35c9acc).
-Its link, with the key check: `{{LIVE_URL}}#/send/0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6/demo-desk/4JL_elI5QI6aemyST_9gJA` (the home page's Demo Desk link and `#/demo` lead there).
+Its link, with the key check: `https://kylne700.github.io/sealdrop/#/send/0x6a3C43407F58B11E871310cE296eb3bF1a3fdcF6/demo-desk/4JL_elI5QI6aemyST_9gJA` (the home page's Demo Desk link and `#/demo` lead there).
 
 ## Repository map
 
