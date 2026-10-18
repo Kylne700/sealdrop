@@ -50,6 +50,6 @@ export const FPS = 30
 export const W = 1280
 export const H = 720
 
-// Public pages shown on the end card. The live URL is the planned GitHub Pages address from HANDOFF.md.
+// Public pages shown on the end card. The live URL is the GitHub Pages address (deployed 2026-10-17).
 export const REPO_URL = 'github.com/Kylne700/sealdrop'
 export const LIVE_URL = 'kylne700.github.io/sealdrop'
